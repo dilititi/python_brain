@@ -1,0 +1,35 @@
+---
+title: 类型转换
+description: 在字符串、数字、布尔值和容器之间显式转换数据形状。
+definition: 类型转换是调用 int、float、str、bool、list、tuple、set 等构造函数生成目标类型对象。
+mentalModel: 类型转换像把同一份信息换一种容器或表示法，但转换可能失败或丢失信息。
+category: syntax
+level: intro
+tracks: [beginner, web, data, automation]
+prerequisites: [primitive-types]
+related: [operators, try-except, f-string]
+expandsTo: []
+appliedIn:
+  cases: [text-normalizer, function-call-playground]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: Built-in Functions
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/functions.html
+    note: int、float、str、bool 等转换函数属于内置函数。
+history:
+  - year: 1991
+    title: 显式转换
+    note: Python 的强类型模型鼓励在需要时显式转换。
+codeExamples:
+  - title: 字符串转数字
+    description: 用户输入通常先是字符串，需要显式转换。
+    code: |
+      raw = "42"
+      value = int(raw)
+      print(value + 8)
+---
+
+类型转换常常和异常处理一起出现。`int("abc")` 会失败，这种失败应该被你设计进程序流程。

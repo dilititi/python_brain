@@ -1,0 +1,41 @@
+---
+title: match-case
+description: 用结构化模式匹配表达多分支判断，尤其适合解析命令、状态和嵌套数据。
+definition: match-case 是 Python 的结构化模式匹配语法，根据对象形状和取值选择分支。
+mentalModel: match-case 像把数据拿去对一组模板，匹配到哪个模板就执行哪个分支。
+category: control-flow
+level: advanced
+tracks: [web, data, automation, ai]
+prerequisites: [if-statement, dict, tuple]
+related: [python-versions]
+expandsTo: []
+appliedIn:
+  cases: [modern-syntax-upgrade]
+  projects: [python-basics-lab]
+people: [guido-van-rossum]
+works:
+  - title: PEP 634
+    creator: Python community
+    type: pep
+    url: https://peps.python.org/pep-0634/
+    note: Structural Pattern Matching 的规范。
+history:
+  - year: 2021
+    title: Python 3.10 引入 match-case
+    note: 结构化模式匹配进入 Python 语法。
+codeExamples:
+  - title: 命令分发
+    description: match-case 可以让命令解析比长串 if 更清晰。
+    code: |
+      command = ("open", "README.md")
+
+      match command:
+          case ("open", filename):
+              print(f"open {filename}")
+          case ("quit",):
+              print("bye")
+          case _:
+              print("unknown command")
+---
+
+match-case 不是 switch 的简单替代。它更强的地方在于“匹配结构”，比如元组、字典、类实例和嵌套数据。

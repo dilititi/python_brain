@@ -1,0 +1,23 @@
+---
+title: 异常契约
+description: 用 raise 明确拒绝非法输入，用 finally 保证清理逻辑执行。
+scenario: 命令行工具接收文件路径或数字参数时，需要把“不合法输入”变成清楚的错误，而不是让程序在深处莫名失败。
+difficulty: core
+tracks: [automation, web]
+concepts: [raise-assert-finally, try-except, if-statement, type-casting]
+projects: [cli-text-toolkit]
+people: [guido-van-rossum]
+code: |
+  def parse_positive(raw):
+      try:
+          value = int(raw)
+          if value <= 0:
+              raise ValueError("value must be positive")
+          return value
+      finally:
+          print("parse finished")
+
+  print(parse_positive("3"))
+---
+
+异常契约的重点是“失败也要有设计”。该拒绝时主动 `raise`，该收尾时放进 `finally`。

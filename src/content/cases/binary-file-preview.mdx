@@ -1,0 +1,19 @@
+---
+title: 二进制文件预览
+description: 读取 bytes，展示前几个字节，并在需要时解码为文本。
+scenario: 自动化脚本处理文件时，不能假设所有文件都是文本，需要先识别二进制数据或编码。
+difficulty: core
+tracks: [automation, data]
+concepts: [bytes, range, pathlib, string]
+projects: [cli-text-toolkit]
+people: [guido-van-rossum]
+code: |
+  data = "Python".encode("utf-8")
+
+  for index in range(min(4, len(data))):
+      print(index, data[index])
+
+  print(data.decode("utf-8"))
+---
+
+二进制预览是理解 str 和 bytes 边界的好入口。文件、网络、图片和压缩包都会把这个边界推到你面前。

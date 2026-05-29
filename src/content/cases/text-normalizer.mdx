@@ -1,0 +1,21 @@
+---
+title: 文本标准化
+description: 清洗用户输入，把文本转成统一格式，并用正则提取关键片段。
+scenario: 从表单、日志或 CSV 里拿到不整齐的文本，需要统一大小写、去掉空白、转换数字并提取邮箱。
+difficulty: core
+tracks: [data, automation, web]
+concepts: [primitive-types, string, f-string, operators, type-casting, builtin-functions, regular-expression]
+projects: [cli-text-toolkit, python-basics-lab]
+people: [guido-van-rossum]
+code: |
+  import re
+
+  raw = "  Ada, SCORE=98, ada@example.com  "
+  normalized = raw.strip()
+  score = int(re.search(r"SCORE=(\d+)", normalized).group(1))
+  emails = re.findall(r"[\w.-]+@[\w.-]+", normalized)
+
+  print(f"score={score}, emails={emails}")
+---
+
+文本标准化把很多基础语法放在一起：字符串方法、正则、类型转换、内置函数和 f-string 都会出现。

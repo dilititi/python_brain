@@ -1,0 +1,38 @@
+---
+title: raise、assert 与 finally
+description: 主动抛出错误、声明不变量，并确保清理逻辑一定执行。
+definition: raise 用来抛出异常，assert 用来检查调试期假设，finally 用来无论是否异常都执行清理。
+mentalModel: raise 是报警，assert 是开发期断言，finally 是离开现场前必须做的收尾。
+category: control-flow
+level: core
+tracks: [web, data, automation, ai]
+prerequisites: [try-except, if-statement]
+related: [type-casting]
+expandsTo: []
+appliedIn:
+  cases: [exception-contracts]
+  projects: [cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: Raising and Handling Exceptions
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/errors.html
+    note: 官方教程说明 raise、else、finally 和异常链。
+history:
+  - year: 1991
+    title: 异常控制流
+    note: Python 早期就使用异常表达错误路径和恢复路径。
+codeExamples:
+  - title: 主动失败
+    description: raise 让函数明确拒绝不合法输入。
+    code: |
+      def require_positive(number):
+          if number <= 0:
+              raise ValueError("number must be positive")
+          return number
+
+      print(require_positive(3))
+---
+
+`try-except` 是处理错误，`raise` 是制造清楚的错误，`finally` 是清理现场。它们合在一起，才是完整的异常控制流。

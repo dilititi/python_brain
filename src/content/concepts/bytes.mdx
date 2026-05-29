@@ -1,0 +1,36 @@
+---
+title: bytes 与 bytearray
+description: 表示二进制数据，常见于文件、网络、编码和图片处理。
+definition: bytes 是不可变的字节序列，bytearray 是可变的字节序列。
+mentalModel: str 面向人类文本，bytes 面向机器数据。编码就是两者之间的桥。
+category: data-structure
+level: core
+tracks: [automation, web, data]
+prerequisites: [string, primitive-types]
+related: [pathlib]
+expandsTo: []
+appliedIn:
+  cases: [binary-file-preview]
+  projects: [cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: Binary Sequence Types
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/stdtypes.html#binary-sequence-types-bytes-bytearray-memoryview
+    note: 官方文档说明 bytes、bytearray 和 memoryview。
+history:
+  - year: 2008
+    title: Python 3 区分文本和二进制
+    note: Python 3 把 str 和 bytes 的边界变得更清楚，减少编码混乱。
+codeExamples:
+  - title: 编码
+    description: 文本可以编码成字节，字节可以解码回文本。
+    code: |
+      text = "Python"
+      data = text.encode("utf-8")
+      print(data)
+      print(data.decode("utf-8"))
+---
+
+只要处理文件上传、图片、压缩包、网络响应或编码问题，bytes 就会出现。新人阶段先记住：文本和字节不是同一种东西。

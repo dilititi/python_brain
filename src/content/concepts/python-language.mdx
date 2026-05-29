@@ -1,0 +1,41 @@
+---
+title: Python 语言身份
+description: Python 是解释型、动态类型、强类型、跨平台、开源且多范式的语言。
+definition: Python 的语言身份由运行方式、类型模型、平台能力、社区治理和编程范式共同构成。
+mentalModel: 把 Python 想成一门重视可读性和快速反馈的通用语言，它用解释器执行代码，用对象模型统一数据，用社区生态扩展能力。
+category: foundation
+level: intro
+tracks: [beginner, web, data, automation, ai, creative]
+prerequisites: []
+related: [python-philosophy, python-versions, primitive-types]
+expandsTo: [module, class, function]
+appliedIn:
+  cases: [interpreter-identity-check]
+  projects: [python-basics-lab]
+people: [guido-van-rossum, tim-peters]
+works:
+  - title: Python
+    creator: Python Software Foundation
+    type: project
+    url: https://www.python.org/
+    note: Python 官方网站，是下载解释器、查看文档和进入社区的主要入口。
+  - title: Python Software Foundation
+    creator: Python community
+    type: project
+    url: https://www.python.org/psf/
+    note: 管理 Python 商标、社区基础设施和生态支持的非营利组织。
+history:
+  - year: 1991
+    title: Python 首次公开发布
+    note: Guido van Rossum 发布 Python 早期版本，强调清晰语法和可扩展标准库。
+codeExamples:
+  - title: 运行反馈
+    description: Python 代码通常由解释器直接运行，适合快速试验。
+    code: |
+      import platform
+
+      print(platform.python_version())
+      print(platform.system())
+---
+
+这不是一个语法节点，而是新人进入 Python 世界的总入口。解释型决定了反馈方式，动态类型决定了写代码的节奏，强类型决定了不同类型不会随意混算，多范式决定了你可以按任务选择过程式、函数式或面向对象写法。

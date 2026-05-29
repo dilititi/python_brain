@@ -1,0 +1,35 @@
+---
+title: 运算符
+description: 用符号表达计算、比较、逻辑判断、成员关系和身份判断。
+definition: 运算符是作用在对象上的语法符号，例如 +、==、and、in、is。
+mentalModel: 运算符像短动词，把值之间的关系和动作压缩成清晰符号。
+category: syntax
+level: intro
+tracks: [beginner, data, automation, ai]
+prerequisites: [primitive-types]
+related: [if-statement, walrus-operator, type-casting]
+expandsTo: []
+appliedIn:
+  cases: [text-normalizer, collection-membership-report]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: Expressions
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/reference/expressions.html
+    note: Python 语言参考说明表达式和运算符优先级。
+history:
+  - year: 1991
+    title: 表达式语法
+    note: 运算符构成 Python 表达式系统的基础。
+codeExamples:
+  - title: 成员和逻辑
+    description: in、and、or 常用于条件判断。
+    code: |
+      tags = {"python", "data"}
+      is_ready = "python" in tags and len(tags) > 1
+      print(is_ready)
+---
+
+学习运算符时不要只背符号，还要理解对象类型决定了运算含义。`+` 对数字是加法，对字符串是拼接。

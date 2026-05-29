@@ -1,0 +1,36 @@
+---
+title: 正则表达式
+description: 用模式匹配文本，适合查找、提取、替换和校验字符串。
+definition: 正则表达式是一种文本模式语言，在 Python 中主要通过 re 标准库使用。
+mentalModel: 正则像文本筛子，模式定义筛孔，字符串从筛子里过，匹配的部分会被留下。
+category: stdlib
+level: core
+tracks: [data, automation, web]
+prerequisites: [string]
+related: [import-syntax]
+expandsTo: []
+appliedIn:
+  cases: [text-normalizer, stdlib-import-tour]
+  projects: [cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: re documentation
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/re.html
+    note: 标准库 re 模块文档。
+history:
+  - year: 1998
+    title: re 模块成为常用文本工具
+    note: 正则长期作为 Python 文本处理和数据清洗的重要工具。
+codeExamples:
+  - title: 提取邮箱
+    description: re.findall 可以找出所有匹配片段。
+    code: |
+      import re
+
+      text = "contact ada@example.com or guido@example.org"
+      print(re.findall(r"[\w.-]+@[\w.-]+", text))
+---
+
+正则很强，但不是所有字符串问题都要用正则。简单分割、替换和前后缀判断，优先用字符串方法会更清楚。

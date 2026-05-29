@@ -1,0 +1,17 @@
+---
+title: CLI 文本工具箱
+description: 组合字符串、正则、bytes、异常契约和函数参数，做一个面向文本文件的小工具。
+outcome: 得到一个命令行文本处理工具的雏形，能清洗文本、提取邮箱、预览二进制内容并处理错误输入。
+difficulty: core
+tracks: [automation, data]
+concepts: [string, bytes, regular-expression, pathlib, function-parameters, scope, raise-assert-finally, try-except, f-string, type-casting]
+cases: [text-normalizer, binary-file-preview, function-call-playground, exception-contracts, stdlib-import-tour]
+people: [guido-van-rossum, raymond-hettinger]
+milestones:
+  - 用字符串方法和正则清洗文本。
+  - 区分文本 str 和二进制 bytes。
+  - 用函数参数设计清楚的调用接口。
+  - 用 raise 和 finally 明确失败路径。
+---
+
+这个项目把 Basic Syntax 推到真实脚本场景：输入不干净、文件不总是文本、参数会出错，所以基础语法必须能处理现实边角。

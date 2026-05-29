@@ -46,13 +46,17 @@ const concepts = defineCollection({
     definition: z.string(),
     mentalModel: z.string(),
     category: z.enum([
+      "foundation",
       "syntax",
       "control-flow",
       "data-structure",
       "function",
       "oop",
       "stdlib",
-      "engineering"
+      "typing",
+      "engineering",
+      "ecosystem",
+      "best-practice"
     ]),
     level,
     tracks: z.array(track).default([]),

@@ -1,0 +1,36 @@
+---
+title: import 语法
+description: 用 import、from...import 和 as 别名把模块能力带进当前文件。
+definition: import 语法会加载模块并把模块名或模块成员绑定到当前命名空间。
+mentalModel: import 像把工具箱拿到桌面上，as 别名则是给常用工具贴一个短标签。
+category: engineering
+level: intro
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [module]
+related: [python-language, builtin-functions]
+expandsTo: []
+appliedIn:
+  cases: [interpreter-identity-check, stdlib-import-tour]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: The import system
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/reference/import.html
+    note: Python 语言参考说明 import 系统。
+history:
+  - year: 1991
+    title: 模块导入
+    note: import 是 Python 模块化能力的基础语法。
+codeExamples:
+  - title: 别名
+    description: as 常用于给模块或成员一个更短的名字。
+    code: |
+      import datetime as dt
+
+      today = dt.date.today()
+      print(today.isoformat())
+---
+
+`import module` 和 `from module import name` 会改变当前文件里可见的名字。理解这一点，后面看 `sys.path`、包和项目结构会轻松很多。

@@ -1,0 +1,36 @@
+---
+title: 集合
+description: 保存不重复元素，适合去重、成员判断、交集和差集。
+definition: set 是可变集合类型，frozenset 是不可变集合类型。
+mentalModel: 集合像一张成员名单，只关心某个元素在不在，不关心位置。
+category: data-structure
+level: intro
+tracks: [beginner, data, automation]
+prerequisites: [primitive-types]
+related: [list, tuple, dict]
+expandsTo: []
+appliedIn:
+  cases: [collection-membership-report]
+  projects: [python-basics-lab]
+people: [guido-van-rossum, raymond-hettinger]
+works:
+  - title: Sets
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/datastructures.html#sets
+    note: 官方教程说明集合去重和数学集合运算。
+history:
+  - year: 2003
+    title: set 类型进入 Python
+    note: Python 2.3 引入内置 set 类型，集合运算成为常用数据处理工具。
+codeExamples:
+  - title: 去重和交集
+    description: 集合能快速表达成员关系。
+    code: |
+      seen = {"python", "data", "python"}
+      required = {"python", "git"}
+      print(seen)
+      print(required - seen)
+---
+
+集合适合回答“有没有”“重复不重复”“两组数据差在哪”。它不是列表的替代品，而是另一种问题模型。

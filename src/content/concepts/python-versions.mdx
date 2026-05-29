@@ -1,0 +1,43 @@
+---
+title: Python 版本演进
+description: 理解 Python 2 已停止维护、Python 3 是主流，以及现代版本带来的关键语法变化。
+definition: Python 版本演进描述语言从 Python 2 到 Python 3 的迁移，以及后续版本持续加入的新语法和标准库能力。
+mentalModel: 版本像语言的时间轴。你写的代码不只属于 Python，也属于某个 Python 版本范围。
+category: foundation
+level: intro
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [python-language]
+related: [f-string, type-annotations, match-case, walrus-operator]
+expandsTo: []
+appliedIn:
+  cases: [interpreter-identity-check, modern-syntax-upgrade]
+  projects: [python-basics-lab]
+people: [guido-van-rossum]
+works:
+  - title: Python 2 Sunsetting
+    creator: Python Software Foundation
+    type: project
+    url: https://www.python.org/doc/sunset-python-2/
+    note: Python 2 已在 2020 年 1 月 1 日停止维护。
+  - title: Python Versions
+    creator: Python Developer's Guide
+    type: project
+    url: https://devguide.python.org/versions/
+    note: 官方开发者指南维护各 Python 分支状态和生命周期。
+history:
+  - year: 2008
+    title: Python 3.0 发布
+    note: Python 3 清理了历史包袱，但也带来 Python 2 到 3 的迁移期。
+  - year: 2020
+    title: Python 2 停止维护
+    note: 新项目应使用 Python 3，并按项目依赖选择仍受支持的版本。
+codeExamples:
+  - title: 查看版本
+    description: 在代码里查看当前解释器版本。
+    code: |
+      import sys
+
+      print(sys.version_info)
+---
+
+版本节点会连接到具体语言特性：Python 3.6 的 f-string、Python 3.8 的 walrus 运算符、Python 3.10 的 match-case、以及逐步成熟的类型注解生态。

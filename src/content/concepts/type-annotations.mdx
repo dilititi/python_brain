@@ -1,0 +1,38 @@
+---
+title: 类型注解
+description: 给变量、函数参数和返回值标出预期类型，帮助阅读、补全和静态检查。
+definition: 类型注解是 Python 的可选类型标记，不改变运行时动态类型本质，但能被工具读取。
+mentalModel: 类型注解像代码旁边的路标，告诉读者和工具这里期待什么形状的数据。
+category: typing
+level: core
+tracks: [web, data, automation, ai]
+prerequisites: [primitive-types, function]
+related: [python-versions, function-parameters]
+expandsTo: []
+appliedIn:
+  cases: [modern-syntax-upgrade, function-call-playground]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: PEP 484
+    creator: Python community
+    type: pep
+    url: https://peps.python.org/pep-0484/
+    note: 类型提示的核心设计提案。
+history:
+  - year: 2015
+    title: Python 3.5 引入 typing
+    note: 类型注解生态逐步成为大型 Python 项目的工程基础。
+codeExamples:
+  - title: 函数签名
+    description: 注解让函数输入和输出更清楚。
+    code: |
+      def greet(name: str, age: int | None = None) -> str:
+          if age is None:
+              return f"Hello, {name}"
+          return f"Hello, {name}, age {age}"
+
+      print(greet("Ada"))
+---
+
+类型注解不是把 Python 变成静态语言。它保留运行时灵活性，同时给编辑器、mypy、pyright 和团队协作更多上下文。

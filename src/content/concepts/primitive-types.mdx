@@ -1,0 +1,36 @@
+---
+title: 基础类型
+description: int、float、str、bool 和 None 是 Python 入门阶段最常接触的值类型。
+definition: 基础类型是表达数字、文本、真假和空值的核心内置类型。
+mentalModel: 这些类型像程序语言的基本词汇。变量绑定的是对象，而对象总有自己的类型。
+category: data-structure
+level: intro
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [python-language, variable]
+related: [string, type-casting, operators]
+expandsTo: [list, dict]
+appliedIn:
+  cases: [text-normalizer, function-call-playground]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: Built-in Types
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/stdtypes.html
+    note: 官方文档列出数字、序列、映射、集合等内置类型。
+history:
+  - year: 1991
+    title: 内置对象模型
+    note: Python 从早期就用对象和类型统一表示语言里的值。
+codeExamples:
+  - title: 查看类型
+    description: type 可以查看对象的类型。
+    code: |
+      values = [42, 3.14, "Python", True, None]
+
+      for value in values:
+          print(value, type(value).__name__)
+---
+
+理解基础类型时要同时记住 Python 是强类型语言：`"3" + 4` 不会自动变成 `7`，你需要显式转换。

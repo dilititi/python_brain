@@ -1,0 +1,35 @@
+---
+title: f-string
+description: 用表达式直接嵌入字符串，写出清晰的格式化文本。
+definition: f-string 是以 f 或 F 开头的格式化字符串字面量，可以在花括号里放表达式。
+mentalModel: f-string 像一张带占位槽的模板，运行时把槽里的表达式算出来再填进去。
+category: syntax
+level: intro
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [string, variable]
+related: [python-versions, type-casting]
+expandsTo: []
+appliedIn:
+  cases: [modern-syntax-upgrade, text-normalizer]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: PEP 498
+    creator: Python community
+    type: pep
+    url: https://peps.python.org/pep-0498/
+    note: 字面量字符串插值，也就是 f-string 的设计提案。
+history:
+  - year: 2016
+    title: Python 3.6 引入 f-string
+    note: f-string 成为现代 Python 最常用的字符串格式化方式。
+codeExamples:
+  - title: 嵌入表达式
+    description: 花括号里可以放变量或简单表达式。
+    code: |
+      name = "Ada"
+      score = 98
+      print(f"{name} scored {score}/100")
+---
+
+f-string 的价值是让“文本模板”和“变量来源”贴在一起。它比字符串拼接更可读，也比许多旧式格式化写法更直接。
