@@ -1,0 +1,17 @@
+---
+title: 命令行通讯录
+description: 用 dataclass 保存联系人，用 JSON 文件持久化，并提供新增、搜索和校验。
+outcome: 做出一个小型 CLI 应用，串起输入校验、数据对象、文件读写和异常处理。
+difficulty: core
+tracks: [automation, data]
+concepts: [if-statement, try-except, class, inheritance, dataclass, list, dict, pathlib, json]
+cases: [input-validation, contact-records, json-config-loader]
+people: [raymond-hettinger, guido-van-rossum]
+milestones:
+  - 用 dataclass 定义联系人结构。
+  - 用 if 校验名称和邮箱。
+  - 用 JSON 文件保存联系人列表。
+  - 用 try-except 处理文件缺失和格式错误。
+---
+
+通讯录是一个很好的“外脑式”项目节点：它能从控制流、文件、JSON、OOP、数据结构多个方向进入。

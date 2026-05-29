@@ -1,0 +1,35 @@
+---
+title: venv
+description: 为项目创建隔离的 Python 环境，避免依赖互相污染。
+definition: venv 是标准库里的虚拟环境模块，用来创建独立解释器和包目录。
+mentalModel: venv 像给每个项目一个独立工具箱，不同项目可以装不同版本的工具。
+category: engineering
+level: core
+tracks: [web, data, automation, ai]
+prerequisites: [module]
+related: [pip]
+expandsTo: []
+appliedIn:
+  cases: [package-install-workflow]
+  projects: [weather-notifier, mini-web-api]
+people: [guido-van-rossum]
+works:
+  - title: venv documentation
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/venv.html
+    note: 标准库文档说明虚拟环境创建、激活和配置。
+history:
+  - year: 2012
+    title: Python 3.3 引入 venv
+    note: PEP 405 把虚拟环境能力纳入标准库。
+codeExamples:
+  - title: 创建环境
+    description: 用标准库创建当前项目的虚拟环境。
+    code: |
+      # 在终端执行：
+      # python -m venv .venv
+      print("create an isolated environment per project")
+---
+
+venv 解决的是“这个项目到底用哪一套依赖”。它是 Web、数据和 AI 工程里最早应该建立的工程卫生习惯。

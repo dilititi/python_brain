@@ -1,0 +1,25 @@
+---
+title: 表单输入校验
+description: 检查用户输入是否为空、格式是否合理，再决定是否继续处理。
+scenario: Web 表单或命令行工具收到邮箱、年龄和名称时，需要先判断输入能不能进入后续逻辑。
+difficulty: intro
+tracks: [beginner, web, automation]
+concepts: [variable, if-statement, dict, function]
+projects: [contact-book-cli, mini-web-api]
+people: [guido-van-rossum]
+code: |
+  def validate_user(data):
+      errors = {}
+
+      if not data.get("name"):
+          errors["name"] = "name is required"
+
+      if "@" not in data.get("email", ""):
+          errors["email"] = "email is invalid"
+
+      return errors
+
+  print(validate_user({"name": "Ada", "email": "ada@example.com"}))
+---
+
+这个案例把 `if` 从抽象判断带回真实业务：判断不是为了练语法，而是为了保护后续代码不接收脏数据。

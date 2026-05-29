@@ -25,3 +25,13 @@ npm run validate:relations
 - `src/content/paths/`：学习路径，使用 YAML 存储节点序列和里程碑。
 
 Astro v6 的内容集合配置入口是 `src/content.config.ts`。双向关系聚合在 `src/lib/relations.ts`，全站图谱生成在 `src/lib/graph.ts`。
+
+## 当前 MVP
+
+- 20 个概念节点
+- 10 个真实案例
+- 5 个项目练习
+- 5 位人物锚点
+- 5 条学习路径
+
+`npm run validate:relations` 会检查内容数量、引用完整性和最小连通子图约束。

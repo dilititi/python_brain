@@ -1,0 +1,42 @@
+---
+title: class
+description: 把数据和行为组织成一个自定义类型。
+definition: class 定义一个类，类可以创建对象，并把属性和方法放在同一个命名空间里。
+mentalModel: class 像一张对象蓝图，实例是按蓝图造出来的具体对象。
+category: oop
+level: core
+tracks: [web, data, automation, ai]
+prerequisites: [function, dict]
+related: [dataclass, inheritance]
+expandsTo: [inheritance, dataclass]
+appliedIn:
+  cases: [contact-records]
+  projects: [contact-book-cli]
+people: [guido-van-rossum, raymond-hettinger]
+works:
+  - title: "The Python Tutorial: Classes"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/classes.html
+    note: 官方教程讲解类、实例、方法对象和作用域。
+history:
+  - year: 1991
+    title: 面向对象支持
+    note: Python 从早期就支持类和对象，并把函数式、过程式和面向对象风格放在一起。
+codeExamples:
+  - title: 方法
+    description: 方法的第一个参数 self 指向当前对象。
+    code: |
+      class Counter:
+          def __init__(self):
+              self.value = 0
+
+          def add(self):
+              self.value += 1
+
+      counter = Counter()
+      counter.add()
+      print(counter.value)
+---
+
+类不是每个脚本都必须用。它适合在“同一组数据和行为总是一起出现”时，把散落的函数和字典收束成一个类型。

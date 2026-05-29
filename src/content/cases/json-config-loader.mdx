@@ -1,0 +1,25 @@
+---
+title: JSON 配置读取
+description: 从本地配置文件读取 JSON，并在文件不存在或格式错误时给出兜底。
+scenario: 自动化脚本需要读取 API 地址、城市名或输出目录，但配置文件可能还没创建，也可能被手动改坏。
+difficulty: core
+tracks: [automation, web, ai]
+concepts: [pathlib, json, try-except, dict, function, module]
+projects: [weather-notifier]
+people: [guido-van-rossum]
+code: |
+  import json
+  from pathlib import Path
+
+  def load_config(path):
+      try:
+          return json.loads(Path(path).read_text(encoding="utf-8"))
+      except FileNotFoundError:
+          return {"city": "Hangzhou"}
+      except json.JSONDecodeError:
+          return {"city": "Hangzhou"}
+
+  print(load_config("settings.json"))
+---
+
+配置读取是 `pathlib`、`json` 和 `try-except` 的交叉点。这个案例也提醒新人：失败路径是程序设计的一部分。

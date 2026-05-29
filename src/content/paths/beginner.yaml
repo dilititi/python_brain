@@ -1,24 +1,29 @@
 title: 零基础主路径
-description: 从名字绑定、容器、循环和函数开始，逐步进入小项目。
+description: 从名字绑定、容器、判断、循环和函数开始，逐步进入小项目。
 track: beginner
 audience: 完全零基础或看过教程但没有形成稳定结构的学习者。
-estimatedNodes: 8
+estimatedNodes: 11
 nodes:
   - variable
   - list
   - dict
+  - if-statement
   - for-loop
   - while-loop
   - function
   - comprehension
   - json
+  - try-except
+  - module
 milestones:
   - title: 基础心智模型
     nodes: [variable, list, dict]
   - title: 重复处理
-    nodes: [for-loop, while-loop]
+    nodes: [if-statement, for-loop, while-loop]
   - title: 可复用逻辑
     nodes: [function, comprehension]
+  - title: 文件和失败路径
+    nodes: [json, try-except, module]
 explorationDay:
   cadence: 每周一次
   prompt: 从人物谱系里任选一位，反向查看他连接的概念。

@@ -1,0 +1,18 @@
+---
+title: 第三方包安装工作流
+description: 为项目创建虚拟环境，再用 pip 安装依赖并记录到 requirements 文件。
+scenario: Web 或数据项目需要安装 requests、flask、pandas 等第三方库，但不能污染系统 Python。
+difficulty: core
+tracks: [web, data, automation, ai]
+concepts: [module, venv, pip, pathlib]
+projects: [weather-notifier, mini-web-api]
+people: [guido-van-rossum]
+code: |
+  # 在终端执行：
+  # python -m venv .venv
+  # .venv\Scripts\python -m pip install requests
+  # .venv\Scripts\python -m pip freeze > requirements.txt
+  print("project dependencies are isolated")
+---
+
+这个案例把“装包”从零散命令变成工程流程。新人越早理解环境隔离，后面遇到依赖冲突时越少崩溃。

@@ -1,0 +1,35 @@
+---
+title: 模块
+description: 把函数、类和常量放进独立文件，再通过 import 复用。
+definition: 模块是一个 Python 文件或包中的命名空间，可以被其他代码导入。
+mentalModel: 模块像工具抽屉。常用工具收进文件，需要时用 import 拿出来。
+category: engineering
+level: core
+tracks: [web, data, automation, ai]
+prerequisites: [function]
+related: [pip, venv]
+expandsTo: [class]
+appliedIn:
+  cases: [package-install-workflow, json-config-loader]
+  projects: [weather-notifier, mini-web-api]
+people: [guido-van-rossum]
+works:
+  - title: "The Python Tutorial: Modules"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/modules.html
+    note: 官方教程从 import、包和模块搜索路径讲起。
+history:
+  - year: 1991
+    title: import 组织代码
+    note: 模块系统让 Python 脚本可以拆分为可复用文件。
+codeExamples:
+  - title: 导入标准库
+    description: import 把另一个模块的能力带进当前文件。
+    code: |
+      import math
+
+      print(math.sqrt(16))
+---
+
+模块是从“一个脚本”走向“一个项目”的分界线。只要代码开始分文件，命名、依赖和导入关系就成了工程问题。
