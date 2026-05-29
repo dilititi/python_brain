@@ -1,0 +1,119 @@
+---
+import RelationCard from "../components/astro/RelationCard.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getAllContent } from "../lib/relations";
+
+const { concepts, cases, projects, people, paths } = await getAllContent();
+const stats = [
+  { label: "概念节点", value: concepts.length },
+  { label: "真实案例", value: cases.length },
+  { label: "项目练习", value: projects.length },
+  { label: "人物谱系", value: people.length }
+];
+---
+
+<BaseLayout title="仪表盘" description="从真实意图进入 Python 知识图谱。">
+  <section class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Python Knowledge Graph</p>
+      <h1>从目标进入知识网络</h1>
+      <p class="lead">
+        不是线性教程，而是把概念、代码、案例、人物、作品和历史聚合成可以探索的外脑。
+      </p>
+    </div>
+    <div class="stat-grid" aria-label="内容统计">
+      {stats.map((item) => (
+        <div>
+          <strong>{item.value}</strong>
+          <span>{item.label}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid cols-3">
+      <RelationCard href="/assessment/" title="入口测评" description="用场景题定位起点，再生成个人路径。" meta="start" />
+      <RelationCard href="/path/" title="学习路径" description="零基础、Web、数据、自动化和 AI 的路径入口。" meta="paths" />
+      <RelationCard href="/graph/" title="知识图谱" description="查看概念、案例、项目和人物之间的连接。" meta="map" />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Recent Concepts</p>
+        <h2>首批连通节点</h2>
+      </div>
+      <a class="muted" href="/concepts/">全部概念</a>
+    </div>
+    <div class="grid cols-3">
+      {concepts.slice(0, 6).map((entry) => (
+        <RelationCard href={`/concepts/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.category} />
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Paths</p>
+        <h2>按意图进入</h2>
+      </div>
+    </div>
+    <div class="grid cols-3">
+      {paths.map((entry) => (
+        <RelationCard href={`/path/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.track} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .dashboard-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 24px;
+    align-items: end;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(38px, 7vw, 72px);
+    line-height: 1.02;
+    letter-spacing: 0;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .stat-grid div {
+    min-height: 96px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--color-panel);
+  }
+
+  .stat-grid strong {
+    display: block;
+    font-size: 32px;
+    line-height: 1;
+  }
+
+  .stat-grid span {
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 860px) {
+    .dashboard-hero {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

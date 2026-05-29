@@ -1,0 +1,31 @@
+{
+  "name": "python-brain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "validate:relations": "tsx scripts/validate-relations.ts",
+    "new:concept": "tsx scripts/new-concept.ts",
+    "new:case": "tsx scripts/new-case.ts"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^6.0.1",
+    "@astrojs/react": "^5.0.6",
+    "astro": "^6.4.2",
+    "cytoscape": "^3.33.4",
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/node": "^25.9.1",
+    "gray-matter": "^4.0.3",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,30 @@
+---
+import RelationCard from "../../components/astro/RelationCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const people = await getCollection("people");
+---
+
+<BaseLayout title="人物" description="Python 人物谱系。">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">People</p>
+      <h1>人物谱系</h1>
+    </div>
+  </header>
+  <div class="grid cols-3">
+    {people.map((entry) => (
+      <RelationCard href={`/people/${entry.id}/`} title={entry.data.name} description={entry.data.description} meta={entry.data.title} />
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

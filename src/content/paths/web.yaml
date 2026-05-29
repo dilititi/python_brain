@@ -1,0 +1,21 @@
+title: Web 后端路径
+description: 从函数和字典进入 JSON，再理解装饰器路由如何组织 Web API。
+track: web
+audience: 想写接口、网站后台或自动化服务的学习者。
+estimatedNodes: 7
+nodes:
+  - variable
+  - dict
+  - function
+  - closure
+  - decorator
+  - json
+  - pathlib
+milestones:
+  - title: 请求处理基础
+    nodes: [dict, function, json]
+  - title: 路由机制
+    nodes: [closure, decorator]
+explorationDay:
+  cadence: 每周一次
+  prompt: 从 Flask 或 FastAPI 的人物页面进入框架故事线。

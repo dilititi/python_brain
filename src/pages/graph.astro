@@ -1,0 +1,26 @@
+---
+import GraphView from "../components/react/GraphView";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { buildGraph } from "../lib/graph";
+
+const graph = await buildGraph();
+---
+
+<BaseLayout title="知识图谱" description="Python 知识外脑的节点和关系图。">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Graph</p>
+      <h1>知识图谱</h1>
+    </div>
+  </header>
+  <GraphView nodes={graph.nodes} edges={graph.edges} client:load />
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

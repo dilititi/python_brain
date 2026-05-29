@@ -1,0 +1,22 @@
+---
+title: 天气 API 响应解析
+description: 把接口返回的 JSON 字符串解析成字典，并提取业务字段。
+scenario: 自动化脚本需要每天读取天气接口，把城市、温度和天气状态写入日报。
+difficulty: core
+tracks: [automation, data, ai]
+concepts: [dict, json, function, while-loop]
+projects: [mini-web-api]
+people: [guido-van-rossum]
+code: |
+  import json
+
+  raw = '{"city": "Hangzhou", "temp": 26, "status": "cloudy"}'
+  data = json.loads(raw)
+
+  attempts = 0
+  while attempts < 1:
+      print(f'{data["city"]}: {data["temp"]}C, {data["status"]}')
+      attempts += 1
+---
+
+真实项目里，API 响应几乎总会落到字典和列表。掌握 JSON 解析后，Web、自动化和 AI 工程的入口会打开一大截。

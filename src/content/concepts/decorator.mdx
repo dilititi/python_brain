@@ -1,0 +1,76 @@
+---
+title: 装饰器
+description: 用一个函数包裹另一个函数，在不改原函数主体的情况下添加行为。
+definition: 装饰器本质上是一个接收函数并返回函数的可调用对象。
+mentalModel: 把装饰器想成给函数套一层外壳。外壳可以在调用前后加逻辑，也可以把函数注册到框架里。
+category: function
+level: advanced
+tracks: [web, ai, automation]
+prerequisites: [function]
+related: [closure]
+expandsTo: []
+appliedIn:
+  cases: [flask-routing]
+  projects: [mini-web-api]
+people: [guido-van-rossum, raymond-hettinger, armin-ronacher, sebastian-ramirez]
+works:
+  - title: PEP 318
+    creator: Python community
+    type: pep
+    url: https://peps.python.org/pep-0318/
+    note: 函数和方法装饰器的设计讨论。
+  - title: Flask
+    creator: Armin Ronacher
+    type: framework
+    url: https://flask.palletsprojects.com/
+    note: 用 @app.route 把普通函数注册成 URL 处理器。
+  - title: FastAPI
+    creator: Sebastián Ramírez
+    type: framework
+    url: https://fastapi.tiangolo.com/
+    note: 用装饰器声明 HTTP 方法、路径和元数据。
+history:
+  - year: 2003
+    title: PEP 318 提出
+    note: 社区开始讨论函数和方法装饰器语法。
+  - year: 2004
+    title: Python 2.4 引入 @ 语法
+    note: 装饰器语法正式进入 Python。
+  - year: 2020
+    title: PEP 614 放宽语法限制
+    note: Python 3.9 允许更宽泛的装饰器表达式。
+codeExamples:
+  - title: 最小模型
+    description: 装饰器接收函数，返回一个新的函数。
+    code: |
+      def loud(func):
+          def wrapper():
+              result = func()
+              return result.upper()
+          return wrapper
+
+      @loud
+      def greet():
+          return "hello"
+
+      print(greet())
+  - title: 保留元信息
+    description: functools.wraps 让包装后的函数保留原来的名字和文档。
+    code: |
+      from functools import wraps
+
+      def trace(func):
+          @wraps(func)
+          def wrapper(*args, **kwargs):
+              print("calling", func.__name__)
+              return func(*args, **kwargs)
+          return wrapper
+
+      @trace
+      def add(a, b):
+          return a + b
+
+      print(add(2, 3))
+---
+
+装饰器不是“神奇的 @ 符号”，而是函数式组合。`@decorator` 等价于 `func = decorator(func)`，这句话就是最小心智模型。

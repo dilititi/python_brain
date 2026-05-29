@@ -1,0 +1,154 @@
+---
+import { render } from "astro:content";
+import Breadcrumb from "../components/astro/Breadcrumb.astro";
+import ConceptHeader from "../components/astro/ConceptHeader.astro";
+import FacetSection from "../components/astro/FacetSection.astro";
+import RelationCard from "../components/astro/RelationCard.astro";
+import CodeRunner from "../components/react/CodeRunner";
+import type { ConceptEntry, ConceptRelations } from "../lib/relations";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  entry: ConceptEntry;
+  relations: ConceptRelations;
+}
+
+const { entry, relations } = Astro.props as Props;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description}>
+  <Breadcrumb
+    items={[
+      { label: "首页", href: "/" },
+      { label: "概念", href: "/concepts/" },
+      { label: entry.data.title }
+    ]}
+  />
+  <ConceptHeader
+    title={entry.data.title}
+    description={entry.data.description}
+    category={entry.data.category}
+    level={entry.data.level}
+    tracks={entry.data.tracks}
+  />
+
+  <FacetSection title="概念定义" eyebrow="Definition" tone="blue">
+    <div class="content-flow">
+      <p><strong>{entry.data.definition}</strong></p>
+      <p>{entry.data.mentalModel}</p>
+      <Content />
+    </div>
+  </FacetSection>
+
+  <FacetSection title="可运行代码" eyebrow="Code" tone="green">
+    <CodeRunner examples={entry.data.codeExamples} client:visible />
+  </FacetSection>
+
+  <FacetSection title="真实案例" eyebrow="Cases" tone="amber">
+    <div class="grid cols-3">
+      {relations.cases.map((item) => (
+        <RelationCard
+          href={`/cases/${item.id}/`}
+          title={item.data.title}
+          description={item.data.description}
+          meta={item.data.difficulty}
+        />
+      ))}
+    </div>
+  </FacetSection>
+
+  <FacetSection title="关键人物" eyebrow="People" tone="rose">
+    <div class="grid cols-3">
+      {relations.people.map((item) => (
+        <RelationCard
+          href={`/people/${item.id}/`}
+          title={item.data.name}
+          description={item.data.description}
+          meta="person"
+        />
+      ))}
+    </div>
+  </FacetSection>
+
+  <FacetSection title="经典作品" eyebrow="Works" tone="violet">
+    <div class="grid cols-3">
+      {entry.data.works.map((work) => (
+        <RelationCard
+          href={work.url ?? "#"}
+          title={work.title}
+          description={work.note}
+          meta={work.type}
+        />
+      ))}
+      {relations.projects.map((item) => (
+        <RelationCard
+          href={`/projects/${item.id}/`}
+          title={item.data.title}
+          description={item.data.description}
+          meta="project"
+        />
+      ))}
+    </div>
+  </FacetSection>
+
+  <FacetSection title="历史脉络" eyebrow="History" tone="blue">
+    <ol class="timeline">
+      {entry.data.history.map((item) => (
+        <li>
+          <span>{item.year}</span>
+          <div>
+            <strong>{item.title}</strong>
+            <p>{item.note}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </FacetSection>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Graph Neighbors</p>
+        <h2>前置与延伸</h2>
+      </div>
+    </div>
+    <div class="grid cols-3">
+      {relations.prerequisites.map((item) => (
+        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="前置" />
+      ))}
+      {relations.related.map((item) => (
+        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="相关" />
+      ))}
+      {relations.expandsTo.map((item) => (
+        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="扩展" />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .timeline {
+    display: grid;
+    gap: 14px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .timeline li {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .timeline span {
+    color: var(--color-blue);
+    font-weight: 800;
+  }
+
+  .timeline p {
+    margin: 4px 0 0;
+    color: var(--color-muted);
+  }
+</style>

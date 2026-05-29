@@ -1,0 +1,20 @@
+---
+title: 词频统计
+description: 把一段文本拆成单词，并统计每个单词出现了几次。
+scenario: 内容运营想知道一篇文章里最常出现的词，先用一个小脚本做快速观察。
+difficulty: intro
+tracks: [beginner, data]
+concepts: [variable, list, dict, for-loop, function]
+projects: [text-analyzer]
+people: [guido-van-rossum]
+code: |
+  def count_words(text):
+      counts = {}
+      for word in text.lower().split():
+          counts[word] = counts.get(word, 0) + 1
+      return counts
+
+  print(count_words("Python data Python"))
+---
+
+这个案例把新人最需要打通的四个节点连在一起：字符串拆分、`for` 循环、字典计数和函数封装。

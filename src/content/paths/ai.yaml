@@ -1,0 +1,22 @@
+title: AI 工程路径
+description: 先建立函数、JSON、字典和装饰器基础，再承接模型 API 与服务化。
+track: ai
+audience: 想调用模型 API、写推理服务或做 AI 工具的学习者。
+estimatedNodes: 8
+nodes:
+  - variable
+  - dict
+  - list
+  - function
+  - json
+  - comprehension
+  - decorator
+  - pathlib
+milestones:
+  - title: API 数据结构
+    nodes: [dict, list, json]
+  - title: 服务化准备
+    nodes: [function, decorator]
+explorationDay:
+  cadence: 每周一次
+  prompt: 从 FastAPI 人物线进入现代 API 工程，再回看装饰器节点。

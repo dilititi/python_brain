@@ -1,0 +1,30 @@
+---
+import RelationCard from "../../components/astro/RelationCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const projects = await getCollection("projects");
+---
+
+<BaseLayout title="项目" description="Python 项目练习库。">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Projects</p>
+      <h1>项目练习</h1>
+    </div>
+  </header>
+  <div class="grid cols-3">
+    {projects.map((entry) => (
+      <RelationCard href={`/projects/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.difficulty} />
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+title: for 循环
+description: 对可迭代对象逐个取值，并对每个值执行同一段逻辑。
+definition: for 循环是 Python 的迭代语法，用来遍历列表、字典、文件行、range 等对象。
+mentalModel: for 循环像流水线，每次把一个元素送进循环体。
+category: control-flow
+level: intro
+tracks: [beginner, data, automation, ai]
+prerequisites: [variable, list]
+related: [while-loop, comprehension]
+expandsTo: [function]
+appliedIn:
+  cases: [word-frequency, batch-rename-files, csv-cleaning]
+  projects: [text-analyzer, file-organizer]
+people: [guido-van-rossum]
+works:
+  - title: "The Python Tutorial: for Statements"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/controlflow.html#for-statements
+    note: 官方教程强调 Python 的 for 循环遍历序列项，而不是只操作数字索引。
+history:
+  - year: 2001
+    title: 迭代器协议成熟
+    note: Python 2.2 引入迭代器协议，for 循环可以统一消费更多对象。
+codeExamples:
+  - title: range
+    description: range 生成一串整数，适合明确次数的重复。
+    code: |
+      for i in range(3):
+          print("第", i, "轮")
+  - title: 遍历列表
+    description: 更多时候，for 直接遍历已有数据。
+    code: |
+      tasks = ["读取", "清洗", "保存"]
+      for task in tasks:
+          print(task)
+---
+
+`for i in range(10)` 只是入口。真正的 Pythonic 写法通常是“直接遍历对象”，比如 `for row in rows` 或 `for filename in path.iterdir()`。

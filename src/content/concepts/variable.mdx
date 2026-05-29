@@ -1,0 +1,37 @@
+---
+title: 变量
+description: 给值起名字，让程序能在后续步骤里继续使用它。
+definition: 变量是一个名字，它绑定到某个对象，而不是一个固定的盒子。
+mentalModel: 把变量想成便签。便签贴在对象上，重新赋值就是把便签贴到另一个对象上。
+category: syntax
+level: intro
+tracks: [beginner, web, data, automation, ai]
+prerequisites: []
+related: [list, dict]
+expandsTo: [function]
+appliedIn:
+  cases: [word-frequency]
+  projects: [text-analyzer]
+people: [guido-van-rossum]
+works:
+  - title: Python Tutorial
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/introduction.html
+    note: 官方教程用交互式例子展示变量、数字和字符串。
+history:
+  - year: 1991
+    title: Python 首次发布
+    note: 变量绑定对象的模型从早期版本开始就是 Python 心智模型的一部分。
+codeExamples:
+  - title: 绑定
+    description: 同一个名字可以在不同时间绑定到不同对象。
+    code: |
+      score = 10
+      print(score)
+
+      score = score + 5
+      print(score)
+---
+
+变量最容易被误解成“装值的盒子”。在 Python 里，更准确的理解是“名字绑定对象”。这会影响你理解列表、函数参数、可变对象和闭包。

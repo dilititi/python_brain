@@ -1,0 +1,63 @@
+---
+interface Props {
+  title: string;
+  eyebrow?: string;
+  tone?: "blue" | "green" | "amber" | "rose" | "violet";
+}
+
+const { title, eyebrow, tone = "blue" } = Astro.props;
+---
+
+<section class:list={["facet", `tone-${tone}`]}>
+  <div class="facet-rule" aria-hidden="true"></div>
+  <div class="facet-body">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h2>{title}</h2>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .facet {
+    display: grid;
+    grid-template-columns: 5px minmax(0, 1fr);
+    gap: 18px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .facet-rule {
+    border-radius: 999px;
+    background: var(--tone);
+  }
+
+  .facet-body {
+    min-width: 0;
+  }
+
+  h2 {
+    margin: 0 0 14px;
+    font-size: 24px;
+    line-height: 1.25;
+  }
+
+  .tone-blue {
+    --tone: var(--color-blue);
+  }
+
+  .tone-green {
+    --tone: var(--color-green);
+  }
+
+  .tone-amber {
+    --tone: var(--color-amber);
+  }
+
+  .tone-rose {
+    --tone: var(--color-rose);
+  }
+
+  .tone-violet {
+    --tone: var(--color-violet);
+  }
+</style>

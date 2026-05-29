@@ -1,0 +1,36 @@
+---
+title: while 循环
+description: 只要条件成立，就持续执行同一段逻辑。
+definition: while 循环是基于布尔条件的重复结构。
+mentalModel: while 像一个守门条件，条件还为真就继续，条件变假才停下。
+category: control-flow
+level: intro
+tracks: [beginner, automation]
+prerequisites: [variable]
+related: [for-loop]
+expandsTo: []
+appliedIn:
+  cases: [weather-api]
+  projects: []
+people: [guido-van-rossum]
+works:
+  - title: "The Python Tutorial: while Statements"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/introduction.html#first-steps-towards-programming
+    note: 官方教程用斐波那契序列展示 while 的基本形态。
+history:
+  - year: 1991
+    title: 基础控制流
+    note: while 是 Python 早期就具备的基础控制结构。
+codeExamples:
+  - title: 计数
+    description: while 适合“不知道确切次数，只知道停止条件”的循环。
+    code: |
+      count = 3
+      while count > 0:
+          print(count)
+          count -= 1
+---
+
+大部分“遍历一组数据”的任务更适合 `for`，而 `while` 更适合等待条件、重试、交互循环等场景。

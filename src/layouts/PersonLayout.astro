@@ -1,0 +1,57 @@
+---
+import { render } from "astro:content";
+import Breadcrumb from "../components/astro/Breadcrumb.astro";
+import RelationCard from "../components/astro/RelationCard.astro";
+import type { ConceptEntry, PersonEntry } from "../lib/relations";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  entry: PersonEntry;
+  concepts: ConceptEntry[];
+}
+
+const { entry, concepts } = Astro.props as Props;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={entry.data.name} description={entry.data.description}>
+  <Breadcrumb
+    items={[
+      { label: "首页", href: "/" },
+      { label: "人物", href: "/people/" },
+      { label: entry.data.name }
+    ]}
+  />
+  <header class="detail-header">
+    <p class="eyebrow">{entry.data.title}</p>
+    <h1>{entry.data.name}</h1>
+    <p class="lead">{entry.data.description}</p>
+  </header>
+  <section class="section content-flow">
+    <Content />
+  </section>
+  <section class="section">
+    <div class="grid cols-3">
+      {concepts.map((item) => (
+        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="concept" />
+      ))}
+      {entry.data.works.map((work) => (
+        <RelationCard href={work.url ?? "#"} title={work.title} description={work.note} meta={work.type} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .detail-header {
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

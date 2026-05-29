@@ -1,0 +1,30 @@
+---
+import RelationCard from "../../components/astro/RelationCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const paths = await getCollection("paths");
+---
+
+<BaseLayout title="学习路径" description="按意图组织的 Python 学习路径。">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Paths</p>
+      <h1>学习路径</h1>
+    </div>
+  </header>
+  <div class="grid cols-3">
+    {paths.map((entry) => (
+      <RelationCard href={`/path/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.track} />
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

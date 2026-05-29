@@ -1,0 +1,47 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  tracks: string[];
+}
+
+const { title, description, category, level, tracks } = Astro.props;
+---
+
+<header class="concept-header">
+  <div>
+    <p class="eyebrow">{category} · {level}</p>
+    <h1>{title}</h1>
+    <p class="lead">{description}</p>
+  </div>
+  <ul class="tag-list" aria-label="tracks">
+    {tracks.map((track) => <li class="tag">{track}</li>)}
+  </ul>
+</header>
+
+<style>
+  .concept-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: end;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: 0;
+  }
+
+  @media (max-width: 760px) {
+    .concept-header {
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+  }
+</style>

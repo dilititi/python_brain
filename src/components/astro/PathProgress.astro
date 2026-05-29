@@ -1,0 +1,98 @@
+---
+interface NodeItem {
+  id: string;
+  data: {
+    title: string;
+    level: string;
+    category: string;
+  };
+}
+
+interface Milestone {
+  title: string;
+  nodes: string[];
+}
+
+interface Props {
+  nodes: NodeItem[];
+  milestones: Milestone[];
+}
+
+const { nodes, milestones } = Astro.props;
+const milestoneByNode = new Map<string, string>();
+
+for (const milestone of milestones) {
+  for (const node of milestone.nodes) {
+    milestoneByNode.set(node, milestone.title);
+  }
+}
+---
+
+<ol class="path-progress">
+  {nodes.map((node, index) => (
+    <li>
+      <span class="step">{String(index + 1).padStart(2, "0")}</span>
+      <a href={`/concepts/${node.id}/`}>
+        <strong>{node.data.title}</strong>
+        <span>{node.data.category} · {node.data.level}</span>
+        {milestoneByNode.has(node.id) && (
+          <em>{milestoneByNode.get(node.id)}</em>
+        )}
+      </a>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .path-progress {
+    display: grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .step {
+    display: grid;
+    place-items: center;
+    min-height: 56px;
+    border-radius: var(--radius-md);
+    color: #fff;
+    background: var(--color-ink);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  a {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    background: var(--color-panel);
+  }
+
+  a:hover {
+    border-color: var(--color-blue);
+  }
+
+  span,
+  em {
+    color: var(--color-muted);
+    font-size: 13px;
+    font-style: normal;
+  }
+
+  em {
+    color: var(--color-green);
+    font-weight: 700;
+  }
+</style>

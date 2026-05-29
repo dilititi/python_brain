@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import ProjectLayout from "../../layouts/ProjectLayout.astro";
+import { getAllContent, resolveMany } from "../../lib/relations";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+const { entry } = Astro.props;
+const { concepts, cases, people } = await getAllContent();
+---
+
+<ProjectLayout
+  entry={entry}
+  concepts={resolveMany(concepts, entry.data.concepts)}
+  cases={resolveMany(cases, entry.data.cases)}
+  people={resolveMany(people, entry.data.people)}
+/>

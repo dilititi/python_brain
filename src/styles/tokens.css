@@ -1,0 +1,23 @@
+:root {
+  --font-sans: Inter, "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+
+  --color-ink: #172033;
+  --color-muted: #667085;
+  --color-faint: #8a94a6;
+  --color-paper: #fbfcfe;
+  --color-panel: #ffffff;
+  --color-line: #d9e0ea;
+  --color-soft: #eef3f8;
+  --color-blue: #2563eb;
+  --color-green: #168a5b;
+  --color-amber: #b7791f;
+  --color-rose: #c24161;
+  --color-violet: #6d5bd0;
+
+  --shadow-panel: 0 12px 28px rgb(28 39 58 / 8%);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --space-page: clamp(18px, 3vw, 40px);
+  --content-max: 1180px;
+}

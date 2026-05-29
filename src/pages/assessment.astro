@@ -1,0 +1,23 @@
+---
+import AssessmentQuiz from "../components/react/AssessmentQuiz";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="入口测评" description="用具体场景题定位 Python 学习起点。">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Assessment</p>
+      <h1>入口测评</h1>
+    </div>
+  </header>
+  <AssessmentQuiz client:load />
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

@@ -1,0 +1,22 @@
+title: 数据分析路径
+description: 围绕列表、字典、循环、推导式和 JSON 建立数据清洗基础。
+track: data
+audience: 想做表格清洗、数据分析或 pandas 前置准备的学习者。
+estimatedNodes: 8
+nodes:
+  - variable
+  - list
+  - dict
+  - for-loop
+  - function
+  - comprehension
+  - lambda
+  - json
+milestones:
+  - title: 数据容器
+    nodes: [list, dict]
+  - title: 清洗流程
+    nodes: [for-loop, function, comprehension, lambda]
+explorationDay:
+  cadence: 每周一次
+  prompt: 顺着 Wes McKinney 页面查看 pandas 如何接住这些基础节点。

@@ -1,0 +1,70 @@
+---
+import { render } from "astro:content";
+import Breadcrumb from "../components/astro/Breadcrumb.astro";
+import RelationCard from "../components/astro/RelationCard.astro";
+import type { CaseEntry, ConceptEntry, PersonEntry, ProjectEntry } from "../lib/relations";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  entry: ProjectEntry;
+  concepts: ConceptEntry[];
+  cases: CaseEntry[];
+  people: PersonEntry[];
+}
+
+const { entry, concepts, cases, people } = Astro.props as Props;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description}>
+  <Breadcrumb
+    items={[
+      { label: "首页", href: "/" },
+      { label: "项目", href: "/projects/" },
+      { label: entry.data.title }
+    ]}
+  />
+  <header class="detail-header">
+    <p class="eyebrow">{entry.data.difficulty}</p>
+    <h1>{entry.data.title}</h1>
+    <p class="lead">{entry.data.outcome}</p>
+  </header>
+  <section class="section content-flow">
+    <Content />
+    <ol class="milestones">
+      {entry.data.milestones.map((item) => <li>{item}</li>)}
+    </ol>
+  </section>
+  <section class="section">
+    <div class="grid cols-3">
+      {concepts.map((item) => (
+        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="concept" />
+      ))}
+      {cases.map((item) => (
+        <RelationCard href={`/cases/${item.id}/`} title={item.data.title} description={item.data.description} meta="case" />
+      ))}
+      {people.map((item) => (
+        <RelationCard href={`/people/${item.id}/`} title={item.data.name} description={item.data.description} meta="person" />
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .detail-header {
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+
+  .milestones {
+    display: grid;
+    gap: 10px;
+  }
+</style>
