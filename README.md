@@ -35,3 +35,8 @@ Astro v6 的内容集合配置入口是 `src/content.config.ts`。双向关系�
 - 5 条学习路径
 
 `npm run validate:relations` 会检查内容数量、引用完整性和最小连通子图约束。
+
+## 工程对接
+
+- [工程定位审查 v1.0](docs/project-positioning-v1.md)
+- [内容编辑准则](docs/content-guidelines.md)

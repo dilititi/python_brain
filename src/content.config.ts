@@ -43,6 +43,8 @@ const concepts = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    summary: z.string().max(80).optional(),
+    whyImportant: z.string().max(200).optional(),
     definition: z.string(),
     mentalModel: z.string(),
     category: z.enum([
@@ -62,6 +64,7 @@ const concepts = defineCollection({
     tracks: z.array(track).default([]),
     prerequisites: z.array(slugRef).default([]),
     related: z.array(slugRef).default([]),
+    extends: z.array(slugRef).default([]),
     expandsTo: z.array(slugRef).default([]),
     appliedIn: z
       .object({
@@ -72,6 +75,8 @@ const concepts = defineCollection({
     people: z.array(slugRef).default([]),
     works: z.array(workLink).default([]),
     history: z.array(historyEvent).default([]),
+    tags: z.array(z.string()).default([]),
+    updatedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     codeExamples: z.array(codeExample).default([])
   })
 });
