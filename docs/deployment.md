@@ -14,6 +14,27 @@
 
 这些值已经写入 `vercel.json`，Vercel 通常会自动读取。
 
+## 部署前置条件
+
+部署前必须先跑：
+
+```bash
+npm run validate:relations
+npm run audit:concepts
+npm run test
+npm run build
+```
+
+当前 `summary` / `whyImportant` 仍处于 warning 阶段，`audit:concepts` 会列出缺失清单但不阻断本地构建。升级为严格校验前，main 分支必须先让 `npm run audit:concepts` 返回 0 项缺失。
+
+后续 Vercel 或 GitHub Actions 进入 production gate 时，建议使用：
+
+```bash
+npm run validate:relations -- --warning-exit-code=2
+```
+
+约定退出码：`0` 表示通过且无阻塞问题，`1` 表示错误并阻断，`2` 表示仅有 warning。CI 可在 `2` 时标记通知或黄灯，但不阻断 merge；等 `summary` / `whyImportant` 全量补齐后，再把 strict 校验接入阻断规则。
+
 ## CLI 部署
 
 本地如果已经登录 Vercel，可运行：

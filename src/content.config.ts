@@ -15,6 +15,9 @@ const track = z.enum([
 
 const level = z.enum(["intro", "core", "advanced"]);
 const url = z.url();
+const httpsUrl = z.url().refine((value) => value.startsWith("https://"), {
+  message: "source must be an https URL"
+});
 
 const workLink = z.object({
   title: z.string(),
@@ -29,7 +32,7 @@ const historyEvent = z
     year: z.union([z.number(), z.string()]).optional(),
     pep: z.string().regex(/^PEP \d+$/).optional(),
     event: z.string(),
-    source: url.optional()
+    source: httpsUrl.optional()
   })
   .refine((event) => event.year || event.pep, {
     message: "history event must include year or pep"

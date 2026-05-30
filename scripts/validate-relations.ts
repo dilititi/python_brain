@@ -5,6 +5,12 @@ import YAML from "yaml";
 
 const root = process.cwd();
 const contentRoot = join(root, "src", "content");
+const warningExitCodeArg = process.argv.find((arg) =>
+  arg.startsWith("--warning-exit-code=")
+);
+const warningExitCode = warningExitCodeArg
+  ? Number(warningExitCodeArg.split("=", 2)[1])
+  : 0;
 
 type Entry = {
   id: string;
@@ -169,6 +175,10 @@ for (const entry of concepts) {
 
     if (!event.year && !event.pep) {
       errors.push(`${relative(root, entry.path)}: history[${index}] must include year or pep`);
+    }
+
+    if (typeof event.source === "string" && !event.source.startsWith("https://")) {
+      errors.push(`${relative(root, entry.path)}: history[${index}].source must be an https URL`);
     }
   });
 }
@@ -341,4 +351,8 @@ if (errors.length > 0) {
   console.log(
     `Relations valid: ${concepts.length} concepts, ${cases.length} cases, ${projects.length} projects, ${people.length} people, ${paths.length} paths.`
   );
+
+  if (warnings.length > 0 && Number.isInteger(warningExitCode) && warningExitCode > 0) {
+    process.exitCode = warningExitCode;
+  }
 }
