@@ -325,6 +325,7 @@ works AND、prerequisites DAG、summary/whyImportant、case standard/pitfalls/ex
 - schema 字段名保持 `year` / `pep` / `event` / `source`，不再使用 `firstAppeared`。
 - works 路径 B 在原则表和策略段都表达为“已决策，未迁移”。
 - `validate-relations` 退出码语义在脚本帮助文本和部署文档中一致。
+- 宣告字段进入 strict 前，必须同时核对 `src/content.config.ts`、`scripts/validate-relations.ts`、`scripts/audit-concepts.ts` 与 `docs/deployment.md` 命令语义表。
 
 ## 总结
 
