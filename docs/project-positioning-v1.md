@@ -35,7 +35,7 @@
 | 原则 | 当前状态 | 判断 |
 |---|---|---|
 | 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`works.role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
-| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep；summary/whyImportant 暂按 warning | 部分满足 |
+| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant strict；case standard 与 person sources 待收紧 | 部分满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
 | 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works 已确定路径 B（`works-registry.yaml`）但尚未迁移 | 部分满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，但未包含 milestone cases/projects，也没有拓扑规划 | 部分满足 |
@@ -50,8 +50,8 @@
 
 v1.0 缺口：
 
-- `summary` 已作为可选字段加入并限制 80 字，当前通过 `audit:concepts` 和校验 warning 过渡，待补齐后升级为 required。
-- `whyImportant` 已作为可选字段加入并限制 200 字，当前通过 `audit:concepts` 和校验 warning 过渡，待补齐后升级为 required。
+- `summary` 已补齐 52 个概念并升级为 required，限制 80 字。
+- `whyImportant` 已补齐 52 个概念并升级为 required，限制 200 字。
 - `extends` 已成为唯一延伸字段，`expandsTo` 兼容层已删除。
 - `works` 已正式迁移为 `{title, creator, type, url, role}`，`note` 已删除。
 - `history` 保留数组形态，每项为 `{year?, pep?, event, source?}`，用真实标杆页反向验证后裁决优于单对象；`source` 若填写必须为 `https://` URL。
@@ -60,13 +60,13 @@ v1.0 缺口：
 
 字段语义边界仍需继续收敛：
 
-- `description` 是旧列表页/SEO 描述字段，标记为 deprecated；`summary` 升级为 required 时同步删除，迁移脚本 `scripts/migrate-description-to-summary.ts` 负责把仍只有 `description` 的概念迁移到 `summary`。
-- `summary` 是 80 字以内的一句话定义，当前 warning，后续升级 required。
+- `description` 是旧列表页/SEO 描述字段，标记为 deprecated；后续迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的内容，再从 schema 删除。
+- `summary` 是必填的 80 字以内一句话定义。
 - `definition` 承载核心解释；更长解释进入 MDX 正文。
 - `mentalModel` 是一句话心智模型或类比，可选但应避免和 `summary` 重复。
-- `whyImportant` 是 200 字以内的场景价值，当前 warning，后续升级 required。
+- `whyImportant` 是必填的 200 字以内场景价值。
 
-定位：Concept schema 已完成关键字段裁决，但 52 个概念远超 20 个 MVP 目标。当前内容规模已经超过 schema 治理能力，必须先冻结扩张、补齐文本字段，再把 `summary` / `whyImportant` 升级为阻塞校验。
+定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张，优先继续收紧 case 和 person 质量门禁。
 
 ### Case
 
@@ -136,6 +136,7 @@ v1.0 缺口：
 - prerequisites DAG 无环检测。
 - concept 至少被一个 case 覆盖。
 - concept 必须至少有一个 work，且每个 work 必须有有效 `role`。
+- summary / whyImportant 必须非空、非 TODO-like。
 - history 事件必须有 `event`，必须含 `year` 或 `pep`，`pep` 必须匹配 `PEP \d+`。
 - history `source` 若存在必须是 `https://` URL。
 - case 至少支撑一个 project。
@@ -144,7 +145,6 @@ v1.0 缺口：
 
 v1.0 仍缺：
 
-- `summary` / `whyImportant` 从 warning 升级为 error。
 - case 必须 `concepts >= 2`。
 - case 必须包含 `standard` code version。
 - person 必须 `sources >= 1`。
@@ -252,7 +252,7 @@ localStorage：
 - 生成后默认运行关系校验，并列出待补字段。
 - 已加内容冻结闸门：写入新概念必须显式设置 `PKB_ALLOW_NEW_CONCEPTS=1`。
 
-定位：脚手架第一版已完成。后续随 works registry、summary/whyImportant strict 化继续微调。
+定位：脚手架第一版已完成。后续随 works registry、case codeVersions 和 person sources strict 化继续微调。
 
 ## 内容编辑准则差距
 
@@ -268,7 +268,7 @@ localStorage：
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，后续可随 Tab 布局继续微调 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；当前环境无 Vercel 登录态或 token |
-| 5 | 收紧校验（AND + DAG）+ 单测 | AND + DAG 已完成 | 剩余 case standard、person sources、summary strict 化待 P3 |
+| 5 | 收紧校验（AND + DAG）+ 单测 | AND + DAG + summary strict 已完成 | 剩余 case standard、person sources 待 P3 |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 未完成 | 4-5 后做 |
 | 8 | 测评题库化 | 未完成 | 4-5 后做 |
@@ -309,14 +309,17 @@ localStorage：
 
 ### P3：收紧校验
 
-在三页标杆完成后再强制：
+已完成：
 
-- `summary` / `whyImportant` 从 warning 升级为 error。
-- `summary` 升级为 required 时，同步删除 `description` 字段；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责把仍只有 `description`、没有 `summary` 的概念做一次性迁移。
+- `summary` / `whyImportant` 已从 warning 升级为 error，并在 schema 中改为 required。
+
+剩余收紧项：
+
+- `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
 - case `standard` version。
 - person `sources`。
 
-works AND 与 prerequisites DAG 已经是阻塞校验。剩余收紧项可以避免一次性把 52 个概念全部打红，导致生产停摆。
+works AND、prerequisites DAG、summary/whyImportant 已经是阻塞校验。剩余收紧项可以避免一次性把 case/person 全部打红，导致生产停摆。
 
 ## 审查同步清单
 

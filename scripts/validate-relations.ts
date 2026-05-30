@@ -144,11 +144,11 @@ for (const entry of concepts) {
   reportMissing(errors, entry, "appliedIn.projects", asStringArray(appliedIn?.projects), projectIds);
 
   if (!isUsefulString(entry.data.summary)) {
-    warnings.push(`${relative(root, entry.path)}: summary is missing, empty, or TODO-like`);
+    errors.push(`${relative(root, entry.path)}: summary is required and must be useful`);
   }
 
   if (!isUsefulString(entry.data.whyImportant)) {
-    warnings.push(`${relative(root, entry.path)}: whyImportant is missing, empty, or TODO-like`);
+    errors.push(`${relative(root, entry.path)}: whyImportant is required and must be useful`);
   }
 
   if ("expandsTo" in entry.data) {

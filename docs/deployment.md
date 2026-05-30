@@ -25,7 +25,7 @@ npm run test
 npm run build
 ```
 
-当前 `summary` / `whyImportant` 仍处于 warning 阶段，`audit:concepts` 会列出缺失清单但不阻断本地构建。升级为严格校验前，main 分支必须先让 `npm run audit:concepts` 返回 0 项缺失。
+当前 `summary` / `whyImportant` 已升级为严格字段，`audit:concepts` 必须返回 clean；缺失、空值或 TODO-like 内容会阻断审计、关系校验或 Astro content schema。
 
 后续 Vercel 或 GitHub Actions 进入 production gate 时，建议使用：
 
@@ -38,7 +38,7 @@ npm run validate:relations -- --warning-exit-code=2
 - 默认模式：不带 `--warning-exit-code` 时，warning 不影响退出码；无 error 返回 `0`，有 error 返回 `1`。本地开发和 watch 场景默认使用这一模式，避免 warning 打断编辑。
 - CI 监控模式：带 `--warning-exit-code=2` 时，无 error 但存在 warning 返回 `2`；有 error 仍返回 `1`。CI / Vercel build 可把 `2` 标记为通知或黄灯，但不阻断 merge。
 
-等 `summary` / `whyImportant` 全量补齐后，再把 strict 校验接入阻断规则。升级 strict 前，main 分支必须先让 `npm run audit:concepts` 返回 0 项缺失。
+`--warning-exit-code=2` 只用于未来的非阻塞 warning（例如孤立节点通知）。当前 content strict 项应直接返回 `1` 并阻断。
 
 标杆页验收里的 link check 与 Lighthouse >= 90 还没有自动化脚本；在接入 GitHub Actions 前，只能作为人工 gate。后续新增脚本后，部署前置条件应补充 `npm run link:check` 和 `npm run lighthouse:beacons`，再把它们接入 PR 检查。
 

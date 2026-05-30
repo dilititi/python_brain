@@ -37,11 +37,11 @@
 
 概念页文本字段的边界如下：
 
-- `description`：旧列表页/SEO 描述字段，标记为 deprecated；`summary` 升级为 required 时同步删除，并由 `scripts/migrate-description-to-summary.ts` 迁移仍只有 `description` 的概念。
-- `summary`：80 字以内，一句话定义或最小心智模型，当前 warning，v1.0 冻结后升级为必填。
+- `description`：旧列表页/SEO 描述字段，标记为 deprecated；后续由 `scripts/migrate-description-to-summary.ts` 清理仍依赖 `description` 的内容，并从 schema 删除。
+- `summary`：必填，80 字以内，一句话定义或最小心智模型。
 - `definition`：概念页定义区的核心解释，保持短而准；更长解释放 MDX 正文。
 - `mentalModel`：一句话心智模型或类比，可选但应具体，避免和 `summary` 重复。
-- `whyImportant`：200 字以内，落到具体场景，当前 warning，v1.0 冻结后升级为必填。
+- `whyImportant`：必填，200 字以内，落到具体场景。
 
 如果 `definition` 和 `mentalModel` 难以区分，优先让 `definition` 写边界和反例，让 `mentalModel` 只保留一句可记忆的类比。
 
@@ -127,7 +127,7 @@
 
 v1.0 已移除 `expandsTo` 和 `works.note`。新增内容只使用 `extends` 和 `works.role`；如果在旧内容或脚本里看到旧字段，应视为迁移遗漏并修正。
 
-`summary` 和 `whyImportant` 当前处于 warning 阶段：`npm run audit:concepts` 会列出缺字段清单。标杆页和现有内容补齐后，这两个字段会从 optional 升级为 required，并由构建期校验阻塞。
+`summary` 和 `whyImportant` 已从 optional 升级为 required：`npm run audit:concepts` 必须返回 clean，缺字段或 TODO-like 内容会由审计和构建期校验阻塞。
 
 works 迁移到 registry 前，`worksRef[]` 和内联 `works[]` 可短期共存；新内容优先使用 `worksRef[]`，旧内容按迁移脚本逐步清空内联 `works[]`。同一作品重复出现时，以 registry 元数据为准，但概念侧 `role` 仍必须说明作品如何体现当前概念。
 

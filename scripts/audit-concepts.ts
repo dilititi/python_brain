@@ -6,7 +6,7 @@ import matter from "gray-matter";
 const root = process.cwd();
 const conceptsRoot = join(root, "src", "content", "concepts");
 const todoPattern = /TODO|待补|暂无说明/;
-const warnings: string[] = [];
+const issues: string[] = [];
 
 function isUsefulString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 && !todoPattern.test(value);
@@ -21,28 +21,29 @@ for (const file of files) {
   const label = relative(root, path);
 
   if (!isUsefulString(data.summary)) {
-    warnings.push(`${label}: summary is missing, empty, or TODO-like`);
+    issues.push(`${label}: summary is missing, empty, or TODO-like`);
   }
 
   if (!isUsefulString(data.whyImportant)) {
-    warnings.push(`${label}: whyImportant is missing, empty, or TODO-like`);
+    issues.push(`${label}: whyImportant is missing, empty, or TODO-like`);
   }
 
   if ("expandsTo" in data) {
-    warnings.push(`${label}: expandsTo is deprecated; use extends`);
+    issues.push(`${label}: expandsTo is deprecated; use extends`);
   }
 
   const works = Array.isArray(data.works) ? data.works : [];
   works.forEach((work: Record<string, unknown>, index: number) => {
     if ("note" in work) {
-      warnings.push(`${label}: works[${index}].note is deprecated; use role`);
+      issues.push(`${label}: works[${index}].note is deprecated; use role`);
     }
   });
 }
 
-if (warnings.length === 0) {
-  console.log("Concept audit clean: no summary/whyImportant or transition-field warnings.");
+if (issues.length === 0) {
+  console.log("Concept audit clean: no summary/whyImportant or transition-field issues.");
 } else {
-  console.warn(`Concept audit warnings (${warnings.length}):`);
-  console.warn(warnings.join("\n"));
+  console.error(`Concept audit issues (${issues.length}):`);
+  console.error(issues.join("\n"));
+  process.exitCode = 1;
 }

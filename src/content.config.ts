@@ -50,8 +50,8 @@ const concepts = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    summary: z.string().max(80).optional(),
-    whyImportant: z.string().max(200).optional(),
+    summary: z.string().max(80),
+    whyImportant: z.string().max(200),
     definition: z.string(),
     mentalModel: z.string(),
     category: z.enum([

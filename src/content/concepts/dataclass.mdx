@@ -1,6 +1,8 @@
 ---
 title: dataclass
 description: 用少量代码定义主要用于承载数据的类。
+summary: dataclass 用装饰器自动生成数据类常见的样板方法。
+whyImportant: 配置项、事件记录、解析结果等数据结构不该被样板 __init__ 淹没。dataclass 让字段、默认值和显示形式集中呈现，适合中小型工程建模。
 definition: dataclass 是标准库装饰器，可以自动生成 __init__、__repr__、比较等样板方法。
 mentalModel: dataclass 像给 class 加了数据表单模板，字段写清楚，样板代码自动补上。
 category: oop
