@@ -5,24 +5,35 @@ definition: try-except 是 Python 的异常处理结构，用来处理运行时�
 mentalModel: try 像把危险动作放进保护区；如果出错，就跳到对应的 except 处理。
 category: control-flow
 level: core
-tracks: [web, data, automation, ai]
-prerequisites: [if-statement, function]
-related: [json, pathlib]
-expandsTo: []
+tracks:
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - if-statement
+  - function
+related:
+  - json
+  - pathlib
 appliedIn:
-  cases: [json-config-loader, api-error-handling]
-  projects: [weather-notifier, contact-book-cli]
-people: [guido-van-rossum]
+  cases:
+    - json-config-loader
+    - api-error-handling
+  projects:
+    - weather-notifier
+    - contact-book-cli
+people:
+  - guido-van-rossum
 works:
   - title: "The Python Tutorial: Errors and Exceptions"
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/errors.html
-    note: 官方教程说明异常捕获、抛出和清理动作。
+    role: 官方教程说明异常捕获、抛出和清理动作。
 history:
   - year: 1991
-    title: 异常模型进入语言
-    note: Python 从早期就鼓励用异常表达失败，而不是只靠返回码。
+    event: 异常模型进入语言：Python 从早期就鼓励用异常表达失败，而不是只靠返回码。
 codeExamples:
   - title: 捕获失败
     description: 把可能失败的转换包起来，并给出兜底结果。
@@ -36,5 +47,4 @@ codeExamples:
 
       print(value)
 ---
-
 异常处理不是把错误吞掉。好的 `except` 应该尽量具体，并且让调用者知道程序采取了什么恢复策略。

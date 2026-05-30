@@ -5,24 +5,33 @@ definition: 列表是一个有序、可变、可迭代的容器。
 mentalModel: 列表像一排可移动的格子，你可以按位置读取，也可以追加、删除或排序。
 category: data-structure
 level: intro
-tracks: [beginner, data, automation, ai]
-prerequisites: [variable]
-related: [dict, for-loop]
-expandsTo: [comprehension]
+tracks:
+  - beginner
+  - data
+  - automation
+  - ai
+prerequisites:
+  - variable
+related:
+  - dict
+  - for-loop
 appliedIn:
-  cases: [word-frequency, csv-cleaning]
-  projects: [text-analyzer]
-people: [guido-van-rossum]
+  cases:
+    - word-frequency
+    - csv-cleaning
+  projects:
+    - text-analyzer
+people:
+  - guido-van-rossum
 works:
   - title: Python Data Structures
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/datastructures.html
-    note: 官方文档集中展示列表方法、列表推导式和序列操作。
+    role: 官方文档集中展示列表方法、列表推导式和序列操作。
 history:
   - year: 1991
-    title: 内置序列类型
-    note: 列表作为 Python 核心数据结构随语言早期版本出现。
+    event: 内置序列类型：列表作为 Python 核心数据结构随语言早期版本出现。
 codeExamples:
   - title: 增删查
     description: 列表适合保存一串同类或同流程的数据。
@@ -31,6 +40,7 @@ codeExamples:
       names.append("Grace")
       print(names[0])
       print(len(names))
+extends:
+  - comprehension
 ---
-
 列表通常和 `for` 循环一起出现。新人只要能把“有序容器”和“逐个处理”连起来，就已经进入了 Python 的基本工作流。

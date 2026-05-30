@@ -5,29 +5,42 @@ definition: dataclass 是标准库装饰器，可以自动生成 __init__、__re
 mentalModel: dataclass 像给 class 加了数据表单模板，字段写清楚，样板代码自动补上。
 category: oop
 level: core
-tracks: [beginner, data, automation, ai]
-prerequisites: [class, decorator]
-related: [encapsulation, dunder-methods, dict, list]
-expandsTo: []
+tracks:
+  - beginner
+  - data
+  - automation
+  - ai
+prerequisites:
+  - class
+  - decorator
+related:
+  - encapsulation
+  - dunder-methods
+  - dict
+  - list
 appliedIn:
-  cases: [contact-records]
-  projects: [contact-book-cli]
-people: [raymond-hettinger, guido-van-rossum]
+  cases:
+    - contact-records
+  projects:
+    - contact-book-cli
+people:
+  - raymond-hettinger
+  - guido-van-rossum
 works:
   - title: PEP 557
     creator: Python community
     type: pep
     url: https://peps.python.org/pep-0557/
-    note: Data Classes 的设计提案。
+    role: Data Classes 的设计提案。
   - title: dataclasses documentation
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/library/dataclasses.html
-    note: 标准库文档展示字段、默认值、冻结对象和转换函数。
+    role: 标准库文档展示字段、默认值、冻结对象和转换函数。
 history:
   - year: 2018
-    title: Python 3.7 引入 dataclasses
-    note: PEP 557 让数据类进入标准库，减少样板代码。
+    pep: PEP 557
+    event: Python 3.7 引入 dataclasses：PEP 557 让数据类进入标准库，减少样板代码。
 codeExamples:
   - title: 数据记录
     description: dataclass 适合表达结构明确的数据对象。
@@ -42,5 +55,4 @@ codeExamples:
       contact = Contact("Ada", "ada@example.com")
       print(contact)
 ---
-
 dataclass 把装饰器和 OOP 连在一起。它让新人看到：装饰器不只服务 Web 路由，也可以直接改善普通数据对象的写法。

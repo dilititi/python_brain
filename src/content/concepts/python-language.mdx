@@ -5,34 +5,61 @@ summary: Python 的身份由解释执行、动态强类型、跨平台、开源�
 whyImportant: 新人遇到安装环境、类型报错、Windows/macOS/Linux 差异、框架生态和代码风格时，本质上都在和 Python 的语言身份打交道。
 definition: Python 的语言身份由运行方式、类型模型、平台能力、社区治理和编程范式共同构成。
 mentalModel: 把 Python 想成一门重视可读性和快速反馈的通用语言，它用解释器执行代码，用对象模型统一数据，用社区生态扩展能力。
-category: foundation
+category: language
 level: intro
-tracks: [beginner, web, data, automation, ai, creative]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+  - creative
 prerequisites: []
-related: [interpreter-runtime, dynamic-strong-typing, cross-platform-community, programming-paradigms, python-philosophy, python-versions, primitive-types]
-extends: [interpreter-runtime, dynamic-strong-typing, cross-platform-community, programming-paradigms, module, class, function]
-expandsTo: [interpreter-runtime, dynamic-strong-typing, cross-platform-community, programming-paradigms, module, class, function]
+related:
+  - interpreter-runtime
+  - dynamic-strong-typing
+  - cross-platform-community
+  - programming-paradigms
+  - python-philosophy
+  - python-versions
+  - primitive-types
+extends:
+  - interpreter-runtime
+  - dynamic-strong-typing
+  - cross-platform-community
+  - programming-paradigms
+  - module
+  - class
+  - function
 appliedIn:
-  cases: [interpreter-identity-check]
-  projects: [python-basics-lab]
-people: [guido-van-rossum, tim-peters]
+  cases:
+    - interpreter-identity-check
+  projects:
+    - python-basics-lab
+people:
+  - guido-van-rossum
+  - tim-peters
 works:
   - title: Python
     creator: Python Software Foundation
     type: project
     url: https://www.python.org/
-    note: "role: 官方入口把解释器下载、文档、版本信息和社区资源集中到一起。"
+    role: 官方入口把解释器下载、文档、版本信息和社区资源集中到一起。
   - title: Python Software Foundation
     creator: Python community
     type: project
     url: https://www.python.org/psf/
-    note: "role: PSF 管理商标、基础设施和社区支持，解释 Python 为什么是社区驱动的开源语言。"
+    role: PSF 管理商标、基础设施和社区支持，解释 Python 为什么是社区驱动的开源语言。
 history:
   - year: 1991
-    title: Python 首次公开发布
-    note: Guido van Rossum 发布 Python 早期版本，强调清晰语法和可扩展标准库。
+    event: Python 首次公开发布：Guido van Rossum 发布 Python 早期版本，强调清晰语法和可扩展标准库。
     source: https://www.python.org/doc/essays/foreword/
-tags: [foundation, interpreter, typing, cross-platform, psf]
+tags:
+  - foundation
+  - interpreter
+  - typing
+  - cross-platform
+  - psf
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -62,7 +89,6 @@ codeExamples:
 
       print("runtime ok")
 ---
-
 ## 概念定义
 
 这不是一个语法节点，而是新人进入 Python 世界的总入口。解释型决定了反馈方式，动态类型决定了写代码的节奏，强类型决定了不同类型不会随意混算，多范式决定了你可以按任务选择过程式、函数式或面向对象写法。

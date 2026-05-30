@@ -5,24 +5,34 @@ definition: 继承是类之间的派生关系，子类可以获得父类的方�
 mentalModel: 继承像在已有蓝图上做变体，保留共同结构，只改特殊部分。
 category: oop
 level: advanced
-tracks: [beginner, web, ai]
-prerequisites: [class]
-related: [encapsulation, polymorphism, dunder-methods, dataclass]
-expandsTo: [polymorphism]
+tracks:
+  - beginner
+  - web
+  - ai
+prerequisites:
+  - class
+related:
+  - encapsulation
+  - polymorphism
+  - dunder-methods
+  - dataclass
 appliedIn:
-  cases: [contact-records]
-  projects: [contact-book-cli]
-people: [guido-van-rossum, raymond-hettinger]
+  cases:
+    - contact-records
+  projects:
+    - contact-book-cli
+people:
+  - guido-van-rossum
+  - raymond-hettinger
 works:
   - title: "The Python Tutorial: Inheritance"
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/classes.html#inheritance
-    note: 官方教程展示单继承、多继承和方法查找。
+    role: 官方教程展示单继承、多继承和方法查找。
 history:
   - year: 2002
-    title: 新式类成为现代对象模型基础
-    note: Python 2.2 引入新式类，逐步统一内置类型和用户自定义类的行为。
+    event: 新式类成为现代对象模型基础：Python 2.2 引入新式类，逐步统一内置类型和用户自定义类的行为。
 codeExamples:
   - title: 覆盖方法
     description: 子类可以复用父类结构，并改写某个方法。
@@ -36,6 +46,7 @@ codeExamples:
               return "beep"
 
       print(Robot().speak())
+extends:
+  - polymorphism
 ---
-
 继承很强，但也容易让层级变复杂。新人阶段先理解“复用和覆盖”，等项目真的需要抽象层次时再深入多继承和 MRO。

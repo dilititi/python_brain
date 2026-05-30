@@ -5,27 +5,44 @@ summary: sys.path 是 import 的路线图；导入失败时先看解释器正在
 whyImportant: “明明安装了包却 import 不了”常常不是语法错，而是解释器、虚拟环境或运行目录和你想的不一样。
 definition: sys.path 是 Python 导入系统用于查找模块和包的路径列表，由脚本位置、环境变量、标准库、site-packages 等来源组成。
 mentalModel: import 像找书，sys.path 就是书架顺序；书架上没有或顺序不对，就会找不到或找错版本。
-category: engineering
+category: module-eng
 level: core
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [interpreter-runtime, import-syntax, module]
-related: [package-structure, venv, pip]
-expandsTo: [package-structure]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - interpreter-runtime
+  - import-syntax
+  - module
+related:
+  - package-structure
+  - venv
+  - pip
 appliedIn:
-  cases: [stdlib-import-tour, package-install-workflow]
-  projects: [python-basics-lab, weather-notifier]
-people: [guido-van-rossum]
+  cases:
+    - stdlib-import-tour
+    - package-install-workflow
+  projects:
+    - python-basics-lab
+    - weather-notifier
+people:
+  - guido-van-rossum
 works:
   - title: The initialization of the sys.path module search path
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/library/sys_path_init.html
-    note: 官方文档说明 sys.path 初始化过程。
+    role: 官方文档说明 sys.path 初始化过程。
 history:
   - year: 1991
-    title: import 查找路径成为模块系统基础
-    note: 模块复用需要稳定的查找规则，sys.path 是排查导入问题的核心入口。
-tags: [sys-path, import, module-search]
+    event: import 查找路径成为模块系统基础：模块复用需要稳定的查找规则，sys.path 是排查导入问题的核心入口。
+tags:
+  - sys-path
+  - import
+  - module-search
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -50,8 +67,9 @@ codeExamples:
 
       # 慎用：
       # sys.path.append("..")
+extends:
+  - package-structure
 ---
-
 ## 概念定义
 
 `import` 不是全网搜索，也不是搜索整个磁盘。它会按规则查看 `sys.path` 里的目录。这个列表通常包含当前脚本所在目录、标准库路径、虚拟环境的 `site-packages`，以及环境变量配置的额外路径。

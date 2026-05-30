@@ -6,7 +6,7 @@
 
 当前项目已经不是 12/5/3/5 的初始 MVP，而是一个内容规模已经提前扩张、治理层尚未收紧的原型：
 
-- 内容规模：42 concepts / 18 cases / 7 projects / 6 people / 5 paths。
+- 内容规模：52 concepts / 18 cases / 7 projects / 6 people / 5 paths。
 - 架构形态：Astro + MDX + React Islands 已成立。
 - 关系机制：已有运行时聚合关系，但尚未按设计生成 `dist/relations.json`。
 - 最大风险：内容扩张速度已经超过 schema、校验、脚手架和页面布局契约。
@@ -17,8 +17,8 @@
 
 | 原则 | 当前状态 | 判断 |
 |---|---|---|
-| 内容模型清晰性 > 功能丰富度 | 内容量已经较多，schema 已开始补 v1.0 过渡字段，但旧字段仍并存 | 部分满足 |
-| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，但未覆盖 DAG、summary/whyImportant、standard code version 等 v1.0 约束 | 部分满足 |
+| 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`works.role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
+| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep；summary/whyImportant 暂按 warning | 部分满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
 | 数据写一次，关系自动算 | 概念页会反向聚合 cases/projects/people，但 works 仍主要手写在 concept | 部分满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，但未包含 milestone cases/projects，也没有拓扑规划 | 部分满足 |
@@ -29,15 +29,15 @@
 
 ### Concept
 
-当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`expandsTo`、`appliedIn`、`people`、`works`、`history`、`tags`、`updatedAt`、`codeExamples`。
+当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`works`、`history`、`tags`、`updatedAt`、`codeExamples`。
 
 v1.0 缺口：
 
-- `summary` 已作为可选字段加入并限制 80 字，但未全量迁移、未强制必填。
-- `whyImportant` 已作为可选字段加入并限制 200 字，但未全量迁移、未强制必填。
-- 已加入 `extends`，但现有关系代码仍使用 `expandsTo`，两者处于过渡并存状态。
-- `works` 当前是 `{title, creator, type, url, note}`，设计文档要求 `{name, url, role}`。
-- `history` 当前是数组，设计文档要求对象 `{firstAppeared, pep, note}`。
+- `summary` 已作为可选字段加入并限制 80 字，当前通过 `audit:concepts` 和校验 warning 过渡，待补齐后升级为 required。
+- `whyImportant` 已作为可选字段加入并限制 200 字，当前通过 `audit:concepts` 和校验 warning 过渡，待补齐后升级为 required。
+- `extends` 已成为唯一延伸字段，`expandsTo` 兼容层已删除。
+- `works` 已正式迁移为 `{title, creator, type, url, role}`，`note` 已删除。
+- `history` 保留数组形态，每项为 `{year?, pep?, event, source?}`，用真实标杆页反向验证后裁决优于单对象。
 - `tags` 已作为可选默认字段加入，但未全量补内容。
 - `updatedAt` 已作为可选日期字段加入，但旧内容未全量补齐。
 
@@ -115,10 +115,7 @@ v1.0 缺口：
 
 v1.0 仍缺：
 
-- prerequisites DAG 无环检查。
-- concept 必须 `cases >= 1 AND works >= 1`。
-- `summary` / `whyImportant` 非空非 TODO。
-- `history.pep` 若填必须匹配 `PEP \d+`。
+- `summary` / `whyImportant` 从 warning 升级为 error。
 - case 必须 `concepts >= 2`。
 - case 必须包含 `standard` code version。
 - person 必须 `sources >= 1`。
@@ -131,7 +128,7 @@ v1.0 仍缺：
 
 当前 `src/lib/relations.ts` 在页面渲染时读取集合并聚合：
 
-- concept prerequisites / related / expandsTo。
+- concept prerequisites / related / extends。
 - cases / projects / people 的反向挂载。
 - path concepts。
 
@@ -233,28 +230,28 @@ localStorage：
 4. 生成后默认运行关系校验，并列出待补字段。
 5. 已新增 `docs/content-guidelines.md`。
 
-保留过渡策略：当前脚手架同时生成 `extends` 与 `expandsTo`，以兼容 v1.0 目标字段和现有关系代码。待 schema 正式迁移后，删除 `expandsTo` 兼容层。
+内容冻结策略已落地：`new-concept.ts` 写入新文件前检查 `PKB_ALLOW_NEW_CONCEPTS=1`。脚手架只生成 v1.0 字段：`extends`、`works.role`、`history[].event`。
 
 ### P2：三页标杆反推 schema
 
 已完成第一版：
 
 - `decorator`：验证六维模型、作品、历史、人物、框架案例。
-- `python-language`：验证 Foundation 层、版本、PSF、哲学。
+- `python-language`：验证 `language` 元层级、版本、PSF、哲学。
 - `function-parameters`：验证 Basic Syntax 层、代码三版本、真实案例。
 
 反推发现：
 
 - `summary` 和 `whyImportant` 值得在概念页 Definition 区直接展示，否则 v1.0 字段只参与校验、不参与学习体验。
-- 现有 `works.note` 已经被用来承担 `works.role`，下一步 schema 迁移时应正式改名，避免语义含混。
+- `works.note` 已正式迁移为 `works.role`，避免把“概念中的作用”降级成普通备注。
 - 现有 `history` 数组能表达多事件时间线，比单对象 `{firstAppeared, pep, note}` 更适合历史脉络；建议 v1.0 schema 保留数组形态，但要求至少一项含 `firstAppeared` 或 `pep` 语义。
-- `extends` 与 `expandsTo` 需要尽快合并，当前只是过渡兼容。
+- `extends` 与 `expandsTo` 已合并，当前 schema 和关系代码只保留 `extends`。
 
 ### P3：收紧校验
 
 在三页标杆完成后再强制：
 
-- `summary` / `whyImportant`。
+- `summary` / `whyImportant` 从 warning 升级为 error。
 - works AND。
 - DAG。
 - case `standard` version。

@@ -15,7 +15,7 @@ export type GraphEdge = {
   kind:
     | "prerequisite"
     | "related"
-    | "expands"
+    | "extends"
     | "applies"
     | "builds"
     | "created-by";
@@ -59,11 +59,11 @@ export async function buildGraph() {
       });
     }
 
-    for (const target of entry.data.expandsTo) {
+    for (const target of entry.data.extends) {
       addEdge(edges, {
         source: `concept:${entry.id}`,
         target: `concept:${target}`,
-        kind: "expands"
+        kind: "extends"
       });
     }
   }

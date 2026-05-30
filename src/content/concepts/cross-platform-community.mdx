@@ -5,32 +5,51 @@ summary: 跨平台让代码能迁移，开源社区让标准库、PyPI、PEP 和
 whyImportant: 新人写脚本很快会遇到路径分隔符、环境安装、包版本和系统差异；理解社区治理能帮他判断哪些资料和工具更可靠。
 definition: 跨平台与开源社区描述 Python 的运行环境覆盖、开放治理、包生态和由 Python Software Foundation 支持的公共基础设施。
 mentalModel: Python 像一座公共城市：解释器是道路，标准库是公共设施，PyPI 是市场，PEP 是城市规划讨论。
-category: foundation
+category: language
 level: intro
-tracks: [beginner, web, data, automation, ai, creative]
-prerequisites: [python-language]
-related: [interpreter-runtime, python-versions, pathlib, pip, venv]
-expandsTo: [pathlib, pip, venv]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+  - creative
+prerequisites:
+  - python-language
+related:
+  - interpreter-runtime
+  - python-versions
+  - pathlib
+  - pip
+  - venv
 appliedIn:
-  cases: [interpreter-identity-check, package-install-workflow]
-  projects: [python-basics-lab, weather-notifier]
-people: [guido-van-rossum]
+  cases:
+    - interpreter-identity-check
+    - package-install-workflow
+  projects:
+    - python-basics-lab
+    - weather-notifier
+people:
+  - guido-van-rossum
 works:
   - title: Python Software Foundation
     creator: Python community
     type: project
     url: https://www.python.org/psf/
-    note: PSF 支持 Python 社区、商标、基础设施和生态发展。
+    role: PSF 支持 Python 社区、商标、基础设施和生态发展。
   - title: Python Package Index
     creator: Python community
     type: project
     url: https://pypi.org/
-    note: PyPI 是第三方包发布和安装的核心入口。
+    role: PyPI 是第三方包发布和安装的核心入口。
 history:
   - year: 2001
-    title: Python Software Foundation 成立
-    note: PSF 为 Python 社区提供组织和法律支持。
-tags: [cross-platform, psf, pypi, community]
+    event: Python Software Foundation 成立：PSF 为 Python 社区提供组织和法律支持。
+tags:
+  - cross-platform
+  - psf
+  - pypi
+  - community
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -57,8 +76,11 @@ codeExamples:
           config_dir = ".config"
 
       print(config_dir)
+extends:
+  - pathlib
+  - pip
+  - venv
 ---
-
 ## 概念定义
 
 跨平台不是承诺“所有代码无需修改就能到处跑”。更准确地说，Python 解释器和标准库尽量提供统一接口，让你把平台差异限制在少数边界：路径、权限、换行、可执行文件、系统命令。

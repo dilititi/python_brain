@@ -5,27 +5,45 @@ summary: Python 哲学把可读性、显式、简单和实用主义变成日常�
 whyImportant: 它能帮助新人判断“这段代码只是能跑，还是别人愿意维护”。很多 Pythonic 写法都可以回到 PEP 20 的取舍。
 definition: Python 哲学是一组指导代码可读性和设计取舍的原则，最著名的表达是 The Zen of Python。
 mentalModel: 它像一套代码审美指南，提醒你不要只问“能不能写”，还要问“别人能不能读懂”。
-category: foundation
+category: language
 level: intro
-tracks: [beginner, web, data, automation, ai, creative]
-prerequisites: [python-language]
-related: [programming-paradigms, python-versions, function, module]
-expandsTo: []
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+  - creative
+prerequisites:
+  - python-language
+related:
+  - programming-paradigms
+  - python-versions
+  - function
+  - module
 appliedIn:
-  cases: [interpreter-identity-check]
-  projects: [python-basics-lab]
-people: [tim-peters, guido-van-rossum]
+  cases:
+    - interpreter-identity-check
+  projects:
+    - python-basics-lab
+people:
+  - tim-peters
+  - guido-van-rossum
 works:
   - title: PEP 20
     creator: Tim Peters
     type: pep
     url: https://peps.python.org/pep-0020/
-    note: The Zen of Python 的正式文本。
+    role: The Zen of Python 的正式文本。
 history:
   - year: 2004
-    title: PEP 20 发布
-    note: Tim Peters 用一组短句提炼 Python 社区的设计品味。
-tags: [pep-20, readability, explicit, practical]
+    pep: PEP 20
+    event: PEP 20 发布：Tim Peters 用一组短句提炼 Python 社区的设计品味。
+tags:
+  - pep-20
+  - readability
+  - explicit
+  - practical
 updatedAt: "2026-05-30"
 codeExamples:
   - title: import this
@@ -33,7 +51,6 @@ codeExamples:
     code: |
       import this
 ---
-
 “优美胜于丑陋”“显式胜于隐式”“简单胜于复杂”“实用胜于纯粹”这些原则不是口号。它们会影响你是否拆函数、是否写清楚变量名、是否为了炫技牺牲可读性。
 
 对新人最有用的四条可以先这样记：

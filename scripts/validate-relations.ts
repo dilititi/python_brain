@@ -68,6 +68,12 @@ function reportMissing(
   }
 }
 
+const todoPattern = /TODO|待补|暂无说明/;
+
+function isUsefulString(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0 && !todoPattern.test(value);
+}
+
 const concepts = await readMdxCollection("concepts");
 const cases = await readMdxCollection("cases");
 const projects = await readMdxCollection("projects");
@@ -79,6 +85,7 @@ const caseIds = new Set(cases.map((entry) => entry.id));
 const projectIds = new Set(projects.map((entry) => entry.id));
 const personIds = new Set(people.map((entry) => entry.id));
 const errors: string[] = [];
+const warnings: string[] = [];
 
 const mvpTargets = {
   concepts: 20,
@@ -106,12 +113,64 @@ if (people.length < mvpTargets.people) {
 for (const entry of concepts) {
   reportMissing(errors, entry, "prerequisites", asStringArray(entry.data.prerequisites), conceptIds);
   reportMissing(errors, entry, "related", asStringArray(entry.data.related), conceptIds);
-  reportMissing(errors, entry, "expandsTo", asStringArray(entry.data.expandsTo), conceptIds);
+  reportMissing(errors, entry, "extends", asStringArray(entry.data.extends), conceptIds);
   reportMissing(errors, entry, "people", asStringArray(entry.data.people), personIds);
 
   const appliedIn = entry.data.appliedIn as Record<string, unknown> | undefined;
   reportMissing(errors, entry, "appliedIn.cases", asStringArray(appliedIn?.cases), caseIds);
   reportMissing(errors, entry, "appliedIn.projects", asStringArray(appliedIn?.projects), projectIds);
+
+  if (!isUsefulString(entry.data.summary)) {
+    warnings.push(`${relative(root, entry.path)}: summary is missing, empty, or TODO-like`);
+  }
+
+  if (!isUsefulString(entry.data.whyImportant)) {
+    warnings.push(`${relative(root, entry.path)}: whyImportant is missing, empty, or TODO-like`);
+  }
+
+  if ("expandsTo" in entry.data) {
+    errors.push(`${relative(root, entry.path)}: expandsTo is removed; use extends`);
+  }
+
+  const works = Array.isArray(entry.data.works)
+    ? (entry.data.works as Record<string, unknown>[])
+    : [];
+
+  if (works.length === 0) {
+    errors.push(`${relative(root, entry.path)}: concept must have at least one work`);
+  }
+
+  works.forEach((work, index) => {
+    if (!isUsefulString(work.role)) {
+      errors.push(`${relative(root, entry.path)}: works[${index}].role is required and must be useful`);
+    }
+
+    if ("note" in work) {
+      errors.push(`${relative(root, entry.path)}: works[${index}].note is removed; use role`);
+    }
+  });
+
+  const history = Array.isArray(entry.data.history)
+    ? (entry.data.history as Record<string, unknown>[])
+    : [];
+
+  if (history.length === 0) {
+    errors.push(`${relative(root, entry.path)}: history must contain at least one event`);
+  }
+
+  history.forEach((event, index) => {
+    if (!isUsefulString(event.event)) {
+      errors.push(`${relative(root, entry.path)}: history[${index}].event is required`);
+    }
+
+    if (typeof event.pep === "string" && !/^PEP \d+$/.test(event.pep)) {
+      errors.push(`${relative(root, entry.path)}: history[${index}].pep must match "PEP \\d+"`);
+    }
+
+    if (!event.year && !event.pep) {
+      errors.push(`${relative(root, entry.path)}: history[${index}] must include year or pep`);
+    }
+  });
 }
 
 for (const entry of cases) {
@@ -139,6 +198,38 @@ for (const entry of paths) {
   for (const milestone of milestones) {
     reportMissing(errors, entry, "milestones.nodes", asStringArray(milestone.nodes), conceptIds);
   }
+}
+
+const prerequisiteIndex = new Map<string, string[]>(
+  concepts.map((entry) => [entry.id, asStringArray(entry.data.prerequisites)])
+);
+const visitingPrerequisites = new Set<string>();
+const visitedPrerequisites = new Set<string>();
+
+function visitPrerequisiteNode(id: string, stack: string[]) {
+  if (visitedPrerequisites.has(id)) {
+    return;
+  }
+
+  if (visitingPrerequisites.has(id)) {
+    const cycleStart = stack.indexOf(id);
+    const cycle = [...stack.slice(Math.max(cycleStart, 0)), id].join(" -> ");
+    errors.push(`concept prerequisites graph must be a DAG; cycle detected: ${cycle}`);
+    return;
+  }
+
+  visitingPrerequisites.add(id);
+
+  for (const prerequisite of prerequisiteIndex.get(id) ?? []) {
+    visitPrerequisiteNode(prerequisite, [...stack, prerequisite]);
+  }
+
+  visitingPrerequisites.delete(id);
+  visitedPrerequisites.add(id);
+}
+
+for (const id of conceptIds) {
+  visitPrerequisiteNode(id, [id]);
 }
 
 const casesByConcept = new Map<string, string[]>();
@@ -237,6 +328,10 @@ while (queue.length > 0) {
 if (visited.size !== graphNodes.length) {
   const missing = graphNodes.filter((node) => !visited.has(node));
   errors.push(`MVP content graph must be connected; disconnected nodes: ${missing.join(", ")}`);
+}
+
+if (warnings.length > 0) {
+  console.warn(`Warnings:\n${warnings.join("\n")}`);
 }
 
 if (errors.length > 0) {

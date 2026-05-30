@@ -5,27 +5,44 @@ summary: 包是模块的目录化组织方式，__init__.py 让目录成为可�
 whyImportant: 只写一个脚本时不用包；项目一旦拆成多个文件，包结构会决定 import 是否清楚、代码是否可复用。
 definition: 包是包含模块的目录，通常带有 __init__.py；它让一组相关文件共享同一个导入前缀。
 mentalModel: 模块是单个工具抽屉，包是一组贴了标签的工具柜，__init__.py 是工具柜的前台入口。
-category: engineering
+category: module-eng
 level: core
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [module, import-syntax]
-related: [module-search-path, pip, venv]
-expandsTo: [module-search-path]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - module
+  - import-syntax
+related:
+  - module-search-path
+  - pip
+  - venv
 appliedIn:
-  cases: [package-install-workflow, stdlib-import-tour]
-  projects: [weather-notifier, mini-web-api]
-people: [guido-van-rossum]
+  cases:
+    - package-install-workflow
+    - stdlib-import-tour
+  projects:
+    - weather-notifier
+    - mini-web-api
+people:
+  - guido-van-rossum
 works:
   - title: "The Python Tutorial: Packages"
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/modules.html#packages
-    note: 官方教程解释包、子包和 __init__.py 的作用。
+    role: 官方教程解释包、子包和 __init__.py 的作用。
 history:
   - year: 1990s
-    title: 包系统稳定成为项目组织方式
-    note: 包让 Python 从单文件脚本自然过渡到可维护项目。
-tags: [package, module, init, import]
+    event: 包系统稳定成为项目组织方式：包让 Python 从单文件脚本自然过渡到可维护项目。
+tags:
+  - package
+  - module
+  - init
+  - import
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -54,8 +71,9 @@ codeExamples:
 
       # main.py
       from app import find_user
+extends:
+  - module-search-path
 ---
-
 ## 概念定义
 
 模块解决“一个文件如何被复用”，包解决“一组文件如何一起被复用”。当你开始有 `users.py`、`reports.py`、`settings.py` 这类文件时，包结构会让项目边界更清楚。

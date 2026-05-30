@@ -4,17 +4,16 @@ import { spawnSync } from "node:child_process";
 import { join, relative } from "node:path";
 
 const categories = new Set([
-  "foundation",
+  "language",
   "syntax",
   "control-flow",
   "data-structure",
   "function",
   "oop",
+  "file-io",
+  "module-eng",
   "stdlib",
-  "typing",
-  "engineering",
-  "ecosystem",
-  "best-practice"
+  "third-party"
 ]);
 
 const levels = new Set(["intro", "core", "advanced"]);
@@ -91,7 +90,7 @@ function usage() {
     "  npm run new:concept -- --id=X --title=Y --category=Z --level=W",
     "",
     "Example:",
-    "  npm run new:concept -- --id=iterator --title=迭代器 --category=function --level=core",
+    "  PKB_ALLOW_NEW_CONCEPTS=1 npm run new:concept -- --id=iterator --title=迭代器 --category=function --level=core",
     "",
     "Options:",
     "  --dry-run         Print the generated template without writing a file",
@@ -143,16 +142,14 @@ tracks: [beginner]
 prerequisites: []
 related: []
 extends: []
-expandsTo: []
 appliedIn:
   cases: []
   projects: []
 people: []
 works: []
 history:
-  - year: ${new Date().getFullYear()}
-    title: "TODO: firstAppeared 或相关 PEP"
-    note: "TODO: 解释这个历史点为什么影响今天的写法。"
+  - year: "${new Date().getFullYear()}"
+    event: "TODO: 解释这个历史点为什么影响今天的写法。"
 tags: []
 updatedAt: "${today()}"
 codeExamples:
@@ -180,7 +177,7 @@ TODO: 手写维度 2。让 naive / standard / production 三个版本形成递�
 
 ## 历史脉络
 
-TODO: 手写维度 3。至少补 firstAppeared 或 PEP 之一。
+TODO: 手写维度 3。history 是事件数组，至少补 year 或 pep，并写清 event 的影响。
 
 <!--
 自动聚合维度：
@@ -197,7 +194,7 @@ function pendingFields(options: Required<Options>) {
     `src/content/concepts/${options.id}.mdx: whyImportant`,
     `src/content/concepts/${options.id}.mdx: appliedIn.cases or reverse case.concepts`,
     `src/content/concepts/${options.id}.mdx: works role/source`,
-    `src/content/concepts/${options.id}.mdx: history firstAppeared or PEP`,
+    `src/content/concepts/${options.id}.mdx: history year or pep + event`,
     `src/content/concepts/${options.id}.mdx: standard code example`
   ];
 }
@@ -216,6 +213,12 @@ try {
       console.log(`- ${field}`);
     }
     process.exit(0);
+  }
+
+  if (process.env.PKB_ALLOW_NEW_CONCEPTS !== "1") {
+    throw new Error(
+      "内容扩张已冻结。如需新增，设置 PKB_ALLOW_NEW_CONCEPTS=1 并在 PR 里说明理由。"
+    );
   }
 
   if (existsSync(target)) {

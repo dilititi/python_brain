@@ -1,33 +1,48 @@
 ---
 title: 函数参数
-description: "用位置参数、关键字参数、默认值、*args 和 **kwargs 控制函数输入。"
+description: 用位置参数、关键字参数、默认值、*args 和 **kwargs 控制函数输入。
 summary: 函数参数定义调用者能传什么、怎么绑定、哪些值有默认行为、额外输入放哪里。
 whyImportant: 参数设计就是 API 设计。Web 处理函数、数据清洗函数、CLI 工具函数都靠清楚的参数边界降低误用和维护成本。
 definition: 函数参数定义调用者能传入什么数据，以及这些数据如何绑定到函数内部名字。
 mentalModel: 参数像函数入口处的收件规则，决定哪些包裹能进来、默认值是什么、多余参数放哪里。
 category: function
 level: core
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [function, variable]
-related: [scope, type-annotations]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - function
+  - variable
+related:
+  - scope
+  - type-annotations
 extends: []
-expandsTo: []
 appliedIn:
-  cases: [function-call-playground]
-  projects: [python-basics-lab, cli-text-toolkit]
-people: [guido-van-rossum]
+  cases:
+    - function-call-playground
+  projects:
+    - python-basics-lab
+    - cli-text-toolkit
+people:
+  - guido-van-rossum
 works:
   - title: More on Defining Functions
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
-    note: "role: 官方教程系统解释默认参数、关键字参数、*args、**kwargs 和特殊参数。"
+    role: 官方教程系统解释默认参数、关键字参数、*args、**kwargs 和特殊参数。
 history:
   - year: 1991
-    title: 函数调用模型
-    note: 参数绑定一直是 Python 函数模型的核心部分。
+    event: 函数调用模型：参数绑定一直是 Python 函数模型的核心部分。
     source: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
-tags: [function, api-design, arguments, typing]
+tags:
+  - function
+  - api-design
+  - arguments
+  - typing
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -57,7 +72,6 @@ codeExamples:
 
       print(describe_user("Ada", "python", active=False, city="London"))
 ---
-
 ## 概念定义
 
 函数参数是 API 设计的入口。参数越清楚，调用者越不容易猜错；默认值和可变参数越随意，后期维护越容易混乱。

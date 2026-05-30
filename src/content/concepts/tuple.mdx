@@ -5,24 +5,33 @@ definition: tuple 是不可变序列，可以保存多个对象，并支持解�
 mentalModel: 元组像一条固定格式的记录，位置本身带有含义。
 category: data-structure
 level: intro
-tracks: [beginner, data, automation]
-prerequisites: [primitive-types]
-related: [list, set, match-case]
-expandsTo: []
+tracks:
+  - beginner
+  - data
+  - automation
+prerequisites:
+  - primitive-types
+related:
+  - list
+  - set
+  - match-case
 appliedIn:
-  cases: [collection-membership-report, modern-syntax-upgrade]
-  projects: [python-basics-lab]
-people: [guido-van-rossum]
+  cases:
+    - collection-membership-report
+    - modern-syntax-upgrade
+  projects:
+    - python-basics-lab
+people:
+  - guido-van-rossum
 works:
   - title: Tuples and Sequences
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences
-    note: 官方教程展示元组、序列和解包。
+    role: 官方教程展示元组、序列和解包。
 history:
   - year: 1991
-    title: 序列模型
-    note: 元组作为不可变序列参与 Python 早期对象模型。
+    event: 序列模型：元组作为不可变序列参与 Python 早期对象模型。
 codeExamples:
   - title: 解包
     description: 固定结构的数据可以直接解包成多个名字。
@@ -31,5 +40,4 @@ codeExamples:
       x, y = point
       print(x + y)
 ---
-
 如果数据长度固定、位置有明确意义，元组比列表更能表达意图。match-case 也常用元组模式解析命令。

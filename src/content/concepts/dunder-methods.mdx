@@ -7,25 +7,40 @@ definition: 魔术方法是以双下划线开头和结尾的方法，用来定�
 mentalModel: 魔术方法像对象和 Python 语言之间的插座；插上 __len__，len(obj) 就知道怎么工作。
 category: oop
 level: core
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [class]
-related: [encapsulation, polymorphism, builtin-functions, operators]
-expandsTo: [dataclass]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - class
+related:
+  - encapsulation
+  - polymorphism
+  - builtin-functions
+  - operators
 appliedIn:
-  cases: [contact-records]
-  projects: [contact-book-cli]
-people: [guido-van-rossum, raymond-hettinger]
+  cases:
+    - contact-records
+  projects:
+    - contact-book-cli
+people:
+  - guido-van-rossum
+  - raymond-hettinger
 works:
   - title: Special method names
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/reference/datamodel.html#special-method-names
-    note: 语言参考列出双下划线特殊方法及其协议含义。
+    role: 语言参考列出双下划线特殊方法及其协议含义。
 history:
   - year: 1991
-    title: 数据模型奠定特殊方法机制
-    note: Python 通过数据模型把运算符、内置函数和对象协议连接起来。
-tags: [dunder, data-model, protocol]
+    event: 数据模型奠定特殊方法机制：Python 通过数据模型把运算符、内置函数和对象协议连接起来。
+tags:
+  - dunder
+  - data-model
+  - protocol
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -61,8 +76,9 @@ codeExamples:
               return item in self.values
 
       print("python" in Tags(["python", "data"]))
+extends:
+  - dataclass
 ---
-
 ## 概念定义
 
 魔术方法不是给人直接频繁调用的普通方法，而是给 Python 的语法和内置函数调用的协议。你写 `len(obj)`，Python 会寻找 `obj.__len__()`；你写 `str(obj)`，Python 会寻找 `obj.__str__()`。

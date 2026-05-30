@@ -5,24 +5,32 @@ definition: break 结束最近一层循环，continue 跳到下一轮循环，pa
 mentalModel: break 是停止按钮，continue 是跳过按钮，pass 是先留一个空座位。
 category: control-flow
 level: intro
-tracks: [beginner, data, automation]
-prerequisites: [for-loop, while-loop, if-statement]
-related: [range]
-expandsTo: []
+tracks:
+  - beginner
+  - data
+  - automation
+prerequisites:
+  - for-loop
+  - while-loop
+  - if-statement
+related:
+  - range
 appliedIn:
-  cases: [collection-membership-report]
-  projects: [python-basics-lab]
-people: [guido-van-rossum]
+  cases:
+    - collection-membership-report
+  projects:
+    - python-basics-lab
+people:
+  - guido-van-rossum
 works:
   - title: break and continue Statements
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements
-    note: 官方教程说明 break、continue 和循环 else。
+    role: 官方教程说明 break、continue 和循环 else。
 history:
   - year: 1991
-    title: 循环控制
-    note: break、continue 和 pass 是 Python 基础控制流的一部分。
+    event: 循环控制：break、continue 和 pass 是 Python 基础控制流的一部分。
 codeExamples:
   - title: 跳过空值
     description: continue 常用于跳过不需要处理的数据。
@@ -32,5 +40,4 @@ codeExamples:
               continue
           print(name)
 ---
-
 这三个关键字都很小，但能显著改变阅读顺序。用它们时要让读者很快看懂“为什么停下”或“为什么跳过”。

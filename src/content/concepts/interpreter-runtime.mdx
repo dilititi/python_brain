@@ -5,32 +5,46 @@ summary: 解释器把源码、模块和运行时状态连在一起，是 Python 
 whyImportant: 新人遇到“命令行能跑、编辑器不能跑”“版本不一致”“导入失败”时，真正要排查的是解释器、环境和运行路径。
 definition: 解释型执行指代码由 Python 解释器读取并执行，错误、类型和导入关系大多在运行时暴露。
 mentalModel: 把解释器想成现场执行代码的主持人；它知道当前版本、当前路径、已加载模块和可用标准库。
-category: foundation
+category: language
 level: intro
-tracks: [beginner, web, data, automation, ai, creative]
-prerequisites: [python-language]
-related: [python-versions, module, import-syntax]
-expandsTo: [module-search-path, common-stdlib-modules]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+  - creative
+prerequisites:
+  - python-language
+related:
+  - python-versions
+  - module
+  - import-syntax
 appliedIn:
-  cases: [interpreter-identity-check]
-  projects: [python-basics-lab]
-people: [guido-van-rossum]
+  cases:
+    - interpreter-identity-check
+  projects:
+    - python-basics-lab
+people:
+  - guido-van-rossum
 works:
   - title: Python command line and environment
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/using/cmdline.html
-    note: 官方文档说明解释器命令行参数、环境变量和运行方式。
+    role: 官方文档说明解释器命令行参数、环境变量和运行方式。
   - title: CPython
     creator: Python core developers
     type: project
     url: https://github.com/python/cpython
-    note: 最主流的 Python 实现，通常新人下载的 python 命令就是 CPython。
+    role: 最主流的 Python 实现，通常新人下载的 python 命令就是 CPython。
 history:
   - year: 1991
-    title: 解释器随 Python 诞生
-    note: 交互式解释器和脚本执行共同塑造了 Python 的快速反馈体验。
-tags: [interpreter, runtime, repl]
+    event: 解释器随 Python 诞生：交互式解释器和脚本执行共同塑造了 Python 的快速反馈体验。
+tags:
+  - interpreter
+  - runtime
+  - repl
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -53,8 +67,10 @@ codeExamples:
           raise RuntimeError("Python 3.10+ required")
 
       print("runtime ready")
+extends:
+  - module-search-path
+  - common-stdlib-modules
 ---
-
 ## 概念定义
 
 解释型执行不等于“没有编译”，而是说学习者主要感受到的是运行时反馈：敲一段、跑一段、立刻看到错误。Python 会把源码编译成字节码，再由虚拟机执行，但新手最先需要掌握的是“哪个解释器在执行、它的版本是多少、它从哪里找模块”。

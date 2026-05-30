@@ -5,35 +5,51 @@ summary: 版本决定语法可用性、依赖兼容性和项目生命周期。
 whyImportant: 新人看旧教程、复制旧代码或安装旧依赖时，最容易踩到 Python 2/3 和版本特性边界。
 definition: Python 版本演进描述语言从 Python 2 到 Python 3 的迁移，以及后续版本持续加入的新语法和标准库能力。
 mentalModel: 版本像语言的时间轴。你写的代码不只属于 Python，也属于某个 Python 版本范围。
-category: foundation
+category: language
 level: intro
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [python-language]
-related: [interpreter-runtime, f-string, type-annotations, match-case, walrus-operator]
-expandsTo: []
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - python-language
+related:
+  - interpreter-runtime
+  - f-string
+  - type-annotations
+  - match-case
+  - walrus-operator
 appliedIn:
-  cases: [interpreter-identity-check, modern-syntax-upgrade]
-  projects: [python-basics-lab]
-people: [guido-van-rossum]
+  cases:
+    - interpreter-identity-check
+    - modern-syntax-upgrade
+  projects:
+    - python-basics-lab
+people:
+  - guido-van-rossum
 works:
   - title: Python 2 Sunsetting
     creator: Python Software Foundation
     type: project
     url: https://www.python.org/doc/sunset-python-2/
-    note: Python 2 已在 2020 年 1 月 1 日停止维护。
+    role: Python 2 已在 2020 年 1 月 1 日停止维护。
   - title: Python Versions
     creator: Python Developer's Guide
     type: project
     url: https://devguide.python.org/versions/
-    note: 官方开发者指南维护各 Python 分支状态和生命周期。
+    role: 官方开发者指南维护各 Python 分支状态和生命周期。
 history:
   - year: 2008
-    title: Python 3.0 发布
-    note: Python 3 清理了历史包袱，但也带来 Python 2 到 3 的迁移期。
+    event: Python 3.0 发布：Python 3 清理了历史包袱，但也带来 Python 2 到 3 的迁移期。
   - year: 2020
-    title: Python 2 停止维护
-    note: 新项目应使用 Python 3，并按项目依赖选择仍受支持的版本。
-tags: [version, python-2, python-3, lifecycle]
+    event: Python 2 停止维护：新项目应使用 Python 3，并按项目依赖选择仍受支持的版本。
+tags:
+  - version
+  - python-2
+  - python-3
+  - lifecycle
 updatedAt: "2026-05-30"
 codeExamples:
   - title: 查看版本
@@ -43,7 +59,6 @@ codeExamples:
 
       print(sys.version_info)
 ---
-
 版本节点会连接到具体语言特性：Python 3.6 的 f-string、Python 3.8 的 walrus 运算符、Python 3.10 的 match-case、以及逐步成熟的类型注解生态。
 
 到 2026 年，新项目应避免 Python 2，也不该再把 3.8 当作默认推荐版本。更稳妥的判断方式是：优先选择仍处于 bugfix 或 security 生命周期、且你的依赖生态支持的 Python 3 版本；教学和新项目至少围绕 3.10+ 展开，团队项目再按部署平台和依赖支持收紧到具体小版本。

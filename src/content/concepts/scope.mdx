@@ -5,24 +5,37 @@ definition: 作用域是名字绑定的可见范围，Python 常用 LEGB 规则�
 mentalModel: 作用域像一层层抽屉，Python 会先找最近的抽屉，找不到再往外层找。
 category: function
 level: core
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [function, variable]
-related: [closure, function-parameters]
-expandsTo: []
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - function
+  - variable
+related:
+  - closure
+  - function-parameters
 appliedIn:
-  cases: [function-call-playground]
-  projects: [python-basics-lab, cli-text-toolkit]
-people: [guido-van-rossum, raymond-hettinger]
+  cases:
+    - function-call-playground
+  projects:
+    - python-basics-lab
+    - cli-text-toolkit
+people:
+  - guido-van-rossum
+  - raymond-hettinger
 works:
   - title: Scopes and Namespaces
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces
-    note: 官方教程解释局部、非局部和全局命名空间。
+    role: 官方教程解释局部、非局部和全局命名空间。
 history:
   - year: 2001
-    title: 嵌套作用域
-    note: PEP 227 让 Python 的嵌套函数作用域模型更完整。
+    pep: PEP 227
+    event: 嵌套作用域：PEP 227 让 Python 的嵌套函数作用域模型更完整。
 codeExamples:
   - title: LEGB
     description: 内层函数可以读取外层函数里的名字。
@@ -37,5 +50,4 @@ codeExamples:
 
       print(outer())
 ---
-
 作用域是闭包、装饰器和全局变量问题的前置节点。很多“变量为什么不是我想的值”都和作用域有关。

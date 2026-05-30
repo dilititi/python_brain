@@ -7,25 +7,40 @@ definition: 封装是面向对象中的组织方式，把状态和行为放进�
 mentalModel: 对象像一个有柜门的工具柜；外部通过把手使用它，不需要每次都伸进柜子里改零件。
 category: oop
 level: core
-tracks: [beginner, web, data, automation, ai]
-prerequisites: [class, function-parameters]
-related: [dataclass, dunder-methods, inheritance]
-expandsTo: [dunder-methods]
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - class
+  - function-parameters
+related:
+  - dataclass
+  - dunder-methods
+  - inheritance
 appliedIn:
-  cases: [contact-records]
-  projects: [contact-book-cli]
-people: [raymond-hettinger, guido-van-rossum]
+  cases:
+    - contact-records
+  projects:
+    - contact-book-cli
+people:
+  - raymond-hettinger
+  - guido-van-rossum
 works:
   - title: "The Python Tutorial: Classes"
     creator: Python Software Foundation
     type: book
     url: https://docs.python.org/3/tutorial/classes.html
-    note: 官方教程说明实例变量、方法对象和类的命名空间。
+    role: 官方教程说明实例变量、方法对象和类的命名空间。
 history:
   - year: 1991
-    title: class 支持封装式组织
-    note: Python 的封装更偏向约定和清晰接口，而不是强制访问控制。
-tags: [oop, interface, property]
+    event: class 支持封装式组织：Python 的封装更偏向约定和清晰接口，而不是强制访问控制。
+tags:
+  - oop
+  - interface
+  - property
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -67,8 +82,9 @@ codeExamples:
               self._email = value
 
       print(Contact("ada@example.com").email)
+extends:
+  - dunder-methods
 ---
-
 ## 概念定义
 
 Python 里的封装更依赖约定和接口设计，而不是像某些语言那样用 `private` 关键字强制隔离。单下划线 `_email` 表示“内部实现细节”，提醒外部代码不要直接依赖。

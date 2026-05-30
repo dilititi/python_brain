@@ -8,6 +8,9 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "validate:relations": "tsx scripts/validate-relations.ts",
+    "audit:concepts": "tsx scripts/audit-concepts.ts",
+    "migrate:works-role": "tsx scripts/migrate-works-note-to-role.ts",
+    "migrate:v1-contract": "tsx scripts/migrate-v1-content-contract.ts",
     "new:concept": "tsx scripts/new-concept.ts",
     "new:case": "tsx scripts/new-case.ts"
   },

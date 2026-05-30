@@ -69,9 +69,13 @@
 
 合格示例：`Flask 的 @app.route 把普通函数注册成 URL 处理器，让装饰器从“包装函数”变成“框架注册机制”的真实案例。`
 
+`works.role` 不是 work 本身的功能介绍。“Flask 是 Python Web 框架”是介绍 Flask；“Flask 用 @app.route 把函数注册为 URL 处理器，装饰器在这里从语法糖变成框架契约”才是 role。
+
 ## 历史
 
-每个概念至少需要 `firstAppeared` 或 `pep` 之一。若填写 `pep`，格式必须匹配 `PEP \d+`。
+历史是事件数组，按时间顺序排列。每项含 `event` 字段说明发生了什么，且必须含 `year` 或 `pep`。若填写 `pep`，格式必须匹配 `PEP \d+`。
+
+两者都没有的事件不应进入历史维度。事件描述要解释“为什么”而不只是“什么”：`PEP 318 引入 @ 语法糖，替代之前手动 fn = decorator(fn) 的写法` 比 `2004 年装饰器语法引入` 更有价值。
 
 历史不是年表堆砌，而是解释“为什么现在是这样”。优先记录：
 
@@ -79,6 +83,26 @@
 - 相关 PEP。
 - Python 2 到 Python 3 的迁移影响。
 - 重要库或框架把概念发扬光大的时间点。
+
+## 概念元层级
+
+`category` 中的 `language` 专门容纳 Python 语言本身、设计哲学、版本演进、PSF 等元层级概念。这类节点的特点是它们不“被使用”，而是“被引用”：后续具体语法节点可以在定义、历史或关系里引用它们。不要把 `language` 当成“杂项分类”使用。
+
+## 过渡字段处理
+
+v1.0 已移除 `expandsTo` 和 `works.note`。新增内容只使用 `extends` 和 `works.role`；如果在旧内容或脚本里看到旧字段，应视为迁移遗漏并修正。
+
+`summary` 和 `whyImportant` 当前处于 warning 阶段：`npm run audit:concepts` 会列出缺字段清单。标杆页和现有内容补齐后，这两个字段会从 optional 升级为 required，并由构建期校验阻塞。
+
+## 标杆概念页验收
+
+标杆概念页必须满足：
+
+- 6 维 Tab 全部有实质内容，不靠“暂未整理”占位。
+- 至少一段代码能在 CodeRunner 里跑通。
+- 至少一个 `works` 链接可打开，后续 CI 应加入 link check。
+- 概念页源码 Lighthouse performance + accessibility 均不低于 90。
+- README 保留标杆页截图，作为 v1.0 视觉契约锚点。
 
 ## 学习路径
 

@@ -3,31 +3,41 @@ title: pip
 description: 安装和管理第三方 Python 包，是进入生态系统的入口。
 definition: pip 是 Python 的包安装工具，通常从 Python Package Index 下载依赖。
 mentalModel: pip 像项目的取货员，把别人发布好的库下载安装到当前环境里。
-category: engineering
+category: module-eng
 level: core
-tracks: [web, data, automation, ai]
-prerequisites: [module, venv]
-related: [venv]
-expandsTo: []
+tracks:
+  - web
+  - data
+  - automation
+  - ai
+prerequisites:
+  - module
+  - venv
+related:
+  - venv
 appliedIn:
-  cases: [package-install-workflow]
-  projects: [weather-notifier, mini-web-api]
-people: [guido-van-rossum]
+  cases:
+    - package-install-workflow
+  projects:
+    - weather-notifier
+    - mini-web-api
+people:
+  - guido-van-rossum
 works:
   - title: pip documentation
     creator: Python Packaging Authority
     type: project
     url: https://pip.pypa.io/
-    note: pip 的安装、依赖解析和命令参考。
+    role: pip 的安装、依赖解析和命令参考。
   - title: Python Package Index
     creator: Python Packaging Authority
     type: project
     url: https://pypi.org/
-    note: Python 第三方包的主要发布平台。
+    role: Python 第三方包的主要发布平台。
 history:
   - year: 2014
-    title: ensurepip 随 Python 3.4 发布
-    note: PEP 453 让 Python 自带引导 pip 的能力，降低新环境安装依赖的门槛。
+    pep: PEP 453
+    event: ensurepip 随 Python 3.4 发布：PEP 453 让 Python 自带引导 pip 的能力，降低新环境安装依赖的门槛。
 codeExamples:
   - title: 安装依赖
     description: 在项目虚拟环境里安装包。
@@ -36,5 +46,4 @@ codeExamples:
       # python -m pip install requests
       print("install dependencies in your project environment")
 ---
-
 学习 pip 时要同时学习 venv。包不是“装到电脑上就完事”，而是应该装进当前项目的隔离环境。

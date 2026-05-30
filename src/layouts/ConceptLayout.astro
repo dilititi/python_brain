@@ -84,7 +84,7 @@ const { Content } = await render(entry);
         <RelationCard
           href={work.url ?? "#"}
           title={work.title}
-          description={work.note}
+          description={work.role}
           meta={work.type}
         />
       ))}
@@ -103,10 +103,10 @@ const { Content } = await render(entry);
     <ol class="timeline">
       {entry.data.history.map((item) => (
         <li>
-          <span>{item.year}</span>
+          <span>{item.year ?? item.pep}</span>
           <div>
-            <strong>{item.title}</strong>
-            <p>{item.note}</p>
+            {item.pep && item.year && <strong>{item.pep}</strong>}
+            <p>{item.event}</p>
           </div>
         </li>
       ))}
@@ -127,7 +127,7 @@ const { Content } = await render(entry);
       {relations.related.map((item) => (
         <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="相关" />
       ))}
-      {relations.expandsTo.map((item) => (
+      {relations.extends.map((item) => (
         <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="扩展" />
       ))}
     </div>

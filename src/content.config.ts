@@ -21,15 +21,19 @@ const workLink = z.object({
   creator: z.string().optional(),
   type: z.enum(["library", "framework", "book", "talk", "pep", "project"]),
   url: url.optional(),
-  note: z.string().optional()
+  role: z.string()
 });
 
-const historyEvent = z.object({
-  year: z.union([z.number(), z.string()]),
-  title: z.string(),
-  note: z.string(),
-  source: url.optional()
-});
+const historyEvent = z
+  .object({
+    year: z.union([z.number(), z.string()]).optional(),
+    pep: z.string().regex(/^PEP \d+$/).optional(),
+    event: z.string(),
+    source: url.optional()
+  })
+  .refine((event) => event.year || event.pep, {
+    message: "history event must include year or pep"
+  });
 
 const codeExample = z.object({
   title: z.string(),
@@ -48,24 +52,22 @@ const concepts = defineCollection({
     definition: z.string(),
     mentalModel: z.string(),
     category: z.enum([
-      "foundation",
+      "language",
       "syntax",
       "control-flow",
       "data-structure",
       "function",
       "oop",
+      "file-io",
+      "module-eng",
       "stdlib",
-      "typing",
-      "engineering",
-      "ecosystem",
-      "best-practice"
+      "third-party"
     ]),
     level,
     tracks: z.array(track).default([]),
     prerequisites: z.array(slugRef).default([]),
     related: z.array(slugRef).default([]),
     extends: z.array(slugRef).default([]),
-    expandsTo: z.array(slugRef).default([]),
     appliedIn: z
       .object({
         cases: z.array(slugRef).default([]),
@@ -74,7 +76,7 @@ const concepts = defineCollection({
       .default({ cases: [], projects: [] }),
     people: z.array(slugRef).default([]),
     works: z.array(workLink).default([]),
-    history: z.array(historyEvent).default([]),
+    history: z.array(historyEvent).min(1),
     tags: z.array(z.string()).default([]),
     updatedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     codeExamples: z.array(codeExample).default([])

@@ -5,24 +5,32 @@ definition: 闭包是函数和其引用的外部变量环境组合在一起的�
 mentalModel: 闭包像函数随身带了一只小背包，里面装着创建它时需要的上下文。
 category: function
 level: advanced
-tracks: [web, ai, automation]
-prerequisites: [function]
-related: [lambda, decorator]
-expandsTo: [decorator]
+tracks:
+  - web
+  - ai
+  - automation
+prerequisites:
+  - function
+related:
+  - lambda
+  - decorator
 appliedIn:
-  cases: [flask-routing]
-  projects: [mini-web-api]
-people: [raymond-hettinger]
+  cases:
+    - flask-routing
+  projects:
+    - mini-web-api
+people:
+  - raymond-hettinger
 works:
   - title: "Python Guide: Closures"
     creator: Python community
     type: book
     url: https://docs.python-guide.org/writing/gotchas/#late-binding-closures
-    note: 解释闭包和延迟绑定常见坑。
+    role: 解释闭包和延迟绑定常见坑。
 history:
   - year: 2001
-    title: 嵌套作用域
-    note: PEP 227 让嵌套函数可以访问外层作用域名称。
+    pep: PEP 227
+    event: 嵌套作用域：PEP 227 让嵌套函数可以访问外层作用域名称。
 codeExamples:
   - title: 记住参数
     description: 外层函数返回内层函数，内层函数记住 factor。
@@ -34,6 +42,7 @@ codeExamples:
 
       double = make_multiplier(2)
       print(double(10))
+extends:
+  - decorator
 ---
-
 装饰器通常依赖闭包保存原函数、参数或配置。理解闭包之后，`@decorator` 的魔法感会明显下降。

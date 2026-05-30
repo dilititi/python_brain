@@ -12,7 +12,7 @@ export type ConceptRelations = {
   concept: ConceptEntry;
   prerequisites: ConceptEntry[];
   related: ConceptEntry[];
-  expandsTo: ConceptEntry[];
+  extends: ConceptEntry[];
   cases: CaseEntry[];
   projects: ProjectEntry[];
   people: PersonEntry[];
@@ -82,7 +82,7 @@ export async function getConceptRelations(
     return [
       ...entry.data.prerequisites,
       ...entry.data.related,
-      ...entry.data.expandsTo
+      ...entry.data.extends
     ].includes(conceptId);
   });
 
@@ -90,7 +90,7 @@ export async function getConceptRelations(
     concept,
     prerequisites: resolveMany(concepts, concept.data.prerequisites),
     related: resolveMany(concepts, concept.data.related),
-    expandsTo: resolveMany(concepts, concept.data.expandsTo),
+    extends: resolveMany(concepts, concept.data.extends),
     cases: resolveMany(cases, [...caseIds]),
     projects: resolveMany(projects, [...projectIds]),
     people: resolveMany(people, [...personIds]),

@@ -36,7 +36,7 @@ const { Content } = await render(entry);
         <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="concept" />
       ))}
       {entry.data.works.map((work) => (
-        <RelationCard href={work.url ?? "#"} title={work.title} description={work.note} meta={work.type} />
+        <RelationCard href={work.url ?? "#"} title={work.title} description={work.role} meta={work.type} />
       ))}
     </div>
   </section>

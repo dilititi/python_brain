@@ -7,45 +7,60 @@ definition: 装饰器本质上是一个接收函数并返回函数的可调用�
 mentalModel: 把装饰器想成给函数套一层外壳。外壳可以在调用前后加逻辑，也可以把函数注册到框架里。
 category: function
 level: advanced
-tracks: [web, ai, automation]
-prerequisites: [function]
-related: [closure, dataclass]
-extends: [dataclass]
-expandsTo: [dataclass]
+tracks:
+  - web
+  - ai
+  - automation
+prerequisites:
+  - function
+related:
+  - closure
+  - dataclass
+extends:
+  - dataclass
 appliedIn:
-  cases: [flask-routing]
-  projects: [mini-web-api]
-people: [guido-van-rossum, raymond-hettinger, armin-ronacher, sebastian-ramirez]
+  cases:
+    - flask-routing
+  projects:
+    - mini-web-api
+people:
+  - guido-van-rossum
+  - raymond-hettinger
+  - armin-ronacher
+  - sebastian-ramirez
 works:
   - title: PEP 318
     creator: Python community
     type: pep
     url: https://peps.python.org/pep-0318/
-    note: "role: 解释 @ 语法为什么被引入，以及它如何把函数变换写到定义处。"
+    role: 解释 @ 语法为什么被引入，以及它如何把函数变换写到定义处。
   - title: Flask
     creator: Armin Ronacher
     type: framework
     url: https://flask.palletsprojects.com/
-    note: "role: @app.route 把普通函数注册成 URL 处理器，是装饰器作为框架注册机制的代表。"
+    role: "@app.route 把普通函数注册成 URL 处理器，是装饰器作为框架注册机制的代表。"
   - title: FastAPI
     creator: Sebastián Ramírez
     type: framework
     url: https://fastapi.tiangolo.com/
-    note: "role: @app.get 等装饰器把路径、HTTP 方法和类型信息连接到 API 文档与运行时。"
+    role: "@app.get 等装饰器把路径、HTTP 方法和类型信息连接到 API 文档与运行时。"
 history:
   - year: 2003
-    title: PEP 318 提出
-    note: 社区开始讨论函数和方法装饰器语法。
+    pep: PEP 318
+    event: PEP 318 提出：社区开始讨论函数和方法装饰器语法。
     source: https://peps.python.org/pep-0318/
   - year: 2004
-    title: Python 2.4 引入 @ 语法
-    note: 装饰器语法正式进入 Python。
+    event: Python 2.4 引入 @ 语法：装饰器语法正式进入 Python。
     source: https://docs.python.org/3/whatsnew/2.4.html
   - year: 2020
-    title: PEP 614 放宽语法限制
-    note: Python 3.9 允许更宽泛的装饰器表达式。
+    pep: PEP 614
+    event: PEP 614 放宽语法限制：Python 3.9 允许更宽泛的装饰器表达式。
     source: https://peps.python.org/pep-0614/
-tags: [function, closure, framework, routing]
+tags:
+  - function
+  - closure
+  - framework
+  - routing
 updatedAt: "2026-05-30"
 codeExamples:
   - title: naive
@@ -94,7 +109,6 @@ codeExamples:
 
       print(add(2, 3))
 ---
-
 ## 概念定义
 
 装饰器不是“神奇的 @ 符号”，而是函数式组合。`@decorator` 等价于 `func = decorator(func)`，这句话就是最小心智模型。
