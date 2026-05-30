@@ -28,22 +28,20 @@ appliedIn:
     - cli-text-toolkit
 people:
   - guido-van-rossum
-works:
-  - title: More on Defining Functions
-    creator: Python Software Foundation
-    type: book
-    url: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
+worksRef:
+  - id: more-on-defining-functions
     role: 官方教程系统解释默认参数、关键字参数、*args、**kwargs 和特殊参数。
 history:
   - year: 1991
     event: 函数调用模型：参数绑定一直是 Python 函数模型的核心部分。
-    source: https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
+    source: >-
+      https://docs.python.org/3/tutorial/controlflow.html#more-on-defining-functions
 tags:
   - function
   - api-design
   - arguments
   - typing
-updatedAt: "2026-05-30"
+updatedAt: '2026-05-30'
 codeExamples:
   - title: naive
     description: 只用位置参数时，调用者必须记住顺序，参数一多就容易读错。
@@ -61,8 +59,9 @@ codeExamples:
       print(create_user(name="Ada", email="ada@example.com"))
   - title: production
     description: 组合类型注解、*args 和 **kwargs 时，要让扩展能力有边界，而不是随意吞掉输入。
-    code: |
-      def describe_user(name: str, *tags: str, active: bool = True, **meta: str) -> dict:
+    code: >
+      def describe_user(name: str, *tags: str, active: bool = True, **meta: str)
+      -> dict:
           return {
               "name": name,
               "tags": list(tags),

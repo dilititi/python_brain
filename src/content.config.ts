@@ -27,6 +27,11 @@ const workLink = z.object({
   role: z.string()
 });
 
+const workRef = z.object({
+  id: slugRef,
+  role: z.string()
+});
+
 const sourceLink = z.object({
   label: z.string(),
   url: httpsUrl
@@ -90,6 +95,7 @@ const concepts = defineCollection({
       })
       .default({ cases: [], projects: [] }),
     people: z.array(slugRef).default([]),
+    worksRef: z.array(workRef).default([]),
     works: z.array(workLink).default([]),
     history: z.array(historyEvent).min(1),
     tags: z.array(z.string()).default([]),

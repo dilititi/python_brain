@@ -146,7 +146,7 @@ appliedIn:
   cases: []
   projects: []
 people: []
-works: []
+worksRef: []
 history:
   - year: "${new Date().getFullYear()}"
     event: "TODO: 解释这个历史点为什么影响今天的写法。"
@@ -183,7 +183,7 @@ TODO: 手写维度 3。history 是事件数组，至少补 year 或 pep，并写
 自动聚合维度：
 - 真实案例：由 cases/*.mdx 的 concepts[] 反向聚合。
 - 关键人物：由 people/*.mdx 的 concepts[] 反向聚合。
-- 经典作品：由 works 或后续 relations 索引聚合。
+- 经典作品：由 worksRef[] + works-registry.yaml 聚合。
 -->
 `;
 }
@@ -193,7 +193,7 @@ function pendingFields(options: Required<Options>) {
     `src/content/concepts/${options.id}.mdx: summary`,
     `src/content/concepts/${options.id}.mdx: whyImportant`,
     `src/content/concepts/${options.id}.mdx: appliedIn.cases or reverse case.concepts`,
-    `src/content/concepts/${options.id}.mdx: works role/source`,
+    `src/content/concepts/${options.id}.mdx: worksRef id/role`,
     `src/content/concepts/${options.id}.mdx: history year or pep + event`,
     `src/content/concepts/${options.id}.mdx: standard code example`
   ];

@@ -34,10 +34,10 @@
 
 | 原则 | 当前状态 | 判断 |
 |---|---|---|
-| 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`works.role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
+| 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`worksRef[].role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
 | 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects | 部分满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
-| 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works 已确定路径 B（`works-registry.yaml`）但尚未迁移 | 部分满足 |
+| 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works registry 已落地，concept 侧只保留 `worksRef[].role` | 基本满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，milestone 已包含 cases/projects；仍缺拓扑规划 | 部分满足 |
 
 ## Schema 差距
@@ -46,14 +46,14 @@
 
 ### Concept
 
-当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`works`、`history`、`tags`、`updatedAt`、`codeExamples`。
+当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`worksRef`、`works`（兼容回退）、`history`、`tags`、`updatedAt`、`codeExamples`。
 
 v1.0 缺口：
 
 - `summary` 已补齐 52 个概念并升级为 required，限制 80 字。
 - `whyImportant` 已补齐 52 个概念并升级为 required，限制 200 字。
 - `extends` 已成为唯一延伸字段，`expandsTo` 兼容层已删除。
-- `works` 已正式迁移为 `{title, creator, type, url, role}`，`note` 已删除。
+- `worksRef[]` 已成为概念侧作品引用字段；稳定元数据集中在 `src/content/works-registry.yaml`，概念侧只保留 `role`。
 - `history` 保留数组形态，每项为 `{year?, pep?, event, source?}`，用真实标杆页反向验证后裁决优于单对象；`source` 若填写必须为 `https://` URL。
 - `tags` 已作为可选默认字段加入，但未全量补内容。
 - `updatedAt` 已作为可选日期字段加入，但旧内容未全量补齐。
@@ -163,11 +163,11 @@ v1.0 仍缺：
 
 ## Works 聚合策略
 
-当前 works 仍以内联数组挂在 concept 上，无法像 case/person 一样通过 `concepts[]` 反向聚合。v1.0 采用低迁移成本的路径 B：
+works registry 已按低迁移成本路径 B 落地：
 
 - 新增 `src/content/works-registry.yaml` 作为作品注册表，集中保存 `id`、`title`、`creator`、`type`、`url` 等稳定元数据。
-- concept 侧逐步从内联 `works[]` 迁移为 `worksRef[]` + 概念内的 `role` 说明。
-- 关系索引从 registry + concept 引用生成作品维度；未来若需要作品独立页，再把 YAML 拆为 `src/content/works/*.mdx`。
+- concept 侧已从内联 `works[]` 迁移为 `worksRef[]` + 概念内的 `role` 说明。
+- 概念页从 registry + concept 引用生成作品维度；未来若需要作品独立页，再把 YAML 拆为 `src/content/works/*.mdx`。
 
 注册表字段草案：
 
@@ -188,12 +188,12 @@ v1.0 仍缺：
 
 迁移期规则：
 
-- `worksRef[]` 和内联 `works[]` 可短期共存，页面渲染和关系索引合并两者，并按 `id` 或 `title` 去重。
+- 内联 `works[]` 当前只作为兼容回退保留；新增内容只使用 `worksRef[]`。
 - 若同一作品同时来自 `worksRef[]` 与 `works[]`，以 `worksRef[]` 的 registry 元数据为准，概念侧 `role` 仍必须保留。
-- 校验脚本在迁移期同时检查两类来源的 `role`。
-- 迁移完成标准是所有 concept 的内联 `works[]` 长度为 0，之后从 schema 删除内联 `works` 字段。
+- 校验脚本同时检查 `worksRef[].id` 引用完整性和 `role` 质量。
+- 当前 52 个 concept 的内联 `works[]` 长度已经为 0；下一步可在确认无回退需求后从 schema 删除内联 `works` 字段。
 
-这条路径保留了“数据写一次”的方向，同时避免立刻把现有 52 个概念里的 works 全量拆文件。
+这条路径让作品元数据写一次，概念侧只写“为什么这个作品能锚定当前知识点”。
 
 ## 概念页布局差距
 
@@ -210,10 +210,9 @@ v1.0 仍缺：
 
 未满足：
 
-- 作品维度仍主要来自 concept frontmatter，不是后 3 维完全自动聚合。
 - 代码示例未体现 naive / standard / production 三版本。
 
-定位：页面布局已达到 v1.0 固定 6 维展示契约；剩余差距集中在 worksRegistry 迁移和代码示例版本分层。
+定位：页面布局已达到 v1.0 固定 6 维展示契约；剩余差距集中在代码示例版本分层。
 
 ## Islands 策略对照
 
@@ -236,12 +235,12 @@ localStorage：
 当前 `scripts/new-concept.ts`：
 
 - 支持 `--id`、`--title`、`--category`、`--level`。
-- 生成 v1.0 字段模板：`extends`、`works.role`、`history[].event`。
+- 生成 v1.0 字段模板：`extends`、`worksRef[].role`、`history[].event`。
 - 自动填 `updatedAt`。
 - 生成后默认运行关系校验，并列出待补字段。
 - 已加内容冻结闸门：写入新概念必须显式设置 `PKB_ALLOW_NEW_CONCEPTS=1`。
 
-定位：脚手架第一版已完成。后续随 works registry、person quote 和 path planner 继续微调。
+定位：脚手架第一版已完成。后续随 person quote 和 path planner 继续微调。
 
 ## 内容编辑准则差距
 
@@ -279,7 +278,7 @@ localStorage：
 4. 生成后默认运行关系校验，并列出待补字段。
 5. 已新增 `docs/content-guidelines.md`。
 
-内容冻结策略已落地：`new-concept.ts` 写入新文件前检查 `PKB_ALLOW_NEW_CONCEPTS=1`。脚手架只生成 v1.0 字段：`extends`、`works.role`、`history[].event`。
+内容冻结策略已落地：`new-concept.ts` 写入新文件前检查 `PKB_ALLOW_NEW_CONCEPTS=1`。脚手架只生成 v1.0 字段：`extends`、`worksRef[].role`、`history[].event`。
 
 ### P2：三页标杆反推 schema
 
@@ -292,7 +291,7 @@ localStorage：
 反推发现：
 
 - `summary` 和 `whyImportant` 值得在概念页 Definition 区直接展示，否则 v1.0 字段只参与校验、不参与学习体验。
-- `works.note` 已正式迁移为 `works.role`，避免把“概念中的作用”降级成普通备注。
+- `works.note` 已正式迁移为 `worksRef[].role`，避免把“概念中的作用”降级成普通备注。
 - 现有 `history` 数组能表达多事件时间线，比单对象更适合历史脉络；v1.0 schema 保留数组形态，要求每项含 `year` 或 `pep`，并用 `event` 解释事件影响。
 - `extends` 与 `expandsTo` 已合并，当前 schema 和关系代码只保留 `extends`。
 
@@ -311,6 +310,7 @@ localStorage：
 剩余收紧项：
 
 - `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
+- concept 内联 `works[]` 兼容字段仍需后续删除；当前数据已迁移到 `worksRef[]` + `works-registry.yaml`。
 - 旧兼容字段清理：case `difficulty`、person `title` / `roles` / `links`。
 - person `quote?` 是否进入展示面。
 
@@ -323,7 +323,7 @@ works AND、prerequisites DAG、summary/whyImportant、case standard/pitfalls/ex
 - 内容规模数字保持 `52/18/7/6/5` 一致，不再残留旧快照。
 - 已完成校验项 `DAG` / `works AND` 在原则表、校验差距、交付清单、P3 列表中状态一致。
 - schema 字段名保持 `year` / `pep` / `event` / `source`，不再使用 `firstAppeared`。
-- works 路径 B 在原则表和策略段都表达为“已决策，未迁移”。
+- works 路径 B 在原则表和策略段都表达为“已落地，内联 works 仅兼容回退”。
 - `validate-relations` 退出码语义在脚本帮助文本和部署文档中一致。
 - 宣告字段进入 strict 前，必须同时核对 `src/content.config.ts`、`scripts/validate-relations.ts`、`scripts/audit-concepts.ts` 与 `docs/deployment.md` 命令语义表。
 

@@ -56,7 +56,7 @@
 5. 经典作品
 6. 历史脉络
 
-手写内容只负责前 3 维：定义、代码、历史。案例、人物、作品应优先由关系索引自动聚合。若必须在概念 frontmatter 中补作品，`works.role` 必须说明“这个作品怎样使用或体现这个概念”，禁止只写“X 用了 Y”。
+手写内容只负责前 3 维：定义、代码、历史。案例、人物、作品应优先由关系索引自动聚合。作品元数据写在 `src/content/works-registry.yaml`，概念 frontmatter 只写 `worksRef[].id` 和 `worksRef[].role`；`role` 必须说明“这个作品怎样使用或体现这个概念”，禁止只写“X 用了 Y”。
 
 ## 代码示例
 
@@ -94,7 +94,7 @@
 
 ## 作品
 
-作品必须服务概念理解。`works.role` 要回答：
+作品必须服务概念理解。`worksRef[].role` 要回答：
 
 - 这个作品怎样使用该概念？
 - 新人看这个作品时应该观察什么？
@@ -104,7 +104,7 @@
 
 合格示例：`Flask 的 @app.route 把普通函数注册成 URL 处理器，让装饰器从“包装函数”变成“框架注册机制”的真实案例。`
 
-`works.role` 不是 work 本身的功能介绍。“Flask 是 Python Web 框架”是介绍 Flask；“Flask 用 @app.route 把函数注册为 URL 处理器，装饰器在这里从语法糖变成框架契约”才是 role。
+`worksRef[].role` 不是 work 本身的功能介绍。“Flask 是 Python Web 框架”是介绍 Flask；“Flask 用 @app.route 把函数注册为 URL 处理器，装饰器在这里从语法糖变成框架契约”才是 role。
 
 ## 历史
 
@@ -127,11 +127,11 @@
 
 ## 过渡字段处理
 
-v1.0 已移除 `expandsTo` 和 `works.note`。新增内容只使用 `extends` 和 `works.role`；如果在旧内容或脚本里看到旧字段，应视为迁移遗漏并修正。
+v1.0 已移除 `expandsTo` 和 `works.note`。新增内容只使用 `extends` 和 `worksRef[].role`；如果在旧内容或脚本里看到旧字段，应视为迁移遗漏并修正。
 
 `summary` 和 `whyImportant` 已从 optional 升级为 required：`npm run audit:concepts` 必须返回 clean，缺字段或 TODO-like 内容会由审计和构建期校验阻塞。
 
-works 迁移到 registry 前，`worksRef[]` 和内联 `works[]` 可短期共存；新内容优先使用 `worksRef[]`，旧内容按迁移脚本逐步清空内联 `works[]`。同一作品重复出现时，以 registry 元数据为准，但概念侧 `role` 仍必须说明作品如何体现当前概念。
+works registry 已落地：`src/content/works-registry.yaml` 保存作品稳定元数据，concept 使用 `worksRef[]` 引用。内联 `works[]` 只作为兼容回退保留，新内容不得再使用。同一作品重复出现时，以 registry 元数据为准，但概念侧 `role` 仍必须说明作品如何体现当前概念。
 
 ## 标杆概念页验收
 
@@ -139,7 +139,7 @@ works 迁移到 registry 前，`worksRef[]` 和内联 `works[]` 可短期共存�
 
 - 6 维 Tab 全部有实质内容，不靠“暂未整理”占位。
 - 至少一段代码能在 CodeRunner 里跑通。
-- 至少一个 `works` 链接可打开，后续 CI 应加入 link check。
+- 至少一个 `worksRef` 对应的 registry 链接可打开，后续 CI 应加入 link check。
 - 概念页源码 Lighthouse performance + accessibility 均不低于 90。
 - README 保留标杆页截图，作为 v1.0 视觉契约锚点。
 

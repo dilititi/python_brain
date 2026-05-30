@@ -16,7 +16,7 @@ interface Props {
 const { entry, relations } = Astro.props as Props;
 const { Content } = await render(entry);
 
-const worksCount = entry.data.works.length + relations.projects.length;
+const worksCount = relations.works.length + relations.projects.length;
 const facetCounts = {
   definition: 1,
   code: entry.data.codeExamples.length,
@@ -134,7 +134,7 @@ const tabs = [
           <FacetSection title="经典作品" eyebrow="Works" tone="violet">
             {worksCount > 0 ? (
               <div class="grid cols-3">
-                {entry.data.works.map((work) => (
+                {relations.works.map((work) => (
                   <RelationCard
                     href={work.url ?? "#"}
                     title={work.title}

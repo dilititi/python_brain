@@ -2,7 +2,9 @@
 title: 魔术方法
 description: __str__、__repr__、__len__ 等双下划线方法让对象接入 Python 的内置协议。
 summary: 魔术方法是对象和语言内置操作之间的协议接口。
-whyImportant: 新人看到 __init__、__str__、__repr__ 常以为只是奇怪命名。理解协议后，就能知道 print、len、in、排序为什么能作用在自定义对象上。
+whyImportant: >-
+  新人看到 __init__、__str__、__repr__ 常以为只是奇怪命名。理解协议后，就能知道
+  print、len、in、排序为什么能作用在自定义对象上。
 definition: 魔术方法是以双下划线开头和结尾的方法，用来定义对象在内置函数、运算符和语法协议下的行为。
 mentalModel: 魔术方法像对象和 Python 语言之间的插座；插上 __len__，len(obj) 就知道怎么工作。
 category: oop
@@ -28,11 +30,8 @@ appliedIn:
 people:
   - guido-van-rossum
   - raymond-hettinger
-works:
-  - title: Special method names
-    creator: Python Software Foundation
-    type: book
-    url: https://docs.python.org/3/reference/datamodel.html#special-method-names
+worksRef:
+  - id: special-method-names
     role: 语言参考列出双下划线特殊方法及其协议含义。
 history:
   - year: 1991
@@ -41,7 +40,7 @@ tags:
   - dunder
   - data-model
   - protocol
-updatedAt: "2026-05-30"
+updatedAt: '2026-05-30'
 codeExamples:
   - title: naive
     description: 没有 __repr__ 时，打印对象只看到默认地址信息。

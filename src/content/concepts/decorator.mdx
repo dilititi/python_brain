@@ -2,7 +2,9 @@
 title: 装饰器
 description: 用一个函数包裹另一个函数，在不改原函数主体的情况下添加行为。
 summary: 装饰器是接收函数并返回函数的包装器，@ 语法等价于重新绑定函数名。
-whyImportant: Web 路由、测试夹具、缓存、权限检查和日志追踪都会用装饰器把横切行为挂到函数上；理解它，才能看懂 Flask、FastAPI、pytest 这类真实框架代码。
+whyImportant: >-
+  Web 路由、测试夹具、缓存、权限检查和日志追踪都会用装饰器把横切行为挂到函数上；理解它，才能看懂 Flask、FastAPI、pytest
+  这类真实框架代码。
 definition: 装饰器本质上是一个接收函数并返回函数的可调用对象。
 mentalModel: 把装饰器想成给函数套一层外壳。外壳可以在调用前后加逻辑，也可以把函数注册到框架里。
 category: function
@@ -28,40 +30,31 @@ people:
   - raymond-hettinger
   - armin-ronacher
   - sebastian-ramirez
-works:
-  - title: PEP 318
-    creator: Python community
-    type: pep
-    url: https://peps.python.org/pep-0318/
+worksRef:
+  - id: pep-318
     role: 解释 @ 语法为什么被引入，以及它如何把函数变换写到定义处。
-  - title: Flask
-    creator: Armin Ronacher
-    type: framework
-    url: https://flask.palletsprojects.com/
-    role: "@app.route 把普通函数注册成 URL 处理器，是装饰器作为框架注册机制的代表。"
-  - title: FastAPI
-    creator: Sebastián Ramírez
-    type: framework
-    url: https://fastapi.tiangolo.com/
-    role: "@app.get 等装饰器把路径、HTTP 方法和类型信息连接到 API 文档与运行时。"
+  - id: flask
+    role: '@app.route 把普通函数注册成 URL 处理器，是装饰器作为框架注册机制的代表。'
+  - id: fastapi
+    role: '@app.get 等装饰器把路径、HTTP 方法和类型信息连接到 API 文档与运行时。'
 history:
   - year: 2003
     pep: PEP 318
     event: PEP 318 提出：社区开始讨论函数和方法装饰器语法。
-    source: https://peps.python.org/pep-0318/
+    source: 'https://peps.python.org/pep-0318/'
   - year: 2004
     event: Python 2.4 引入 @ 语法：装饰器语法正式进入 Python。
-    source: https://docs.python.org/3/whatsnew/2.4.html
+    source: 'https://docs.python.org/3/whatsnew/2.4.html'
   - year: 2020
     pep: PEP 614
     event: PEP 614 放宽语法限制：Python 3.9 允许更宽泛的装饰器表达式。
-    source: https://peps.python.org/pep-0614/
+    source: 'https://peps.python.org/pep-0614/'
 tags:
   - function
   - closure
   - framework
   - routing
-updatedAt: "2026-05-30"
+updatedAt: '2026-05-30'
 codeExamples:
   - title: naive
     description: 先不用 @ 语法，直接把函数传给包装函数，看到“函数名被重新绑定”的本质。

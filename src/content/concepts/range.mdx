@@ -26,18 +26,15 @@ appliedIn:
     - cli-text-toolkit
 people:
   - guido-van-rossum
-works:
-  - title: Ranges
-    creator: Python Software Foundation
-    type: book
-    url: https://docs.python.org/3/library/stdtypes.html#ranges
+worksRef:
+  - id: ranges
     role: 官方文档说明 range 的惰性序列行为。
 history:
   - year: 2008
     event: Python 3 中 range 变为惰性序列：Python 3 的 range 替代了 Python 2 中常见的 xrange 使用方式。
 codeExamples:
   - title: 步长
-    description: range(start, stop, step) 可以表达整数规律。
+    description: 'range(start, stop, step) 可以表达整数规律。'
     code: |
       for number in range(2, 10, 2):
           print(number)

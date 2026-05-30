@@ -37,11 +37,26 @@ for (const file of files) {
     if ("note" in work) {
       issues.push(`${label}: works[${index}].note is deprecated; use role`);
     }
+
+    if (!isUsefulString(work.role)) {
+      issues.push(`${label}: works[${index}].role is missing, empty, or TODO-like`);
+    }
+  });
+
+  const worksRef = Array.isArray(data.worksRef) ? data.worksRef : [];
+  worksRef.forEach((work: Record<string, unknown>, index: number) => {
+    if (!isUsefulString(work.id)) {
+      issues.push(`${label}: worksRef[${index}].id is missing, empty, or TODO-like`);
+    }
+
+    if (!isUsefulString(work.role)) {
+      issues.push(`${label}: worksRef[${index}].role is missing, empty, or TODO-like`);
+    }
   });
 }
 
 if (issues.length === 0) {
-  console.log("Concept audit clean: no summary/whyImportant or transition-field issues.");
+  console.log("Concept audit clean: no summary/whyImportant, worksRef, or transition-field issues.");
 } else {
   console.error(`Concept audit issues (${issues.length}):`);
   console.error(issues.join("\n"));

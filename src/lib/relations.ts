@@ -1,4 +1,7 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { getCollection, type CollectionEntry } from "astro:content";
+import YAML from "yaml";
 export {
   buildRelationIndex,
   caseUsedIn,
@@ -14,6 +17,18 @@ export type ProjectEntry = CollectionEntry<"projects">;
 export type PersonEntry = CollectionEntry<"people">;
 export type PathEntry = CollectionEntry<"paths">;
 
+export type WorkRegistryEntry = {
+  id: string;
+  title: string;
+  creator?: string;
+  type: string;
+  url?: string;
+};
+
+export type ConceptWork = WorkRegistryEntry & {
+  role: string;
+};
+
 type AnyEntry = ConceptEntry | CaseEntry | ProjectEntry | PersonEntry | PathEntry;
 
 export type ConceptRelations = {
@@ -24,19 +39,37 @@ export type ConceptRelations = {
   cases: CaseEntry[];
   projects: ProjectEntry[];
   people: PersonEntry[];
+  works: ConceptWork[];
   referencedBy: ConceptEntry[];
 };
 
+let worksRegistryCache: WorkRegistryEntry[] | undefined;
+
+async function getWorksRegistry() {
+  if (worksRegistryCache) {
+    return worksRegistryCache;
+  }
+
+  const raw = await readFile(
+    join(process.cwd(), "src", "content", "works-registry.yaml"),
+    "utf8"
+  );
+  const parsed = YAML.parse(raw) as { works?: WorkRegistryEntry[] } | null;
+  worksRegistryCache = Array.isArray(parsed?.works) ? parsed.works : [];
+  return worksRegistryCache;
+}
+
 export async function getAllContent() {
-  const [concepts, cases, projects, people, paths] = await Promise.all([
+  const [concepts, cases, projects, people, paths, works] = await Promise.all([
     getCollection("concepts"),
     getCollection("cases"),
     getCollection("projects"),
     getCollection("people"),
-    getCollection("paths")
+    getCollection("paths"),
+    getWorksRegistry()
   ]);
 
-  return { concepts, cases, projects, people, paths };
+  return { concepts, cases, projects, people, paths, works };
 }
 
 export function byId<T extends AnyEntry>(entries: T[]) {
@@ -53,7 +86,7 @@ export function resolveMany<T extends AnyEntry>(entries: T[], ids: string[]) {
 export async function getConceptRelations(
   conceptId: string
 ): Promise<ConceptRelations> {
-  const { concepts, cases, projects, people } = await getAllContent();
+  const { concepts, cases, projects, people, works } = await getAllContent();
   const concept = concepts.find((entry) => entry.id === conceptId);
 
   if (!concept) {
@@ -63,6 +96,44 @@ export async function getConceptRelations(
   const caseIds = new Set(concept.data.appliedIn.cases);
   const projectIds = new Set(concept.data.appliedIn.projects);
   const personIds = new Set(concept.data.people);
+  const worksById = new Map(works.map((work) => [work.id, work]));
+  const conceptWorks: ConceptWork[] = [];
+  const seenWorks = new Set<string>();
+
+  for (const ref of concept.data.worksRef) {
+    const work = worksById.get(ref.id);
+
+    if (!work) {
+      continue;
+    }
+
+    conceptWorks.push({
+      ...work,
+      role: ref.role
+    });
+    seenWorks.add(work.id);
+  }
+
+  for (const work of concept.data.works) {
+    const fallbackId = [
+      "inline",
+      work.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+    ].filter(Boolean).join("-");
+
+    if (seenWorks.has(fallbackId)) {
+      continue;
+    }
+
+    conceptWorks.push({
+      id: fallbackId,
+      title: work.title,
+      creator: work.creator,
+      type: work.type,
+      url: work.url,
+      role: work.role
+    });
+    seenWorks.add(fallbackId);
+  }
 
   for (const entry of cases) {
     if (entry.data.concepts.includes(conceptId)) {
@@ -102,6 +173,7 @@ export async function getConceptRelations(
     cases: resolveMany(cases, [...caseIds]),
     projects: resolveMany(projects, [...projectIds]),
     people: resolveMany(people, [...personIds]),
+    works: conceptWorks,
     referencedBy
   };
 }

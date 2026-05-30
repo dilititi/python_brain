@@ -69,6 +69,19 @@ async function readYamlCollection(name: string): Promise<Entry[]> {
   );
 }
 
+async function readWorksRegistry(): Promise<Entry[]> {
+  const path = join(contentRoot, "works-registry.yaml");
+  const raw = await readFile(path, "utf8");
+  const parsed = YAML.parse(raw) as { works?: Record<string, unknown>[] } | null;
+  const works = Array.isArray(parsed?.works) ? parsed.works : [];
+
+  return works.map((work, index) => ({
+    id: typeof work.id === "string" ? work.id : `missing-work-id-${index}`,
+    path,
+    data: work
+  }));
+}
+
 function asStringArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
@@ -108,13 +121,16 @@ const cases = await readMdxCollection("cases");
 const projects = await readMdxCollection("projects");
 const people = await readMdxCollection("people");
 const paths = await readYamlCollection("paths");
+const works = await readWorksRegistry();
 
 const conceptIds = new Set(concepts.map((entry) => entry.id));
 const caseIds = new Set(cases.map((entry) => entry.id));
 const projectIds = new Set(projects.map((entry) => entry.id));
 const personIds = new Set(people.map((entry) => entry.id));
+const workIds = new Set(works.map((entry) => entry.id));
 const errors: string[] = [];
 const warnings: string[] = [];
+const workTypes = new Set(["library", "framework", "book", "talk", "pep", "project"]);
 
 const mvpTargets = {
   concepts: 20,
@@ -137,6 +153,40 @@ if (projects.length < mvpTargets.projects) {
 
 if (people.length < mvpTargets.people) {
   errors.push(`MVP requires at least ${mvpTargets.people} people, found ${people.length}`);
+}
+
+if (works.length === 0) {
+  errors.push("src/content/works-registry.yaml: works must contain at least one work");
+}
+
+const seenWorkIds = new Set<string>();
+for (const entry of works) {
+  const label = `${relative(root, entry.path)}: works.${entry.id}`;
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(entry.id)) {
+    errors.push(`${label}: id must be kebab-case`);
+  }
+
+  if (seenWorkIds.has(entry.id)) {
+    errors.push(`${label}: duplicate work id`);
+  }
+  seenWorkIds.add(entry.id);
+
+  if (!isUsefulString(entry.data.title)) {
+    errors.push(`${label}: title is required and must be useful`);
+  }
+
+  if (typeof entry.data.creator === "string" && !isUsefulString(entry.data.creator)) {
+    errors.push(`${label}: creator must be useful when present`);
+  }
+
+  if (typeof entry.data.type !== "string" || !workTypes.has(entry.data.type)) {
+    errors.push(`${label}: type must be one of ${[...workTypes].join(", ")}`);
+  }
+
+  if (typeof entry.data.url === "string" && !entry.data.url.startsWith("https://")) {
+    errors.push(`${label}: url must be an https URL`);
+  }
 }
 
 for (const entry of concepts) {
@@ -164,10 +214,30 @@ for (const entry of concepts) {
   const works = Array.isArray(entry.data.works)
     ? (entry.data.works as Record<string, unknown>[])
     : [];
+  const worksRef = asRecordArray(entry.data.worksRef);
+  const worksRefIds = worksRef
+    .map((work) => work.id)
+    .filter((id): id is string => typeof id === "string");
 
-  if (works.length === 0) {
+  reportMissing(errors, entry, "worksRef.id", worksRefIds, workIds);
+
+  if (works.length + worksRef.length === 0) {
     errors.push(`${relative(root, entry.path)}: concept must have at least one work`);
   }
+
+  if (works.length > 0) {
+    warnings.push(`${relative(root, entry.path)}: inline works[] is deprecated; use worksRef[] + works-registry.yaml`);
+  }
+
+  worksRef.forEach((work, index) => {
+    if (!isUsefulString(work.id)) {
+      errors.push(`${relative(root, entry.path)}: worksRef[${index}].id is required`);
+    }
+
+    if (!isUsefulString(work.role)) {
+      errors.push(`${relative(root, entry.path)}: worksRef[${index}].role is required and must be useful`);
+    }
+  });
 
   works.forEach((work, index) => {
     if (!isUsefulString(work.role)) {
@@ -442,7 +512,7 @@ if (errors.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Relations valid: ${concepts.length} concepts, ${cases.length} cases, ${projects.length} projects, ${people.length} people, ${paths.length} paths.`
+    `Relations valid: ${concepts.length} concepts, ${cases.length} cases, ${projects.length} projects, ${people.length} people, ${paths.length} paths, ${works.length} works.`
   );
 
   if (warnings.length > 0 && Number.isInteger(warningExitCode) && warningExitCode > 0) {

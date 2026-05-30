@@ -1,9 +1,9 @@
 ---
 title: walrus 运算符
 description: 在表达式内部完成赋值，让重复计算的结果可以立即复用。
-summary: walrus 运算符 := 在表达式中赋值，并立即复用结果。
-whyImportant: 读取一行再判断、计算一次再筛选等场景会出现重复表达式。:= 能减少重复，但也应谨慎使用，避免把条件写得难读。
-definition: walrus 运算符是 :=，正式名称是 assignment expression。
+summary: 'walrus 运算符 := 在表达式中赋值，并立即复用结果。'
+whyImportant: '读取一行再判断、计算一次再筛选等场景会出现重复表达式。:= 能减少重复，但也应谨慎使用，避免把条件写得难读。'
+definition: 'walrus 运算符是 :=，正式名称是 assignment expression。'
 mentalModel: 它像在判断或循环条件里顺手贴一张便签，后面同一块代码还能用这个名字。
 category: syntax
 level: advanced
@@ -23,15 +23,12 @@ appliedIn:
     - python-basics-lab
 people:
   - guido-van-rossum
-works:
-  - title: PEP 572
-    creator: Python community
-    type: pep
-    url: https://peps.python.org/pep-0572/
+worksRef:
+  - id: pep-572
     role: Assignment Expressions 的设计提案。
 history:
   - year: 2019
-    event: Python 3.8 引入 :=：walrus 运算符让表达式内部赋值成为语法能力。
+    event: 'Python 3.8 引入 :=：walrus 运算符让表达式内部赋值成为语法能力。'
 codeExamples:
   - title: 减少重复
     description: 当计算结果既要判断又要使用时，可以考虑 walrus。

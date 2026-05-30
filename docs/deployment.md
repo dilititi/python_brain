@@ -34,7 +34,7 @@ npm run build
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
 
-当前 `summary` / `whyImportant`、case `standard` code version / `pitfalls` / `extensions`、project `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值或 TODO-like 内容会阻断审计、关系校验或 Astro content schema。当前不保留 `summary` / `whyImportant` 的 warning-only 过渡状态。
+当前 `summary` / `whyImportant`、concept `worksRef` 引用与 `role`、case `standard` code version / `pitfalls` / `extensions`、project `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值、TODO-like 内容或 registry 引用缺失会阻断审计、关系校验或 Astro content schema。当前不保留 `summary` / `whyImportant` 的 warning-only 过渡状态。
 
 后续 GitHub Actions 进入 production monitoring gate 时，可额外使用：
 
