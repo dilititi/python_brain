@@ -2,6 +2,9 @@
 
 一个基于 Astro Content Collections 的 Python 学习外脑原型。它把概念、代码、案例、人物、作品和历史作为同一个知识节点的六个侧面，同时保留案例库、项目库、人物谱系和学习路径这些独立入口。
 
+## 公网连接（暂时的）
+https://python-brain-zmmb.onrender.com/
+
 ## 本地运行
 
 ```bash
