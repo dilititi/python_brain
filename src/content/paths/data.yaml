@@ -34,11 +34,51 @@ nodes:
   - common-stdlib-modules
 milestones:
   - title: 数据容器
-    nodes: [primitive-types, string, list, tuple, set, range, dict]
+    nodes:
+      - primitive-types
+      - string
+      - list
+      - tuple
+      - set
+      - range
+      - dict
+    cases:
+      - word-frequency
+      - collection-membership-report
+    projects:
+      - text-analyzer
   - title: 清洗流程
-    nodes: [operators, type-casting, builtin-functions, if-statement, for-loop, break-continue-pass, function, function-parameters, comprehension, lambda, regular-expression]
+    nodes:
+      - operators
+      - type-casting
+      - builtin-functions
+      - if-statement
+      - for-loop
+      - break-continue-pass
+      - function
+      - function-parameters
+      - comprehension
+      - lambda
+      - regular-expression
+    cases:
+      - csv-cleaning
+      - text-normalizer
+      - modern-syntax-upgrade
+    projects:
+      - text-analyzer
+      - cli-text-toolkit
   - title: 数据对象
-    nodes: [programming-paradigms, class, dataclass, module, common-stdlib-modules]
+    nodes:
+      - programming-paradigms
+      - class
+      - dataclass
+      - module
+      - common-stdlib-modules
+    cases:
+      - contact-records
+      - json-config-loader
+    projects:
+      - contact-book-cli
 explorationDay:
   cadence: 每周一次
   prompt: 顺着 Wes McKinney 页面查看 pandas 如何接住这些基础节点。

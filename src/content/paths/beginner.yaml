@@ -49,19 +49,98 @@ nodes:
   - regular-expression
 milestones:
   - title: 语言入口
-    nodes: [python-language, interpreter-runtime, dynamic-strong-typing, cross-platform-community, programming-paradigms, python-philosophy, python-versions]
+    nodes:
+      - python-language
+      - interpreter-runtime
+      - dynamic-strong-typing
+      - cross-platform-community
+      - programming-paradigms
+      - python-philosophy
+      - python-versions
+    cases:
+      - interpreter-identity-check
+    projects:
+      - python-basics-lab
   - title: 基础心智模型
-    nodes: [variable, primitive-types, string, operators, type-casting, f-string]
+    nodes:
+      - variable
+      - primitive-types
+      - string
+      - operators
+      - type-casting
+      - f-string
+    cases:
+      - input-validation
+      - modern-syntax-upgrade
+    projects:
+      - python-basics-lab
   - title: 容器和内置工具
-    nodes: [list, tuple, dict, set, range, builtin-functions]
+    nodes:
+      - list
+      - tuple
+      - dict
+      - set
+      - range
+      - builtin-functions
+    cases:
+      - word-frequency
+      - collection-membership-report
+    projects:
+      - text-analyzer
+      - python-basics-lab
   - title: 重复处理
-    nodes: [if-statement, for-loop, while-loop, break-continue-pass]
+    nodes:
+      - if-statement
+      - for-loop
+      - while-loop
+      - break-continue-pass
+    cases:
+      - batch-rename-files
+      - word-frequency
+    projects:
+      - file-organizer
   - title: 可复用逻辑
-    nodes: [function, function-parameters, scope, type-annotations, comprehension]
+    nodes:
+      - function
+      - function-parameters
+      - scope
+      - type-annotations
+      - comprehension
+    cases:
+      - function-call-playground
+      - modern-syntax-upgrade
+    projects:
+      - cli-text-toolkit
   - title: 对象组织
-    nodes: [class, encapsulation, inheritance, polymorphism, dunder-methods]
+    nodes:
+      - class
+      - encapsulation
+      - inheritance
+      - polymorphism
+      - dunder-methods
+    cases:
+      - contact-records
+    projects:
+      - contact-book-cli
   - title: 文件和失败路径
-    nodes: [json, try-except, raise-assert-finally, module, import-syntax, package-structure, module-search-path, common-stdlib-modules, pathlib, regular-expression]
+    nodes:
+      - json
+      - try-except
+      - raise-assert-finally
+      - module
+      - import-syntax
+      - package-structure
+      - module-search-path
+      - common-stdlib-modules
+      - pathlib
+      - regular-expression
+    cases:
+      - json-config-loader
+      - exception-contracts
+      - stdlib-import-tour
+    projects:
+      - weather-notifier
+      - cli-text-toolkit
 explorationDay:
   cadence: 每周一次
   prompt: 从人物谱系里任选一位，反向查看他连接的概念。

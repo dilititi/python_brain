@@ -2,6 +2,7 @@
 title: 集合成员报告
 description: 用 tuple 表达固定记录，用 set 去重和比较，用 range 控制批量输出。
 scenario: 分析一组标签或文件类型时，需要找出缺失项、重复项，并按序号生成报告。
+level: intro
 difficulty: intro
 tracks:
   - beginner
@@ -34,6 +35,10 @@ codeVersions:
           print(index)
 
       print("missing:", required - seen_tags)
+pitfalls:
+  - 用 list 做大量成员判断会退化成反复线性扫描，数据一多就明显变慢。
+extensions:
+  - 把输入转换成 set 后生成差异报告，并导出缺失项与重复项。
 ---
 
 这个案例让 tuple、set、range 不再是孤立类型，而是进入“记录、去重、序号、跳过”的真实数据处理动作。

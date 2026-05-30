@@ -34,11 +34,45 @@ nodes:
   - pathlib
 milestones:
   - title: 请求处理基础
-    nodes: [primitive-types, string, f-string, dict, if-statement, function, function-parameters, json]
+    nodes:
+      - primitive-types
+      - string
+      - f-string
+      - dict
+      - if-statement
+      - function
+      - function-parameters
+      - json
+    cases:
+      - input-validation
+      - json-config-loader
+      - api-error-handling
+    projects:
+      - mini-web-api
   - title: 工程环境
-    nodes: [module, import-syntax, package-structure, module-search-path, common-stdlib-modules, venv, pip]
+    nodes:
+      - module
+      - import-syntax
+      - package-structure
+      - module-search-path
+      - common-stdlib-modules
+      - venv
+      - pip
+    cases:
+      - package-install-workflow
+      - stdlib-import-tour
+    projects:
+      - mini-web-api
   - title: 路由机制
-    nodes: [try-except, closure, decorator]
+    nodes:
+      - try-except
+      - closure
+      - decorator
+    cases:
+      - flask-routing
+      - api-error-handling
+    projects:
+      - mini-web-api
 explorationDay:
   cadence: 每周一次
   prompt: 从 Flask 或 FastAPI 的人物页面进入框架故事线。

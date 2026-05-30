@@ -26,7 +26,7 @@ const codeVersions = entry.data.codeVersions;
     ]}
   />
   <header class="detail-header">
-    <p class="eyebrow">{entry.data.difficulty}</p>
+    <p class="eyebrow">{entry.data.level}</p>
     <h1>{entry.data.title}</h1>
     <p class="lead">{entry.data.description}</p>
   </header>
@@ -39,6 +39,20 @@ const codeVersions = entry.data.codeVersions;
         <pre><code>{version.code}</code></pre>
       </article>
     ))}
+    <div class="case-notes">
+      <section>
+        <h2>常见坑</h2>
+        <ul>
+          {entry.data.pitfalls.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+      <section>
+        <h2>延伸方向</h2>
+        <ul>
+          {entry.data.extensions.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+    </div>
   </section>
   <section class="section">
     <div class="grid cols-3">
@@ -79,5 +93,28 @@ const codeVersions = entry.data.codeVersions;
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
+  }
+
+  .case-notes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 720px) {
+    .case-notes {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

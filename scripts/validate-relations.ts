@@ -232,16 +232,39 @@ for (const entry of cases) {
   if (!hasStandardCode) {
     errors.push(`${relative(root, entry.path)}: codeVersions must include a useful standard version`);
   }
+
+  const pitfalls = asStringArray(entry.data.pitfalls);
+  if (pitfalls.length === 0 || pitfalls.some((pitfall) => !isUsefulString(pitfall))) {
+    errors.push(`${relative(root, entry.path)}: pitfalls must contain at least one useful item`);
+  }
+
+  const extensions = asStringArray(entry.data.extensions);
+  if (extensions.length === 0 || extensions.some((extension) => !isUsefulString(extension))) {
+    errors.push(`${relative(root, entry.path)}: extensions must contain at least one useful item`);
+  }
 }
 
 for (const entry of projects) {
-  reportMissing(errors, entry, "concepts", asStringArray(entry.data.concepts), conceptIds);
+  const projectConcepts = asStringArray(entry.data.concepts);
+  reportMissing(errors, entry, "concepts", projectConcepts, conceptIds);
   reportMissing(errors, entry, "cases", asStringArray(entry.data.cases), caseIds);
   reportMissing(errors, entry, "people", asStringArray(entry.data.people), personIds);
+
+  if (projectConcepts.length < 3) {
+    errors.push(`${relative(root, entry.path)}: project.concepts must include at least three concepts`);
+  }
 }
 
 for (const entry of people) {
   reportMissing(errors, entry, "concepts", asStringArray(entry.data.concepts), conceptIds);
+
+  if (!isUsefulString(entry.data.role)) {
+    errors.push(`${relative(root, entry.path)}: person.role is required and must be useful`);
+  }
+
+  if (!isUsefulString(entry.data.field)) {
+    errors.push(`${relative(root, entry.path)}: person.field is required and must be useful`);
+  }
 
   const sources = asRecordArray(entry.data.sources);
   if (sources.length === 0) {
@@ -267,6 +290,16 @@ for (const entry of paths) {
 
   for (const milestone of milestones) {
     reportMissing(errors, entry, "milestones.nodes", asStringArray(milestone.nodes), conceptIds);
+    reportMissing(errors, entry, "milestones.cases", asStringArray(milestone.cases), caseIds);
+    reportMissing(errors, entry, "milestones.projects", asStringArray(milestone.projects), projectIds);
+
+    if (asStringArray(milestone.cases).length === 0) {
+      errors.push(`${relative(root, entry.path)}: milestones.cases must contain at least one case`);
+    }
+
+    if (asStringArray(milestone.projects).length === 0) {
+      errors.push(`${relative(root, entry.path)}: milestones.projects must contain at least one project`);
+    }
   }
 }
 

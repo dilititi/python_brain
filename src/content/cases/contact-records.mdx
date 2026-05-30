@@ -2,6 +2,7 @@
 title: 联系人数据对象
 description: 用 dataclass 表达联系人记录，并提供简单的显示和筛选逻辑。
 scenario: 命令行通讯录需要保存姓名、邮箱和标签，用字典也能做，但 dataclass 更容易表达字段结构。
+level: core
 difficulty: core
 tracks:
   - automation
@@ -55,6 +56,10 @@ codeVersions:
       for contact in contacts:
           if contact.matches("python"):
               print(contact.label(), str(contact))
+pitfalls:
+  - 联系人字段散落在 dict 中时，拼写错误和缺字段通常到运行时才暴露。
+extensions:
+  - 用 dataclass 增加字段默认值、格式化输出和 JSON 持久化。
 ---
 
 这个案例把 OOP 放在数据整理场景里，而不是抽象讲“动物、猫和狗”。新人更容易看到 class 和 dataclass 什么时候值得用。

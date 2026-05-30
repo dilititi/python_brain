@@ -2,6 +2,7 @@
 title: 天气 API 响应解析
 description: 把接口返回的 JSON 字符串解析成字典，并提取业务字段。
 scenario: 自动化脚本需要每天读取天气接口，把城市、温度和天气状态写入日报。
+level: core
 difficulty: core
 tracks:
   - automation
@@ -30,6 +31,10 @@ codeVersions:
       while attempts < 1:
           print(f'{data["city"]}: {data["temp"]}C, {data["status"]}')
           attempts += 1
+pitfalls:
+  - 直接访问嵌套字段会在接口缺字段或返回错误对象时抛 KeyError。
+extensions:
+  - 用 dataclass 或 TypedDict 描述响应结构，并对缺失字段给默认值。
 ---
 
 真实项目里，API 响应几乎总会落到字典和列表。掌握 JSON 解析后，Web、自动化和 AI 工程的入口会打开一大截。

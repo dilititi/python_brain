@@ -2,6 +2,7 @@
 title: 函数调用练习场
 description: 观察参数绑定、作用域、类型注解和类型转换如何一起工作。
 scenario: 写一个小工具函数时，需要让调用方式清楚，同时避免外部变量和内部变量互相干扰。
+level: core
 difficulty: core
 tracks:
   - beginner
@@ -37,6 +38,10 @@ codeVersions:
           return f"{amount:.2f} {currency}"
 
       print(total("100", 2.5, 3.5, currency="USD"))
+pitfalls:
+  - 可变默认参数和混用 *args/**kwargs 容易让函数调用结果看起来不稳定。
+extensions:
+  - 加入类型注解、默认值示例和 pytest 参数化测试，形成函数契约练习。
 ---
 
 函数参数和作用域是很多进阶概念的前置。闭包、装饰器、回调和 Web 处理函数，底层都离不开这两个节点。

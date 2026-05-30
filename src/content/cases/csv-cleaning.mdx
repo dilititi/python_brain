@@ -2,6 +2,7 @@
 title: CSV 清洗
 description: 读取表格行，过滤空值，整理字段名，再输出干净结构。
 scenario: 数据分析前，原始 CSV 常常有空白、大小写不一致和多余字段，需要先规整。
+level: core
 difficulty: core
 tracks:
   - data
@@ -36,6 +37,10 @@ codeVersions:
       ]
 
       print(sorted(cleaned, key=lambda row: row["score"], reverse=True))
+pitfalls:
+  - 默认编码、分隔符和列名都可能和真实 CSV 不一致，脚本不能假设输入总是干净的。
+extensions:
+  - 加入列名映射、缺失值报告和 pandas 版本，对比标准库与数据分析工作流。
 ---
 
 这个案例故意不用 pandas，因为它更适合作为基础语法和数据结构的交叉节点。等这些概念稳了，再进入 pandas 会舒服很多。

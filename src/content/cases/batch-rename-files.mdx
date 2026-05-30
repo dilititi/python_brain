@@ -2,6 +2,7 @@
 title: 批量改名文件
 description: 遍历目录里的文件，按统一规则重命名。
 scenario: 下载目录里有一批截图和报告，需要把文件名前缀统一成日期加序号。
+level: core
 difficulty: core
 tracks:
   - automation
@@ -27,6 +28,10 @@ codeVersions:
               print(file.name, "->", new_name.name)
 
       preview_renames(".")
+pitfalls:
+  - 直接改名且没有 dry-run，容易覆盖已有文件或让批量操作不可回滚。
+extensions:
+  - 增加 dry-run 预览、冲突检测和改名日志，必要时支持按日志撤销。
 ---
 
 `pathlib` 的关键优势是让路径操作从字符串拼接变成对象方法。先预览，再真正 `rename`，也是自动化脚本的好习惯。

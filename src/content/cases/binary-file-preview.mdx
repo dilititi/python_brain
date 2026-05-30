@@ -2,6 +2,7 @@
 title: 二进制文件预览
 description: 读取 bytes，展示前几个字节，并在需要时解码为文本。
 scenario: 自动化脚本处理文件时，不能假设所有文件都是文本，需要先识别二进制数据或编码。
+level: core
 difficulty: core
 tracks:
   - automation
@@ -26,6 +27,10 @@ codeVersions:
           print(index, data[index])
 
       print(data.decode("utf-8"))
+pitfalls:
+  - 把二进制文件当文本读取会产生乱码，也可能一次性加载过大的文件。
+extensions:
+  - 按文件大小和后缀选择预览策略，只读取前几个字节并显示十六进制摘要。
 ---
 
 二进制预览是理解 str 和 bytes 边界的好入口。文件、网络、图片和压缩包都会把这个边界推到你面前。

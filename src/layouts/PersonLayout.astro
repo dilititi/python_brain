@@ -23,9 +23,9 @@ const { Content } = await render(entry);
     ]}
   />
   <header class="detail-header">
-    <p class="eyebrow">{entry.data.title}</p>
+    <p class="eyebrow">{entry.data.field}</p>
     <h1>{entry.data.name}</h1>
-    <p class="lead">{entry.data.description}</p>
+    <p class="lead">{entry.data.role}。{entry.data.description}</p>
   </header>
   <section class="section content-flow">
     <Content />

@@ -15,7 +15,7 @@ const people = await getCollection("people");
   </header>
   <div class="grid cols-3">
     {people.map((entry) => (
-      <RelationCard href={`/people/${entry.id}/`} title={entry.data.name} description={entry.data.description} meta={entry.data.title} />
+      <RelationCard href={`/people/${entry.id}/`} title={entry.data.name} description={entry.data.description} meta={entry.data.field} />
     ))}
   </div>
 </BaseLayout>

@@ -37,6 +37,8 @@ const caseCodeVersion = z.object({
   code: z.string()
 });
 
+const nonEmptyStringArray = z.array(z.string().min(1)).min(1);
+
 const historyEvent = z
   .object({
     year: z.union([z.number(), z.string()]).optional(),
@@ -102,6 +104,7 @@ const cases = defineCollection({
     title: z.string(),
     description: z.string(),
     scenario: z.string(),
+    level,
     difficulty: level,
     tracks: z.array(track).default([]),
     concepts: z.array(slugRef).min(2),
@@ -115,7 +118,9 @@ const cases = defineCollection({
       .min(1)
       .refine((versions) => versions.some((version) => version.label === "standard"), {
         message: "case must include a standard code version"
-      })
+      }),
+    pitfalls: nonEmptyStringArray,
+    extensions: nonEmptyStringArray
   })
 });
 
@@ -127,7 +132,7 @@ const projects = defineCollection({
     outcome: z.string(),
     difficulty: level,
     tracks: z.array(track).default([]),
-    concepts: z.array(slugRef).default([]),
+    concepts: z.array(slugRef).min(3),
     cases: z.array(slugRef).default([]),
     people: z.array(slugRef).default([]),
     milestones: z.array(z.string()).default([])
@@ -139,9 +144,11 @@ const people = defineCollection({
   schema: z.object({
     name: z.string(),
     title: z.string(),
+    role: z.string(),
+    field: z.string(),
     description: z.string(),
     roles: z.array(z.string()).default([]),
-    concepts: z.array(slugRef).default([]),
+    concepts: z.array(slugRef).min(3),
     works: z.array(workLink).default([]),
     sources: z.array(sourceLink).min(1),
     links: z
@@ -168,7 +175,9 @@ const paths = defineCollection({
       .array(
         z.object({
           title: z.string(),
-          nodes: z.array(slugRef)
+          nodes: z.array(slugRef),
+          cases: z.array(slugRef).min(1),
+          projects: z.array(slugRef).min(1)
         })
       )
       .default([]),

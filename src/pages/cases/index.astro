@@ -15,7 +15,7 @@ const cases = await getCollection("cases");
   </header>
   <div class="grid cols-3">
     {cases.map((entry) => (
-      <RelationCard href={`/cases/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.difficulty} />
+      <RelationCard href={`/cases/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.level} />
     ))}
   </div>
 </BaseLayout>

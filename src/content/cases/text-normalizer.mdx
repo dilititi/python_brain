@@ -2,6 +2,7 @@
 title: 文本标准化
 description: 清洗用户输入，把文本转成统一格式，并用正则提取关键片段。
 scenario: 从表单、日志或 CSV 里拿到不整齐的文本，需要统一大小写、去掉空白、转换数字并提取邮箱。
+level: core
 difficulty: core
 tracks:
   - data
@@ -33,6 +34,10 @@ codeVersions:
       emails = re.findall(r"[\w.-]+@[\w.-]+", normalized)
 
       print(f"score={score}, emails={emails}")
+pitfalls:
+  - 过度清洗会丢掉大小写、标点或空格中携带的真实业务含义。
+extensions:
+  - 把清洗步骤做成可配置流水线，让不同文本来源选择不同规则。
 ---
 
 文本标准化把很多基础语法放在一起：字符串方法、正则、类型转换、内置函数和 f-string 都会出现。

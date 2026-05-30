@@ -37,11 +37,46 @@ nodes:
   - regular-expression
 milestones:
   - title: 批量处理
-    nodes: [cross-platform-community, string, type-casting, f-string, if-statement, for-loop, break-continue-pass, function, function-parameters, module, import-syntax, package-structure, common-stdlib-modules, pathlib]
+    nodes:
+      - cross-platform-community
+      - string
+      - type-casting
+      - f-string
+      - if-statement
+      - for-loop
+      - break-continue-pass
+      - function
+      - function-parameters
+      - module
+      - import-syntax
+      - package-structure
+      - common-stdlib-modules
+      - pathlib
+    cases:
+      - batch-rename-files
+      - text-normalizer
+      - stdlib-import-tour
+    projects:
+      - file-organizer
+      - cli-text-toolkit
   - title: 环境隔离
-    nodes: [venv, pip]
+    nodes:
+      - venv
+      - pip
+    cases:
+      - package-install-workflow
+    projects:
+      - weather-notifier
   - title: 数据交换
-    nodes: [dict, json, try-except]
+    nodes:
+      - dict
+      - json
+      - try-except
+    cases:
+      - json-config-loader
+      - api-error-handling
+    projects:
+      - weather-notifier
 explorationDay:
   cadence: 每周一次
   prompt: 找一个和文件或路径有关的标准库节点，补一条自己的笔记。

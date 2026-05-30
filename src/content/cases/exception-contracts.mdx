@@ -2,6 +2,7 @@
 title: 异常契约
 description: 用 raise 明确拒绝非法输入，用 finally 保证清理逻辑执行。
 scenario: 命令行工具接收文件路径或数字参数时，需要把“不合法输入”变成清楚的错误，而不是让程序在深处莫名失败。
+level: core
 difficulty: core
 tracks:
   - automation
@@ -30,6 +31,10 @@ codeVersions:
               print("parse finished")
 
       print(parse_positive("3"))
+pitfalls:
+  - 捕获过宽的 Exception 会把真正的程序 bug 伪装成可恢复错误。
+extensions:
+  - 拆分自定义异常类型，并为每种失败路径补一条单元测试。
 ---
 
 异常契约的重点是“失败也要有设计”。该拒绝时主动 `raise`，该收尾时放进 `finally`。

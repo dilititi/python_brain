@@ -2,6 +2,7 @@
 title: 词频统计
 description: 把一段文本拆成单词，并统计每个单词出现了几次。
 scenario: 内容运营想知道一篇文章里最常出现的词，先用一个小脚本做快速观察。
+level: intro
 difficulty: intro
 tracks:
   - beginner
@@ -28,6 +29,10 @@ codeVersions:
           return counts
 
       print(count_words("Python data Python"))
+pitfalls:
+  - 简单 split 会把标点、大小写和停用词混进统计结果。
+extensions:
+  - 加入正则分词、停用词过滤和 Top N 输出，形成更接近真实分析的小工具。
 ---
 
 这个案例把新人最需要打通的四个节点连在一起：字符串拆分、`for` 循环、字典计数和函数封装。

@@ -25,7 +25,7 @@ npm run test
 npm run build
 ```
 
-当前 `summary` / `whyImportant`、case `standard` code version、person `sources` 已升级为严格字段；缺失、空值或 TODO-like 内容会阻断审计、关系校验或 Astro content schema。
+当前 `summary` / `whyImportant`、case `standard` code version / `pitfalls` / `extensions`、project `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值或 TODO-like 内容会阻断审计、关系校验或 Astro content schema。
 
 后续 Vercel 或 GitHub Actions 进入 production gate 时，建议使用：
 

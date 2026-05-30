@@ -2,6 +2,7 @@
 title: 表单输入校验
 description: 检查用户输入是否为空、格式是否合理，再决定是否继续处理。
 scenario: Web 表单或命令行工具收到邮箱、年龄和名称时，需要先判断输入能不能进入后续逻辑。
+level: intro
 difficulty: intro
 tracks:
   - beginner
@@ -34,6 +35,10 @@ codeVersions:
           return errors
 
       print(validate_user({"name": "Ada", "email": "ada@example.com"}))
+pitfalls:
+  - 在检查空字符串之前直接 int() 转换，会让用户输入错误变成未处理异常。
+extensions:
+  - 把校验规则抽成函数，并返回统一的错误消息或字段级错误对象。
 ---
 
 这个案例把 `if` 从抽象判断带回真实业务：判断不是为了练语法，而是为了保护后续代码不接收脏数据。

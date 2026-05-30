@@ -2,6 +2,7 @@
 title: 现代语法改写
 description: 把旧式字符串拼接和冗长分支改成 f-string、match-case 和类型注解。
 scenario: 维护一段老脚本时，需要在不改变行为的前提下，用现代 Python 语法提升可读性。
+level: core
 difficulty: core
 tracks:
   - beginner
@@ -35,6 +36,10 @@ codeVersions:
                   return "Unknown command"
 
       print(handle(("hello", "Ada")))
+pitfalls:
+  - 使用过新的语法但部署环境版本较低，会在上线时直接 SyntaxError。
+extensions:
+  - 结合 pyproject 的 Python 版本约束，给出 f-string、match-case、walrus 的兼容改写。
 ---
 
 现代语法不是为了追新。它应该让意图更清楚：f-string 让输出模板更清楚，类型注解让接口更清楚，match-case 让结构化分支更清楚。
