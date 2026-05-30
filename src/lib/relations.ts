@@ -1,4 +1,12 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+export {
+  buildRelationIndex,
+  caseUsedIn,
+  conceptNeighbors,
+  conceptUsedIn,
+  personPortfolio,
+  type RelationIndex
+} from "./relation-index";
 
 export type ConceptEntry = CollectionEntry<"concepts">;
 export type CaseEntry = CollectionEntry<"cases">;

@@ -8,7 +8,7 @@
 
 - 内容规模：52 concepts / 18 cases / 7 projects / 6 people / 5 paths。
 - 架构形态：Astro + MDX + React Islands 已成立。
-- 关系机制：已有运行时聚合关系，但尚未按设计生成 `dist/relations.json`。
+- 关系机制：已有运行时聚合关系，并已新增构建期 `dist/relations.json` 索引产物。
 - 最大风险：内容扩张速度已经超过 schema、校验、脚手架和页面布局契约。
 
 结论：项目当前处于“内容外脑原型可运行，但 v1.0 工程契约未冻结”的阶段。下一步不应继续扩内容，而应先完成设计文档中的 1-3 项。
@@ -126,23 +126,21 @@ v1.0 仍缺：
 
 ## 双向索引差距
 
-当前 `src/lib/relations.ts` 在页面渲染时读取集合并聚合：
+当前 `src/lib/relations.ts` 仍支持页面渲染时读取集合并聚合，同时已通过 `src/lib/relation-index.ts` 提供纯函数关系索引：
 
 - concept prerequisites / related / extends。
 - cases / projects / people 的反向挂载。
 - path concepts。
+- `conceptUsedIn(id)`、`caseUsedIn(id)`、`personPortfolio(id)`、`conceptNeighbors(id)`。
+- `npm run build` 会在 Astro 静态构建后生成 `dist/relations.json`。
+- `dist/relations.json` 带 MD5 `contentHash`。
+- `tests/relation-index.test.ts` 覆盖增删改场景。
 
 v1.0 仍缺：
 
-- 构建期一次性序列化 `dist/relations.json`。
-- `conceptUsedIn(id)`。
-- `caseUsedIn(id)`。
-- `personPortfolio(id)`。
-- `conceptNeighbors(id)` 中的 successors。
-- MD5 内容哈希缓存 key。
-- 单元测试覆盖增删改。
+- 概念页和图谱页尚未切换为消费构建期索引产物，当前仍保留运行时聚合路径。
 
-定位：现在是“运行时关系服务”，不是设计文档要求的“构建期关系索引产物”。
+定位：构建期关系索引产物已成立，下一步是让页面读取同一份索引，进一步落实“数据写一次，关系自动算”。
 
 ## 概念页布局差距
 

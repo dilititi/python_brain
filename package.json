@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && npm run build:relations",
+    "build:relations": "tsx scripts/build-relations.ts",
     "preview": "astro preview",
+    "test": "tsx --test tests/*.test.ts",
     "validate:relations": "tsx scripts/validate-relations.ts",
     "audit:concepts": "tsx scripts/audit-concepts.ts",
     "migrate:works-role": "tsx scripts/migrate-works-note-to-role.ts",
