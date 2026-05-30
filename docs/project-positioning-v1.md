@@ -210,7 +210,7 @@ localStorage：
 | 1 | 完善 new-concept 脚手架 | 已完成第一版 | 后续随 schema 冻结微调 |
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，后续可随 Tab 布局继续微调 |
-| 4 | 部署 main 到 Vercel | 未完成 | 等 1-3 后做 |
+| 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；当前环境无 Vercel 登录态或 token |
 | 5 | 收紧校验（AND + DAG）+ 单测 | 部分完成 | 等标杆概念反向验证 schema 后做 |
 | 6 | 内容扩到 20/10/5/5 | 已超过 | 暂停扩内容 |
 | 7 | 进度点亮 localStorage | 未完成 | 4-5 后做 |

@@ -40,3 +40,9 @@ Astro v6 的内容集合配置入口是 `src/content.config.ts`。双向关系�
 
 - [工程定位审查 v1.0](docs/project-positioning-v1.md)
 - [内容编辑准则](docs/content-guidelines.md)
+
+## 部署
+
+Vercel 配置见 `vercel.json`。项目使用 Astro 静态输出，构建命令为 `npm run build`，输出目录为 `dist/`。
+
+详细步骤见 [部署说明](docs/deployment.md)。
