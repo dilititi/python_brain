@@ -2,9 +2,11 @@ title: Web 后端路径
 description: 从函数、字典和 JSON 进入工程环境，再理解装饰器路由如何组织 Web API。
 track: web
 audience: 想写接口、网站后台或自动化服务的学习者。
-estimatedNodes: 23
+estimatedNodes: 28
 nodes:
   - python-language
+  - interpreter-runtime
+  - dynamic-strong-typing
   - python-versions
   - variable
   - primitive-types
@@ -18,6 +20,9 @@ nodes:
   - type-annotations
   - module
   - import-syntax
+  - package-structure
+  - module-search-path
+  - common-stdlib-modules
   - venv
   - pip
   - try-except
@@ -31,7 +36,7 @@ milestones:
   - title: 请求处理基础
     nodes: [primitive-types, string, f-string, dict, if-statement, function, function-parameters, json]
   - title: 工程环境
-    nodes: [module, venv, pip]
+    nodes: [module, import-syntax, package-structure, module-search-path, common-stdlib-modules, venv, pip]
   - title: 路由机制
     nodes: [try-except, closure, decorator]
 explorationDay:

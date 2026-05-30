@@ -1,0 +1,76 @@
+---
+title: 多态
+description: 不同对象只要提供相同接口，就可以被同一段代码处理。
+summary: 多态关注“能做什么”，而不是对象到底属于哪个具体类。
+whyImportant: Python 里的多态常常通过鸭子类型出现。理解它能避免过早写复杂继承，也能写出更灵活的函数。
+definition: 多态是让同一操作作用于不同类型对象的能力；在 Python 中常体现为对象拥有相同方法或协议。
+mentalModel: 如果几个对象都能“导出成文本”，调用方只需要调用 export_text，不必关心它们内部长什么样。
+category: oop
+level: core
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [class, function]
+related: [inheritance, dunder-methods, programming-paradigms]
+expandsTo: [dunder-methods]
+appliedIn:
+  cases: [contact-records]
+  projects: [contact-book-cli]
+people: [guido-van-rossum, raymond-hettinger]
+works:
+  - title: "The Python Tutorial: Classes"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/classes.html
+    note: 官方教程解释方法对象、继承和类的动态特性。
+history:
+  - year: 1991
+    title: 鸭子类型成为 Python 风格的一部分
+    note: Python 鼓励按对象行为组织代码，而不是只按显式类型层级组织代码。
+tags: [oop, duck-typing, protocol]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 用 if 判断具体类型会让函数越来越臃肿。
+    code: |
+      def label(item):
+          if isinstance(item, dict):
+              return item["name"]
+          return item.name
+  - title: standard
+    description: 让不同对象提供同名方法，调用方只依赖接口。
+    code: |
+      class Contact:
+          def label(self):
+              return "Ada <ada@example.com>"
+
+      class Group:
+          def label(self):
+              return "Core team"
+
+      for item in [Contact(), Group()]:
+          print(item.label())
+  - title: production
+    description: 用小协议心智模型设计函数：只要求对象有需要的方法。
+    code: |
+      def render_labels(items):
+          return [item.label() for item in items]
+
+      class Contact:
+          def label(self):
+              return "Ada"
+
+      print(render_labels([Contact()]))
+---
+
+## 概念定义
+
+多态让调用方从“你是什么类”转向“你能提供什么行为”。Python 里的鸭子类型就是这种思路：如果一个对象能像文件一样 `read()`，很多代码就可以把它当成可读取对象使用。
+
+继承可以实现多态，但不是唯一方式。很多时候，不同类只要拥有同名方法，就足够让同一个函数处理它们。
+
+## 真实案例
+
+通讯录里联系人、公司、分组都可以提供 `label()` 方法。搜索和显示逻辑只关心 `label()` 的结果，不需要写一串类型判断。
+
+## 历史脉络
+
+Python 的动态类型让多态更轻量，但也要求接口命名更清楚。随着类型注解发展，`Protocol` 可以把这种“只要求行为”的约定写得更明确。

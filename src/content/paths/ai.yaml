@@ -2,9 +2,11 @@ title: AI 工程路径
 description: 先建立函数、JSON、环境管理和装饰器基础，再承接模型 API 与服务化。
 track: ai
 audience: 想调用模型 API、写推理服务或做 AI 工具的学习者。
-estimatedNodes: 24
+estimatedNodes: 26
 nodes:
   - python-language
+  - interpreter-runtime
+  - dynamic-strong-typing
   - python-versions
   - variable
   - primitive-types
@@ -18,6 +20,8 @@ nodes:
   - type-annotations
   - module
   - import-syntax
+  - package-structure
+  - module-search-path
   - venv
   - pip
   - json
@@ -30,7 +34,7 @@ milestones:
   - title: API 数据结构
     nodes: [primitive-types, string, type-casting, dict, list, if-statement, json, try-except, raise-assert-finally]
   - title: 工程环境
-    nodes: [module, venv, pip]
+    nodes: [module, import-syntax, package-structure, module-search-path, venv, pip]
   - title: 服务化准备
     nodes: [function, decorator]
 explorationDay:

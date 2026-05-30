@@ -1,0 +1,74 @@
+---
+title: 动态类型与强类型
+description: Python 在运行时检查类型，同时不会随意把不兼容类型自动混算。
+summary: 动态类型让变量名灵活绑定对象，强类型让不兼容操作及时报错。
+whyImportant: 很多新人把 Python 误会成“类型随便来”。真正的模型是：变量不用声明类型，但对象始终有类型，错误会在运行时出现。
+definition: 动态类型指变量名不固定某种类型；强类型指对象之间的操作必须满足类型规则，不能靠隐式魔法混过去。
+mentalModel: 变量像标签，可以贴到不同对象上；对象像带材质的物品，不能把字符串和数字当成同一种材质直接相加。
+category: foundation
+level: intro
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [python-language, variable]
+related: [primitive-types, type-casting, operators, type-annotations]
+expandsTo: [type-annotations]
+appliedIn:
+  cases: [function-call-playground, input-validation]
+  projects: [python-basics-lab, cli-text-toolkit]
+people: [guido-van-rossum]
+works:
+  - title: Built-in Types
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/stdtypes.html
+    note: 官方文档列出内置类型及它们支持的操作。
+  - title: PEP 484
+    creator: Guido van Rossum, Jukka Lehtosalo, Lukasz Langa
+    type: pep
+    url: https://peps.python.org/pep-0484/
+    note: 类型注解让动态语言也能获得静态检查工具的帮助。
+history:
+  - year: 1991
+    title: 动态对象模型
+    note: Python 早期就采用“名字绑定对象，对象携带类型”的模型。
+  - year: 2015
+    title: PEP 484 引入类型提示标准
+    note: 类型注解没有改变运行时动态类型，但改善了大型项目里的可读性和工具检查。
+tags: [typing, runtime, type-error]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 同一个变量名可以先后绑定不同类型的对象。
+    code: |
+      value = 3
+      print(type(value).__name__)
+
+      value = "3"
+      print(type(value).__name__)
+  - title: standard
+    description: 不兼容类型不会自动混算，需要显式转换。
+    code: |
+      amount = "3"
+      total = int(amount) + 4
+      print(total)
+  - title: production
+    description: 在函数边界使用类型注解和显式转换，让输入契约更清楚。
+    code: |
+      def parse_count(raw: str) -> int:
+          return int(raw.strip())
+
+      print(parse_count(" 42 "))
+---
+
+## 概念定义
+
+“动态类型”说的是名字不需要预先声明类型，不是对象没有类型。`score = 10` 之后，`score` 这个名字绑定到了一个 `int` 对象；下一行再写 `score = "10"`，名字换了绑定对象，但两个对象各自的类型并没有消失。
+
+“强类型”说的是类型规则会被认真执行。`"3" + 4` 不会自动猜成 `7`，因为字符串拼接和数字加法是两套不同操作。你要写出 `int("3") + 4`，让转换变成显式动作。
+
+## 真实案例
+
+Web 表单、命令行参数和环境变量通常先以字符串进入程序。数据分析里的 CSV 字段也常常先是文本。能不能把文本转换成数字、日期或布尔值，是输入校验和错误处理的核心。
+
+## 历史脉络
+
+Python 一直是动态强类型语言。后来类型注解进入语言生态，是为了让编辑器、mypy、pyright 等工具更早发现问题，而不是把 Python 改造成静态语言。

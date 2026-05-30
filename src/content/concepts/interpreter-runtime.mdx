@@ -1,0 +1,70 @@
+---
+title: 解释型执行
+description: Python 代码通常由解释器逐步执行，因此反馈快，也更依赖运行时环境。
+summary: 解释器把源码、模块和运行时状态连在一起，是 Python 快速试错体验的基础。
+whyImportant: 新人遇到“命令行能跑、编辑器不能跑”“版本不一致”“导入失败”时，真正要排查的是解释器、环境和运行路径。
+definition: 解释型执行指代码由 Python 解释器读取并执行，错误、类型和导入关系大多在运行时暴露。
+mentalModel: 把解释器想成现场执行代码的主持人；它知道当前版本、当前路径、已加载模块和可用标准库。
+category: foundation
+level: intro
+tracks: [beginner, web, data, automation, ai, creative]
+prerequisites: [python-language]
+related: [python-versions, module, import-syntax]
+expandsTo: [module-search-path, common-stdlib-modules]
+appliedIn:
+  cases: [interpreter-identity-check]
+  projects: [python-basics-lab]
+people: [guido-van-rossum]
+works:
+  - title: Python command line and environment
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/using/cmdline.html
+    note: 官方文档说明解释器命令行参数、环境变量和运行方式。
+  - title: CPython
+    creator: Python core developers
+    type: project
+    url: https://github.com/python/cpython
+    note: 最主流的 Python 实现，通常新人下载的 python 命令就是 CPython。
+history:
+  - year: 1991
+    title: 解释器随 Python 诞生
+    note: 交互式解释器和脚本执行共同塑造了 Python 的快速反馈体验。
+tags: [interpreter, runtime, repl]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 先确认代码确实在当前解释器里执行。
+    code: |
+      print("hello from Python")
+  - title: standard
+    description: 查看解释器版本和可执行文件路径。
+    code: |
+      import sys
+
+      print(sys.version)
+      print(sys.executable)
+  - title: production
+    description: 在脚本入口处检查最低版本，避免运行时才发现语法不兼容。
+    code: |
+      import sys
+
+      if sys.version_info < (3, 10):
+          raise RuntimeError("Python 3.10+ required")
+
+      print("runtime ready")
+---
+
+## 概念定义
+
+解释型执行不等于“没有编译”，而是说学习者主要感受到的是运行时反馈：敲一段、跑一段、立刻看到错误。Python 会把源码编译成字节码，再由虚拟机执行，但新手最先需要掌握的是“哪个解释器在执行、它的版本是多少、它从哪里找模块”。
+
+这也是为什么环境问题在 Python 学习中很早出现。编辑器、终端、虚拟环境、系统 Python 可能指向不同解释器；同一段代码在不同解释器上，看到的包、版本和语法支持都可能不同。
+
+## 代码示例
+
+最小动作是打印 `sys.version` 和 `sys.executable`。当你能说清楚“当前代码由哪个 python.exe / python 命令执行”，后面排查 pip 安装、模块导入和版本差异会容易很多。
+
+## 历史脉络
+
+Python 从一开始就提供脚本执行和交互式体验。这个反馈速度让它适合教学、自动化和数据探索，也让“环境身份检查”成为 Foundation 层必须掌握的第一类技能。

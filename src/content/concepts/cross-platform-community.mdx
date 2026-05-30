@@ -1,0 +1,74 @@
+---
+title: 跨平台与开源社区
+description: Python 由 PSF 和全球社区推动，能在 Windows、macOS、Linux 等平台上运行。
+summary: 跨平台让代码能迁移，开源社区让标准库、PyPI、PEP 和文档形成共同基础设施。
+whyImportant: 新人写脚本很快会遇到路径分隔符、环境安装、包版本和系统差异；理解社区治理能帮他判断哪些资料和工具更可靠。
+definition: 跨平台与开源社区描述 Python 的运行环境覆盖、开放治理、包生态和由 Python Software Foundation 支持的公共基础设施。
+mentalModel: Python 像一座公共城市：解释器是道路，标准库是公共设施，PyPI 是市场，PEP 是城市规划讨论。
+category: foundation
+level: intro
+tracks: [beginner, web, data, automation, ai, creative]
+prerequisites: [python-language]
+related: [interpreter-runtime, python-versions, pathlib, pip, venv]
+expandsTo: [pathlib, pip, venv]
+appliedIn:
+  cases: [interpreter-identity-check, package-install-workflow]
+  projects: [python-basics-lab, weather-notifier]
+people: [guido-van-rossum]
+works:
+  - title: Python Software Foundation
+    creator: Python community
+    type: project
+    url: https://www.python.org/psf/
+    note: PSF 支持 Python 社区、商标、基础设施和生态发展。
+  - title: Python Package Index
+    creator: Python community
+    type: project
+    url: https://pypi.org/
+    note: PyPI 是第三方包发布和安装的核心入口。
+history:
+  - year: 2001
+    title: Python Software Foundation 成立
+    note: PSF 为 Python 社区提供组织和法律支持。
+tags: [cross-platform, psf, pypi, community]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 查看当前操作系统，确认脚本运行在哪个平台。
+    code: |
+      import platform
+
+      print(platform.system())
+  - title: standard
+    description: 用 pathlib 写跨平台路径，避免手拼斜杠。
+    code: |
+      from pathlib import Path
+
+      path = Path("reports") / "today.txt"
+      print(path)
+  - title: production
+    description: 针对少量平台差异显式分支，其他逻辑保持共享。
+    code: |
+      import sys
+
+      if sys.platform.startswith("win"):
+          config_dir = "AppData"
+      else:
+          config_dir = ".config"
+
+      print(config_dir)
+---
+
+## 概念定义
+
+跨平台不是承诺“所有代码无需修改就能到处跑”。更准确地说，Python 解释器和标准库尽量提供统一接口，让你把平台差异限制在少数边界：路径、权限、换行、可执行文件、系统命令。
+
+开源社区则解释了另一个现实：Python 的能力不只来自语言本身，还来自标准库、PEP、PyPI、官方文档、核心开发者和大量第三方维护者。
+
+## 代码示例
+
+新手阶段最实用的跨平台习惯是使用 `pathlib`，少写字符串路径拼接。第二个习惯是输出 `platform.system()` 或 `sys.platform`，先看事实，再判断差异。
+
+## 历史脉络
+
+PSF 的存在让 Python 不只是一个个人项目，而是有公共治理和社区基础设施的语言生态。理解这一点，能帮助学习者把“学语法”自然延伸到“读官方文档、看 PEP、用 PyPI、尊重版本生命周期”。

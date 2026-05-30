@@ -1,0 +1,84 @@
+---
+title: 封装
+description: 把数据和操作数据的方法放在一起，并通过清楚的接口减少外部依赖内部细节。
+summary: 封装不是把一切藏起来，而是让对象对外暴露稳定接口，对内保留实现自由。
+whyImportant: 新人写 class 时容易只把字典换成对象。封装提醒他：类的价值在于维护数据规则和行为边界。
+definition: 封装是面向对象中的组织方式，把状态和行为放进同一个对象，并用方法、属性或约定控制访问方式。
+mentalModel: 对象像一个有柜门的工具柜；外部通过把手使用它，不需要每次都伸进柜子里改零件。
+category: oop
+level: core
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [class, function-parameters]
+related: [dataclass, dunder-methods, inheritance]
+expandsTo: [dunder-methods]
+appliedIn:
+  cases: [contact-records]
+  projects: [contact-book-cli]
+people: [raymond-hettinger, guido-van-rossum]
+works:
+  - title: "The Python Tutorial: Classes"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/classes.html
+    note: 官方教程说明实例变量、方法对象和类的命名空间。
+history:
+  - year: 1991
+    title: class 支持封装式组织
+    note: Python 的封装更偏向约定和清晰接口，而不是强制访问控制。
+tags: [oop, interface, property]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 直接暴露字典字段，外部代码可以随意修改。
+    code: |
+      contact = {"email": "ada@example.com"}
+      contact["email"] = ""
+      print(contact)
+  - title: standard
+    description: 用方法集中维护更新规则。
+    code: |
+      class Contact:
+          def __init__(self, email):
+              self.email = email
+
+          def change_email(self, email):
+              if "@" not in email:
+                  raise ValueError("invalid email")
+              self.email = email
+
+      user = Contact("ada@example.com")
+      user.change_email("ada@python.org")
+      print(user.email)
+  - title: production
+    description: 用 property 把读取接口和校验逻辑放在一起。
+    code: |
+      class Contact:
+          def __init__(self, email):
+              self.email = email
+
+          @property
+          def email(self):
+              return self._email
+
+          @email.setter
+          def email(self, value):
+              if "@" not in value:
+                  raise ValueError("invalid email")
+              self._email = value
+
+      print(Contact("ada@example.com").email)
+---
+
+## 概念定义
+
+Python 里的封装更依赖约定和接口设计，而不是像某些语言那样用 `private` 关键字强制隔离。单下划线 `_email` 表示“内部实现细节”，提醒外部代码不要直接依赖。
+
+封装的核心不是神秘感，而是降低耦合。外部只调用 `change_email()` 或读取 `email` 属性，内部以后从字符串换成对象、增加校验、记录更新时间，都不需要改调用方。
+
+## 真实案例
+
+通讯录项目里，联系人不只是三个字段。邮箱格式、显示名称、搜索标签都可以成为对象方法。封装让这些规则离数据更近，也让测试更集中。
+
+## 历史脉络
+
+Python 的 OOP 一直偏向“成年人协议”：语言给你工具和约定，但不强迫你。这个取舍和 PEP 20 的“显式胜于隐式”“实用胜于纯粹”是一致的。

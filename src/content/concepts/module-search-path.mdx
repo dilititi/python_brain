@@ -1,0 +1,67 @@
+---
+title: sys.path 与模块查找路径
+description: import 会沿着 sys.path 查找模块，路径顺序决定了 Python 能导入什么。
+summary: sys.path 是 import 的路线图；导入失败时先看解释器正在搜索哪些目录。
+whyImportant: “明明安装了包却 import 不了”常常不是语法错，而是解释器、虚拟环境或运行目录和你想的不一样。
+definition: sys.path 是 Python 导入系统用于查找模块和包的路径列表，由脚本位置、环境变量、标准库、site-packages 等来源组成。
+mentalModel: import 像找书，sys.path 就是书架顺序；书架上没有或顺序不对，就会找不到或找错版本。
+category: engineering
+level: core
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [interpreter-runtime, import-syntax, module]
+related: [package-structure, venv, pip]
+expandsTo: [package-structure]
+appliedIn:
+  cases: [stdlib-import-tour, package-install-workflow]
+  projects: [python-basics-lab, weather-notifier]
+people: [guido-van-rossum]
+works:
+  - title: The initialization of the sys.path module search path
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/library/sys_path_init.html
+    note: 官方文档说明 sys.path 初始化过程。
+history:
+  - year: 1991
+    title: import 查找路径成为模块系统基础
+    note: 模块复用需要稳定的查找规则，sys.path 是排查导入问题的核心入口。
+tags: [sys-path, import, module-search]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 查看当前导入搜索路径的前几项。
+    code: |
+      import sys
+
+      for path in sys.path[:3]:
+          print(path)
+  - title: standard
+    description: 确认某个模块实际从哪个文件加载。
+    code: |
+      import json
+
+      print(json.__file__)
+  - title: production
+    description: 工程中优先通过包结构和正确运行入口解决导入，而不是到处修改 sys.path。
+    runnable: false
+    code: |
+      # 推荐：
+      # python -m app.main
+
+      # 慎用：
+      # sys.path.append("..")
+---
+
+## 概念定义
+
+`import` 不是全网搜索，也不是搜索整个磁盘。它会按规则查看 `sys.path` 里的目录。这个列表通常包含当前脚本所在目录、标准库路径、虚拟环境的 `site-packages`，以及环境变量配置的额外路径。
+
+导入问题最常见的三连问是：当前解释器是谁？当前运行目录在哪里？`sys.path` 里有没有目标模块所在目录？
+
+## 代码示例
+
+`json.__file__` 这种写法能告诉你模块来自哪里。排查第三方包时也可以用同样方法确认是不是导入到了预期版本。
+
+## 历史脉络
+
+模块查找路径看似工程细节，却是 Python 项目化的关键。它把解释器、包结构、虚拟环境和第三方依赖连接成一条可以排查的链。

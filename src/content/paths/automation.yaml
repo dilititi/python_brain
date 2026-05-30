@@ -5,6 +5,7 @@ audience: 想批量处理文件、表格或接口数据的学习者。
 estimatedNodes: 31
 nodes:
   - python-language
+  - cross-platform-community
   - python-versions
   - variable
   - primitive-types
@@ -24,6 +25,8 @@ nodes:
   - scope
   - module
   - import-syntax
+  - package-structure
+  - common-stdlib-modules
   - pathlib
   - venv
   - pip
@@ -34,7 +37,7 @@ nodes:
   - regular-expression
 milestones:
   - title: 批量处理
-    nodes: [string, type-casting, f-string, if-statement, for-loop, break-continue-pass, function, function-parameters, module, import-syntax, pathlib]
+    nodes: [cross-platform-community, string, type-casting, f-string, if-statement, for-loop, break-continue-pass, function, function-parameters, module, import-syntax, package-structure, common-stdlib-modules, pathlib]
   - title: 环境隔离
     nodes: [venv, pip]
   - title: 数据交换

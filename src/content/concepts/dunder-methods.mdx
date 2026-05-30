@@ -1,0 +1,78 @@
+---
+title: 魔术方法
+description: __str__、__repr__、__len__ 等双下划线方法让对象接入 Python 的内置协议。
+summary: 魔术方法是对象和语言内置操作之间的协议接口。
+whyImportant: 新人看到 __init__、__str__、__repr__ 常以为只是奇怪命名。理解协议后，就能知道 print、len、in、排序为什么能作用在自定义对象上。
+definition: 魔术方法是以双下划线开头和结尾的方法，用来定义对象在内置函数、运算符和语法协议下的行为。
+mentalModel: 魔术方法像对象和 Python 语言之间的插座；插上 __len__，len(obj) 就知道怎么工作。
+category: oop
+level: core
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [class]
+related: [encapsulation, polymorphism, builtin-functions, operators]
+expandsTo: [dataclass]
+appliedIn:
+  cases: [contact-records]
+  projects: [contact-book-cli]
+people: [guido-van-rossum, raymond-hettinger]
+works:
+  - title: Special method names
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/reference/datamodel.html#special-method-names
+    note: 语言参考列出双下划线特殊方法及其协议含义。
+history:
+  - year: 1991
+    title: 数据模型奠定特殊方法机制
+    note: Python 通过数据模型把运算符、内置函数和对象协议连接起来。
+tags: [dunder, data-model, protocol]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 没有 __repr__ 时，打印对象只看到默认地址信息。
+    code: |
+      class Contact:
+          pass
+
+      print(Contact())
+  - title: standard
+    description: 定义 __str__ 和 __repr__，让调试和展示更清楚。
+    code: |
+      class Contact:
+          def __init__(self, name):
+              self.name = name
+
+          def __str__(self):
+              return self.name
+
+          def __repr__(self):
+              return f"Contact(name={self.name!r})"
+
+      print(Contact("Ada"))
+      print([Contact("Ada")])
+  - title: production
+    description: 定义 __contains__ 让 in 语法接入自定义对象。
+    code: |
+      class Tags:
+          def __init__(self, values):
+              self.values = set(values)
+
+          def __contains__(self, item):
+              return item in self.values
+
+      print("python" in Tags(["python", "data"]))
+---
+
+## 概念定义
+
+魔术方法不是给人直接频繁调用的普通方法，而是给 Python 的语法和内置函数调用的协议。你写 `len(obj)`，Python 会寻找 `obj.__len__()`；你写 `str(obj)`，Python 会寻找 `obj.__str__()`。
+
+`__init__` 负责初始化实例，`__repr__` 偏调试，`__str__` 偏用户可读显示。先掌握这三个，再逐步理解 `__iter__`、`__next__`、`__enter__`、`__exit__` 等更进阶协议。
+
+## 真实案例
+
+通讯录里的联系人对象如果有好的 `__repr__`，调试列表时会直观看到字段；如果有 `__str__`，命令行展示就不需要每次手写格式化逻辑。
+
+## 历史脉络
+
+Python 的数据模型让语言核心保持小而一致。很多“语法特性”背后其实都是对象协议，这也是后续迭代器、上下文管理器、dataclass 能自然接入语言的原因。

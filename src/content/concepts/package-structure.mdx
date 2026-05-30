@@ -1,0 +1,71 @@
+---
+title: 包结构与 __init__.py
+description: 用目录组织多个模块，并通过 __init__.py 标记包边界和公开入口。
+summary: 包是模块的目录化组织方式，__init__.py 让目录成为可导入的命名空间。
+whyImportant: 只写一个脚本时不用包；项目一旦拆成多个文件，包结构会决定 import 是否清楚、代码是否可复用。
+definition: 包是包含模块的目录，通常带有 __init__.py；它让一组相关文件共享同一个导入前缀。
+mentalModel: 模块是单个工具抽屉，包是一组贴了标签的工具柜，__init__.py 是工具柜的前台入口。
+category: engineering
+level: core
+tracks: [beginner, web, data, automation, ai]
+prerequisites: [module, import-syntax]
+related: [module-search-path, pip, venv]
+expandsTo: [module-search-path]
+appliedIn:
+  cases: [package-install-workflow, stdlib-import-tour]
+  projects: [weather-notifier, mini-web-api]
+people: [guido-van-rossum]
+works:
+  - title: "The Python Tutorial: Packages"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/modules.html#packages
+    note: 官方教程解释包、子包和 __init__.py 的作用。
+history:
+  - year: 1990s
+    title: 包系统稳定成为项目组织方式
+    note: 包让 Python 从单文件脚本自然过渡到可维护项目。
+tags: [package, module, init, import]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 单文件脚本阶段，所有函数放在一个文件里。
+    code: |
+      def greet(name):
+          return f"hello {name}"
+
+      print(greet("Ada"))
+  - title: standard
+    description: 项目变大后，把相关模块放进包目录。
+    runnable: false
+    code: |
+      app/
+        __init__.py
+        users.py
+        reports.py
+
+      from app.users import find_user
+  - title: production
+    description: 在 __init__.py 中公开稳定入口，减少外部代码依赖内部文件名。
+    runnable: false
+    code: |
+      # app/__init__.py
+      from .users import find_user
+
+      # main.py
+      from app import find_user
+---
+
+## 概念定义
+
+模块解决“一个文件如何被复用”，包解决“一组文件如何一起被复用”。当你开始有 `users.py`、`reports.py`、`settings.py` 这类文件时，包结构会让项目边界更清楚。
+
+`__init__.py` 最小可以是空文件，表示这个目录是包；也可以导出少量稳定对象，作为包的公共入口。新人阶段不要把大量初始化逻辑塞进去，先让它保持轻薄。
+
+## 代码示例
+
+最常见的失败是从错误位置运行脚本，导致包导入失败。包结构、模块查找路径和虚拟环境要一起看：代码放在哪里、从哪里运行、当前解释器能看到哪些路径。
+
+## 历史脉络
+
+包结构是 Python 从脚本语言走向大型项目的重要组织能力。后续的 pip、venv、pyproject.toml 和现代打包工具，都建立在“代码可以被组织成包并被导入”这个基础上。

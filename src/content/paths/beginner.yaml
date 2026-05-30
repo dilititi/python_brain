@@ -1,10 +1,14 @@
 title: 零基础主路径
-description: 从 Python 语言身份、基础类型、字符串、容器、判断、循环和函数开始，逐步进入小项目。
+description: 从 Python 语言身份、基础类型、字符串、容器、判断、循环、函数、类和模块包结构开始，逐步进入小项目。
 track: beginner
 audience: 完全零基础或看过教程但没有形成稳定结构的学习者。
-estimatedNodes: 31
+estimatedNodes: 43
 nodes:
   - python-language
+  - interpreter-runtime
+  - dynamic-strong-typing
+  - cross-platform-community
+  - programming-paradigms
   - python-philosophy
   - python-versions
   - variable
@@ -28,16 +32,24 @@ nodes:
   - scope
   - type-annotations
   - comprehension
+  - class
+  - encapsulation
+  - inheritance
+  - polymorphism
+  - dunder-methods
   - json
   - try-except
   - raise-assert-finally
   - module
   - import-syntax
+  - package-structure
+  - module-search-path
+  - common-stdlib-modules
   - pathlib
   - regular-expression
 milestones:
   - title: 语言入口
-    nodes: [python-language, python-philosophy, python-versions]
+    nodes: [python-language, interpreter-runtime, dynamic-strong-typing, cross-platform-community, programming-paradigms, python-philosophy, python-versions]
   - title: 基础心智模型
     nodes: [variable, primitive-types, string, operators, type-casting, f-string]
   - title: 容器和内置工具
@@ -46,8 +58,10 @@ milestones:
     nodes: [if-statement, for-loop, while-loop, break-continue-pass]
   - title: 可复用逻辑
     nodes: [function, function-parameters, scope, type-annotations, comprehension]
+  - title: 对象组织
+    nodes: [class, encapsulation, inheritance, polymorphism, dunder-methods]
   - title: 文件和失败路径
-    nodes: [json, try-except, raise-assert-finally, module, import-syntax, pathlib, regular-expression]
+    nodes: [json, try-except, raise-assert-finally, module, import-syntax, package-structure, module-search-path, common-stdlib-modules, pathlib, regular-expression]
 explorationDay:
   cadence: 每周一次
   prompt: 从人物谱系里任选一位，反向查看他连接的概念。

@@ -1,0 +1,74 @@
+---
+title: 多范式编程
+description: Python 同时支持过程式、函数式和面向对象写法，重点是按问题选择表达方式。
+summary: 多范式不是风格混乱，而是同一任务可以按流程、函数或对象组织。
+whyImportant: 新人常问“到底该写函数还是 class”。多范式节点给出的答案是：先看数据和行为的关系，再选组织方式。
+definition: 多范式编程指 Python 允许过程式、函数式、面向对象等风格在同一语言内协作。
+mentalModel: 过程式像步骤清单，函数式像数据变换管道，面向对象像把长期一起出现的数据和行为打包。
+category: foundation
+level: intro
+tracks: [beginner, web, data, automation, ai, creative]
+prerequisites: [python-language]
+related: [function, lambda, comprehension, class, dataclass]
+expandsTo: [function, class, lambda]
+appliedIn:
+  cases: [function-call-playground, contact-records]
+  projects: [python-basics-lab, contact-book-cli]
+people: [guido-van-rossum, raymond-hettinger]
+works:
+  - title: "The Python Tutorial: More Control Flow Tools"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/controlflow.html
+    note: 官方教程从流程控制、函数定义和 lambda 进入不同组织方式。
+  - title: "The Python Tutorial: Classes"
+    creator: Python Software Foundation
+    type: book
+    url: https://docs.python.org/3/tutorial/classes.html
+    note: class 是 Python 面向对象写法的基础入口。
+history:
+  - year: 1991
+    title: 多范式气质随语言形成
+    note: Python 从早期就没有把学习者锁进单一范式，而是让任务决定组织方式。
+tags: [paradigm, procedural, functional, oop]
+updatedAt: "2026-05-30"
+codeExamples:
+  - title: naive
+    description: 过程式写法直接按步骤处理数据。
+    code: |
+      names = ["Ada", "Guido", "Raymond"]
+      for name in names:
+          print(name.lower())
+  - title: standard
+    description: 函数式一点的写法把变换逻辑命名出来。
+    code: |
+      def normalize(name):
+          return name.lower()
+
+      print([normalize(name) for name in ["Ada", "Guido"]])
+  - title: production
+    description: 当数据和行为总是一起出现时，可以收进对象。
+    code: |
+      class Contact:
+          def __init__(self, name):
+              self.name = name
+
+          def normalized_name(self):
+              return self.name.lower()
+
+      print(Contact("Ada").normalized_name())
+---
+
+## 概念定义
+
+Python 的多范式不是让代码随意混搭，而是给不同问题保留不同表达方式。一次性脚本适合过程式，清洗管道适合函数和推导式，长期维护的数据实体适合 class 或 dataclass。
+
+新人可以先用一个判断：如果只是一次流程，先写清楚步骤；如果一段逻辑会被复用，抽成函数；如果同一组数据和行为总是一起移动，再考虑类。
+
+## 真实案例
+
+命令行通讯录可以先用字典和函数写出来，等联系人字段、校验和显示逻辑开始稳定，再把它们收成 dataclass。这个转变比从第一天就背 OOP 概念更自然。
+
+## 历史脉络
+
+Python 的实用主义让它长期容纳多种风格。这个节点也连接到 PEP 20 里的“实用胜于纯粹”：写法的优先级不是范式标签，而是清晰、可维护和适合问题。
