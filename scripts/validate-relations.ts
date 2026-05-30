@@ -5,6 +5,23 @@ import YAML from "yaml";
 
 const root = process.cwd();
 const contentRoot = join(root, "src", "content");
+
+if (process.argv.includes("--help") || process.argv.includes("-h")) {
+  console.log(`Usage: npm run validate:relations -- [options]
+
+Options:
+  --warning-exit-code=<code>  Exit with this code when validation has warnings but no errors.
+                              Omit this flag for local development; warnings then keep exit 0.
+  -h, --help                  Show this help message.
+
+Exit codes:
+  0  No blocking errors. Warnings also return 0 unless --warning-exit-code is set.
+  1  Blocking validation errors.
+  N  Warning-only result when --warning-exit-code=N is set, for example 2 in CI.
+`);
+  process.exit(0);
+}
+
 const warningExitCodeArg = process.argv.find((arg) =>
   arg.startsWith("--warning-exit-code=")
 );

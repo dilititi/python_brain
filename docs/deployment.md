@@ -33,7 +33,14 @@ npm run build
 npm run validate:relations -- --warning-exit-code=2
 ```
 
-约定退出码：`0` 表示通过且无阻塞问题，`1` 表示错误并阻断，`2` 表示仅有 warning。CI 可在 `2` 时标记通知或黄灯，但不阻断 merge；等 `summary` / `whyImportant` 全量补齐后，再把 strict 校验接入阻断规则。
+退出码语义分两种模式：
+
+- 默认模式：不带 `--warning-exit-code` 时，warning 不影响退出码；无 error 返回 `0`，有 error 返回 `1`。本地开发和 watch 场景默认使用这一模式，避免 warning 打断编辑。
+- CI 监控模式：带 `--warning-exit-code=2` 时，无 error 但存在 warning 返回 `2`；有 error 仍返回 `1`。CI / Vercel build 可把 `2` 标记为通知或黄灯，但不阻断 merge。
+
+等 `summary` / `whyImportant` 全量补齐后，再把 strict 校验接入阻断规则。升级 strict 前，main 分支必须先让 `npm run audit:concepts` 返回 0 项缺失。
+
+标杆页验收里的 link check 与 Lighthouse >= 90 还没有自动化脚本；在接入 GitHub Actions 前，只能作为人工 gate。后续新增脚本后，部署前置条件应补充 `npm run link:check` 和 `npm run lighthouse:beacons`，再把它们接入 PR 检查。
 
 ## CLI 部署
 

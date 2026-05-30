@@ -16,6 +16,7 @@
 - [内容编辑准则差距](#内容编辑准则差距)
 - [本阶段交付清单定位](#本阶段交付清单定位)
 - [近期执行顺序](#近期执行顺序)
+- [审查同步清单](#审查同步清单)
 - [总结](#总结)
 
 ## 当前定位
@@ -36,7 +37,7 @@
 | 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`works.role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
 | 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep；summary/whyImportant 暂按 warning | 部分满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
-| 数据写一次，关系自动算 | 概念页会反向聚合 cases/projects/people，但 works 仍主要手写在 concept | 部分满足 |
+| 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works 已确定路径 B（`works-registry.yaml`）但尚未迁移 | 部分满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，但未包含 milestone cases/projects，也没有拓扑规划 | 部分满足 |
 
 ## Schema 差距
@@ -59,7 +60,7 @@ v1.0 缺口：
 
 字段语义边界仍需继续收敛：
 
-- `description` 是旧列表页/SEO 描述字段，标记为 deprecated；迁移到 `summary` 后应从 schema 删除。
+- `description` 是旧列表页/SEO 描述字段，标记为 deprecated；`summary` 升级为 required 时同步删除，迁移脚本 `scripts/migrate-description-to-summary.ts` 负责把仍只有 `description` 的概念迁移到 `summary`。
 - `summary` 是 80 字以内的一句话定义，当前 warning，后续升级 required。
 - `definition` 承载核心解释；更长解释进入 MDX 正文。
 - `mentalModel` 是一句话心智模型或类比，可选但应避免和 `summary` 重复。
@@ -178,6 +179,30 @@ v1.0 仍缺：
 - concept 侧逐步从内联 `works[]` 迁移为 `worksRef[]` + 概念内的 `role` 说明。
 - 关系索引从 registry + concept 引用生成作品维度；未来若需要作品独立页，再把 YAML 拆为 `src/content/works/*.mdx`。
 
+注册表字段草案：
+
+```yaml
+- id: flask
+  title: Flask
+  creator:
+    personId: armin-ronacher
+  type: framework
+  url: https://flask.palletsprojects.com/
+```
+
+- `id`：稳定 slug，作为 `worksRef[].id` 的引用目标。
+- `title`：作品展示名。
+- `creator`：优先使用 `{ personId }` 指向 people collection；无法对应现有人物节点时允许 `{ name }` 字符串回退。
+- `type`：枚举，初始值为 `library`、`framework`、`tool`、`book`、`talk`、`project`。
+- `url`：必须是 `https://` URL；可访问性进入后续 link check。
+
+迁移期规则：
+
+- `worksRef[]` 和内联 `works[]` 可短期共存，页面渲染和关系索引合并两者，并按 `id` 或 `title` 去重。
+- 若同一作品同时来自 `worksRef[]` 与 `works[]`，以 `worksRef[]` 的 registry 元数据为准，概念侧 `role` 仍必须保留。
+- 校验脚本在迁移期同时检查两类来源的 `role`。
+- 迁移完成标准是所有 concept 的内联 `works[]` 长度为 0，之后从 schema 删除内联 `works` 字段。
+
 这条路径保留了“数据写一次”的方向，同时避免立刻把现有 52 个概念里的 works 全量拆文件。
 
 ## 概念页布局差距
@@ -243,8 +268,8 @@ localStorage：
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，后续可随 Tab 布局继续微调 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；当前环境无 Vercel 登录态或 token |
-| 5 | 收紧校验（AND + DAG）+ 单测 | 部分完成 | 等标杆概念反向验证 schema 后做 |
-| 6 | 内容扩到 20/10/5/5 | 已超过 | 暂停扩内容 |
+| 5 | 收紧校验（AND + DAG）+ 单测 | AND + DAG 已完成 | 剩余 case standard、person sources、summary strict 化待 P3 |
+| 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 未完成 | 4-5 后做 |
 | 8 | 测评题库化 | 未完成 | 4-5 后做 |
 | 9 | 路径规划拓扑排序 | 未完成 | 4-5 后做 |
@@ -253,7 +278,7 @@ localStorage：
 
 ### P0：冻结内容扩张
 
-在 schema、脚手架、标杆页完成前，不再继续扩概念数量。当前 52/18/7/6 已远超 MVP 目标，足够验证系统，也反过来强化了冻结扩张的必要性。
+在 schema、脚手架、标杆页完成前，不再继续扩概念数量。当前 52/18/7/6/5 已远超 MVP 目标，足够验证系统，也反过来强化了冻结扩张的必要性。
 
 ### P1：脚手架与编辑准则
 
@@ -287,10 +312,21 @@ localStorage：
 在三页标杆完成后再强制：
 
 - `summary` / `whyImportant` 从 warning 升级为 error。
+- `summary` 升级为 required 时，同步删除 `description` 字段；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责把仍只有 `description`、没有 `summary` 的概念做一次性迁移。
 - case `standard` version。
 - person `sources`。
 
 works AND 与 prerequisites DAG 已经是阻塞校验。剩余收紧项可以避免一次性把 52 个概念全部打红，导致生产停摆。
+
+## 审查同步清单
+
+每次更新本审查文档或工程契约时，先做一次跨文档关键词检查：
+
+- 内容规模数字保持 `52/18/7/6/5` 一致，不再残留旧快照。
+- 已完成校验项 `DAG` / `works AND` 在原则表、校验差距、交付清单、P3 列表中状态一致。
+- schema 字段名保持 `year` / `pep` / `event` / `source`，不再使用 `firstAppeared`。
+- works 路径 B 在原则表和策略段都表达为“已决策，未迁移”。
+- `validate-relations` 退出码语义在脚本帮助文本和部署文档中一致。
 
 ## 总结
 
