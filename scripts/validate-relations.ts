@@ -75,6 +75,12 @@ function asStringArray(value: unknown): string[] {
     : [];
 }
 
+function asRecordArray(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+    : [];
+}
+
 function reportMissing(
   errors: string[],
   source: Entry,
@@ -201,9 +207,31 @@ for (const entry of concepts) {
 }
 
 for (const entry of cases) {
-  reportMissing(errors, entry, "concepts", asStringArray(entry.data.concepts), conceptIds);
+  const caseConcepts = asStringArray(entry.data.concepts);
+  reportMissing(errors, entry, "concepts", caseConcepts, conceptIds);
   reportMissing(errors, entry, "projects", asStringArray(entry.data.projects), projectIds);
   reportMissing(errors, entry, "people", asStringArray(entry.data.people), personIds);
+
+  if (typeof entry.data.project === "string") {
+    reportMissing(errors, entry, "project", [entry.data.project], projectIds);
+  }
+
+  if (caseConcepts.length < 2) {
+    errors.push(`${relative(root, entry.path)}: case.concepts must include at least two concepts`);
+  }
+
+  const codeVersions = asRecordArray(entry.data.codeVersions);
+  const hasStandardCode = codeVersions.some(
+    (version) => version.label === "standard" && isUsefulString(version.code)
+  );
+
+  if (codeVersions.length === 0) {
+    errors.push(`${relative(root, entry.path)}: codeVersions must contain at least one version`);
+  }
+
+  if (!hasStandardCode) {
+    errors.push(`${relative(root, entry.path)}: codeVersions must include a useful standard version`);
+  }
 }
 
 for (const entry of projects) {
@@ -214,6 +242,21 @@ for (const entry of projects) {
 
 for (const entry of people) {
   reportMissing(errors, entry, "concepts", asStringArray(entry.data.concepts), conceptIds);
+
+  const sources = asRecordArray(entry.data.sources);
+  if (sources.length === 0) {
+    errors.push(`${relative(root, entry.path)}: person.sources must contain at least one source`);
+  }
+
+  sources.forEach((source, index) => {
+    if (!isUsefulString(source.label)) {
+      errors.push(`${relative(root, entry.path)}: sources[${index}].label is required`);
+    }
+
+    if (typeof source.url !== "string" || !source.url.startsWith("https://")) {
+      errors.push(`${relative(root, entry.path)}: sources[${index}].url must be an https URL`);
+    }
+  });
 }
 
 for (const entry of paths) {

@@ -25,7 +25,7 @@ npm run test
 npm run build
 ```
 
-当前 `summary` / `whyImportant` 已升级为严格字段，`audit:concepts` 必须返回 clean；缺失、空值或 TODO-like 内容会阻断审计、关系校验或 Astro content schema。
+当前 `summary` / `whyImportant`、case `standard` code version、person `sources` 已升级为严格字段；缺失、空值或 TODO-like 内容会阻断审计、关系校验或 Astro content schema。
 
 后续 Vercel 或 GitHub Actions 进入 production gate 时，建议使用：
 

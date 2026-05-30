@@ -3,19 +3,40 @@ title: 函数调用练习场
 description: 观察参数绑定、作用域、类型注解和类型转换如何一起工作。
 scenario: 写一个小工具函数时，需要让调用方式清楚，同时避免外部变量和内部变量互相干扰。
 difficulty: core
-tracks: [beginner, web, data, automation, ai]
-concepts: [dynamic-strong-typing, programming-paradigms, function-parameters, scope, type-annotations, primitive-types, type-casting, function]
-projects: [python-basics-lab, cli-text-toolkit]
-people: [guido-van-rossum, raymond-hettinger]
-code: |
-  tax_rate = 0.08
+tracks:
+  - beginner
+  - web
+  - data
+  - automation
+  - ai
+concepts:
+  - dynamic-strong-typing
+  - programming-paradigms
+  - function-parameters
+  - scope
+  - type-annotations
+  - primitive-types
+  - type-casting
+  - function
+project: python-basics-lab
+projects:
+  - python-basics-lab
+  - cli-text-toolkit
+libraries: []
+people:
+  - guido-van-rossum
+  - raymond-hettinger
+codeVersions:
+  - label: standard
+    code: |
+      tax_rate = 0.08
 
-  def total(price: str, *fees: float, currency: str = "USD") -> str:
-      amount = float(price) + sum(fees)
-      amount = amount * (1 + tax_rate)
-      return f"{amount:.2f} {currency}"
+      def total(price: str, *fees: float, currency: str = "USD") -> str:
+          amount = float(price) + sum(fees)
+          amount = amount * (1 + tax_rate)
+          return f"{amount:.2f} {currency}"
 
-  print(total("100", 2.5, 3.5, currency="USD"))
+      print(total("100", 2.5, 3.5, currency="USD"))
 ---
 
 函数参数和作用域是很多进阶概念的前置。闭包、装饰器、回调和 Web 处理函数，底层都离不开这两个节点。

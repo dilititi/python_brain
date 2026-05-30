@@ -3,39 +3,58 @@ title: 联系人数据对象
 description: 用 dataclass 表达联系人记录，并提供简单的显示和筛选逻辑。
 scenario: 命令行通讯录需要保存姓名、邮箱和标签，用字典也能做，但 dataclass 更容易表达字段结构。
 difficulty: core
-tracks: [automation, data]
-concepts: [programming-paradigms, class, encapsulation, inheritance, polymorphism, dunder-methods, dataclass, list, dict, for-loop, if-statement]
-projects: [contact-book-cli]
-people: [raymond-hettinger]
-code: |
-  from dataclasses import dataclass
+tracks:
+  - automation
+  - data
+concepts:
+  - programming-paradigms
+  - class
+  - encapsulation
+  - inheritance
+  - polymorphism
+  - dunder-methods
+  - dataclass
+  - list
+  - dict
+  - for-loop
+  - if-statement
+project: contact-book-cli
+projects:
+  - contact-book-cli
+libraries: []
+people:
+  - raymond-hettinger
+codeVersions:
+  - label: standard
+    code: |
+      from dataclasses import dataclass
 
-  @dataclass
-  class Record:
-      name: str
+      @dataclass
+      class Record:
+          name: str
 
-      def label(self):
-          return self.name
+          def label(self):
+              return self.name
 
-  @dataclass
-  class Contact(Record):
-      email: str
-      tags: list[str]
+      @dataclass
+      class Contact(Record):
+          email: str
+          tags: list[str]
 
-      def __str__(self):
-          return f"{self.name} <{self.email}>"
+          def __str__(self):
+              return f"{self.name} <{self.email}>"
 
-      def matches(self, tag):
-          return tag in self.tags
+          def matches(self, tag):
+              return tag in self.tags
 
-  contacts = [
-      Contact("Ada", "ada@example.com", ["vip"]),
-      Contact("Guido", "guido@example.com", ["python"]),
-  ]
+      contacts = [
+          Contact("Ada", "ada@example.com", ["vip"]),
+          Contact("Guido", "guido@example.com", ["python"]),
+      ]
 
-  for contact in contacts:
-      if contact.matches("python"):
-          print(contact.label(), str(contact))
+      for contact in contacts:
+          if contact.matches("python"):
+              print(contact.label(), str(contact))
 ---
 
 这个案例把 OOP 放在数据整理场景里，而不是抽象讲“动物、猫和狗”。新人更容易看到 class 和 dataclass 什么时候值得用。

@@ -38,6 +38,9 @@ const { Content } = await render(entry);
       {entry.data.works.map((work) => (
         <RelationCard href={work.url ?? "#"} title={work.title} description={work.role} meta={work.type} />
       ))}
+      {entry.data.sources.map((source) => (
+        <RelationCard href={source.url} title={source.label} description="可验证来源" meta="source" />
+      ))}
     </div>
   </section>
 </BaseLayout>

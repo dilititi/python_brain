@@ -3,22 +3,38 @@ title: 标准库导入巡览
 description: 用 import 加载 os、sys、math、datetime 和 re，形成标准库入口感。
 scenario: 新人写脚本时经常需要路径、系统参数、数学计算、日期和文本匹配，先认识这些模块的位置。
 difficulty: intro
-tracks: [beginner, automation, data]
-concepts: [import-syntax, module, module-search-path, common-stdlib-modules, regular-expression, builtin-functions]
-projects: [python-basics-lab, cli-text-toolkit]
-people: [guido-van-rossum]
-code: |
-  import datetime as dt
-  import math
-  import os
-  import re
-  import sys
+tracks:
+  - beginner
+  - automation
+  - data
+concepts:
+  - import-syntax
+  - module
+  - module-search-path
+  - common-stdlib-modules
+  - regular-expression
+  - builtin-functions
+project: python-basics-lab
+projects:
+  - python-basics-lab
+  - cli-text-toolkit
+libraries: []
+people:
+  - guido-van-rossum
+codeVersions:
+  - label: standard
+    code: |
+      import datetime as dt
+      import math
+      import os
+      import re
+      import sys
 
-  print(dt.date.today())
-  print(math.sqrt(16))
-  print(os.name)
-  print(sys.version_info.major)
-  print(bool(re.search("py", "python")))
+      print(dt.date.today())
+      print(math.sqrt(16))
+      print(os.name)
+      print(sys.version_info.major)
+      print(bool(re.search("py", "python")))
 ---
 
 这个案例先做入口导航，不深入每个标准库。后续标准库层可以把 os、sys、math、datetime、re 拆成更细节点。

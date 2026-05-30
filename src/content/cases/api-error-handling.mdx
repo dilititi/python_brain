@@ -3,25 +3,41 @@ title: API 错误处理
 description: 根据响应状态和数据字段判断请求是否成功，并把失败转成清楚的信息。
 scenario: 调用天气、模型或后台接口时，返回值可能缺字段、失败或格式异常，业务代码需要能解释这些失败。
 difficulty: core
-tracks: [web, automation, ai]
-concepts: [if-statement, try-except, dict, json, function]
-projects: [weather-notifier, mini-web-api]
-people: [sebastian-ramirez, armin-ronacher]
-code: |
-  import json
+tracks:
+  - web
+  - automation
+  - ai
+concepts:
+  - if-statement
+  - try-except
+  - dict
+  - json
+  - function
+project: weather-notifier
+projects:
+  - weather-notifier
+  - mini-web-api
+libraries: []
+people:
+  - sebastian-ramirez
+  - armin-ronacher
+codeVersions:
+  - label: standard
+    code: |
+      import json
 
-  def parse_response(raw):
-      try:
-          data = json.loads(raw)
-      except json.JSONDecodeError:
-          return {"ok": False, "error": "invalid json"}
+      def parse_response(raw):
+          try:
+              data = json.loads(raw)
+          except json.JSONDecodeError:
+              return {"ok": False, "error": "invalid json"}
 
-      if data.get("status") != "ok":
-          return {"ok": False, "error": data.get("message", "unknown error")}
+          if data.get("status") != "ok":
+              return {"ok": False, "error": data.get("message", "unknown error")}
 
-      return {"ok": True, "data": data["data"]}
+          return {"ok": True, "data": data["data"]}
 
-  print(parse_response('{"status": "error", "message": "city missing"}'))
+      print(parse_response('{"status": "error", "message": "city missing"}'))
 ---
 
 API 错误处理让 `if` 和异常处理分工清楚：`try-except` 管格式和运行失败，`if` 管业务状态。

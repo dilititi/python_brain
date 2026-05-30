@@ -27,6 +27,16 @@ const workLink = z.object({
   role: z.string()
 });
 
+const sourceLink = z.object({
+  label: z.string(),
+  url: httpsUrl
+});
+
+const caseCodeVersion = z.object({
+  label: z.enum(["naive", "standard", "production"]),
+  code: z.string()
+});
+
 const historyEvent = z
   .object({
     year: z.union([z.number(), z.string()]).optional(),
@@ -94,11 +104,18 @@ const cases = defineCollection({
     scenario: z.string(),
     difficulty: level,
     tracks: z.array(track).default([]),
-    concepts: z.array(slugRef).default([]),
+    concepts: z.array(slugRef).min(2),
+    project: slugRef.optional(),
     projects: z.array(slugRef).default([]),
+    libraries: z.array(z.string()).default([]),
     people: z.array(slugRef).default([]),
     sourceUrl: url.optional(),
-    code: z.string().optional()
+    codeVersions: z
+      .array(caseCodeVersion)
+      .min(1)
+      .refine((versions) => versions.some((version) => version.label === "standard"), {
+        message: "case must include a standard code version"
+      })
   })
 });
 
@@ -126,6 +143,7 @@ const people = defineCollection({
     roles: z.array(z.string()).default([]),
     concepts: z.array(slugRef).default([]),
     works: z.array(workLink).default([]),
+    sources: z.array(sourceLink).min(1),
     links: z
       .array(
         z.object({

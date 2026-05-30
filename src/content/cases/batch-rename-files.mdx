@@ -3,19 +3,30 @@ title: 批量改名文件
 description: 遍历目录里的文件，按统一规则重命名。
 scenario: 下载目录里有一批截图和报告，需要把文件名前缀统一成日期加序号。
 difficulty: core
-tracks: [automation]
-concepts: [variable, for-loop, function, pathlib]
-projects: [file-organizer]
-people: [guido-van-rossum]
-code: |
-  from pathlib import Path
+tracks:
+  - automation
+concepts:
+  - variable
+  - for-loop
+  - function
+  - pathlib
+project: file-organizer
+projects:
+  - file-organizer
+libraries: []
+people:
+  - guido-van-rossum
+codeVersions:
+  - label: standard
+    code: |
+      from pathlib import Path
 
-  def preview_renames(folder):
-      for index, file in enumerate(Path(folder).glob("*.txt"), start=1):
-          new_name = file.with_name(f"report-{index:03d}{file.suffix}")
-          print(file.name, "->", new_name.name)
+      def preview_renames(folder):
+          for index, file in enumerate(Path(folder).glob("*.txt"), start=1):
+              new_name = file.with_name(f"report-{index:03d}{file.suffix}")
+              print(file.name, "->", new_name.name)
 
-  preview_renames(".")
+      preview_renames(".")
 ---
 
 `pathlib` 的关键优势是让路径操作从字符串拼接变成对象方法。先预览，再真正 `rename`，也是自动化脚本的好习惯。

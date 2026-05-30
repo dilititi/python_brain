@@ -35,7 +35,7 @@
 | 原则 | 当前状态 | 判断 |
 |---|---|---|
 | 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`works.role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
-| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant strict；case standard 与 person sources 待收紧 | 部分满足 |
+| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard、person sources | 部分满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
 | 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works 已确定路径 B（`works-registry.yaml`）但尚未迁移 | 部分满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，但未包含 milestone cases/projects，也没有拓扑规划 | 部分满足 |
@@ -70,19 +70,15 @@ v1.0 缺口：
 
 ### Case
 
-当前字段：`title`、`description`、`scenario`、`difficulty`、`tracks`、`concepts`、`projects`、`people`、`sourceUrl`、`code`。
+当前字段：`title`、`description`、`scenario`、`difficulty`、`tracks`、`concepts`、`project`、`projects`、`libraries`、`people`、`sourceUrl`、`codeVersions`。
 
 v1.0 缺口：
 
 - `difficulty` 应迁移或映射为 `level`。
-- 缺 `libraries`。
-- 缺单数 `project?`，当前是 `projects[]`。
-- 缺 `codeVersions[]`，也未强制存在 `standard` 版本。
 - 缺 `pitfalls[]`。
 - 缺 `extensions[]`。
-- 未在 schema 层强制 `concepts.length >= 2`。
 
-定位：Case 是“代码示例三版本化”的核心改造对象。当前案例更像简短说明，不足以支撑生产版概念页。
+定位：Case 已完成 `concepts.length >= 2`、`standard` code version 和 `project?` 迁移；下一步是补 `pitfalls[]` / `extensions[]`，再把旧 `difficulty` 命名收敛为 `level`。
 
 ### Project
 
@@ -103,18 +99,15 @@ v1.0 缺口：
 
 ### Person
 
-当前字段：`name`、`title`、`description`、`roles`、`concepts`、`works`、`links`。
+当前字段：`name`、`title`、`description`、`roles`、`concepts`、`works`、`sources`、`links`。
 
 v1.0 缺口：
 
 - `title`/`roles` 应整理成 `role`。
 - 缺 `field`。
-- 缺 `sources[]`，当前 `links[]` 不等价。
-- 未强制 `sources.length >= 1`。
 - 未明确 `quote?`。
-- 未在 schema 层强制 `concepts.length >= 3`。
 
-定位：人物页目前是叙事锚点，但来源可信度规则还没有落地。
+定位：人物页已补 `sources[]` 并进入阻塞校验；下一步是把 `title`/`roles` 收敛成 `role`/`field`，并决定 `quote?` 是否进入展示面。
 
 ### Path
 
@@ -139,15 +132,14 @@ v1.0 缺口：
 - summary / whyImportant 必须非空、非 TODO-like。
 - history 事件必须有 `event`，必须含 `year` 或 `pep`，`pep` 必须匹配 `PEP \d+`。
 - history `source` 若存在必须是 `https://` URL。
+- case 必须 `concepts >= 2`，且必须包含有用的 `standard` code version。
 - case 至少支撑一个 project。
 - person 至少连接 3 个 concept。
+- person 必须包含至少一个 `sources[]`，且来源 URL 必须是 `https://`。
 - 整张内容图连通。
 
 v1.0 仍缺：
 
-- case 必须 `concepts >= 2`。
-- case 必须包含 `standard` code version。
-- person 必须 `sources >= 1`。
 - 孤立节点只 warning 不阻塞的输出分层；约定本地 warning 退出码保持 0，CI 可用 `--warning-exit-code=2` 标记 warning-only 状态并发送通知，但不阻断 merge。
 - 错误输出需要更系统地包含文件路径和具体字段。
 
@@ -252,7 +244,7 @@ localStorage：
 - 生成后默认运行关系校验，并列出待补字段。
 - 已加内容冻结闸门：写入新概念必须显式设置 `PKB_ALLOW_NEW_CONCEPTS=1`。
 
-定位：脚手架第一版已完成。后续随 works registry、case codeVersions 和 person sources strict 化继续微调。
+定位：脚手架第一版已完成。后续随 works registry、case pitfalls/extensions 和 person role/field 继续微调。
 
 ## 内容编辑准则差距
 
@@ -268,7 +260,7 @@ localStorage：
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，后续可随 Tab 布局继续微调 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；当前环境无 Vercel 登录态或 token |
-| 5 | 收紧校验（AND + DAG）+ 单测 | AND + DAG + summary strict 已完成 | 剩余 case standard、person sources 待 P3 |
+| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard、person sources |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 未完成 | 4-5 后做 |
 | 8 | 测评题库化 | 未完成 | 4-5 后做 |
@@ -312,14 +304,16 @@ localStorage：
 已完成：
 
 - `summary` / `whyImportant` 已从 warning 升级为 error，并在 schema 中改为 required。
+- case `concepts >= 2` 与 `standard` code version 已进入 schema 和关系校验。
+- person `sources >= 1` 已进入 schema 和关系校验，且 URL 必须是 `https://`。
 
 剩余收紧项：
 
 - `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
-- case `standard` version。
-- person `sources`。
+- case `pitfalls[]` / `extensions[]`。
+- person `role` / `field` / `quote?` 字段收敛。
 
-works AND、prerequisites DAG、summary/whyImportant 已经是阻塞校验。剩余收紧项可以避免一次性把 case/person 全部打红，导致生产停摆。
+works AND、prerequisites DAG、summary/whyImportant、case standard、person sources 已经是阻塞校验。剩余收紧项可以避免一次性把 case/person 全部打红，导致生产停摆。
 
 ## 审查同步清单
 

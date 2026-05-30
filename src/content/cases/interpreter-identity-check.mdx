@@ -3,17 +3,34 @@ title: 解释器身份检查
 description: 查看当前 Python 版本、平台和 Zen of Python，建立语言身份的第一组锚点。
 scenario: 新人安装 Python 后，先确认自己运行的版本、系统平台和语言哲学，避免一开始就混淆 Python 2、Python 3 或不同解释器环境。
 difficulty: intro
-tracks: [beginner]
-concepts: [python-language, interpreter-runtime, dynamic-strong-typing, cross-platform-community, python-philosophy, python-versions, import-syntax, common-stdlib-modules, string]
-projects: [python-basics-lab]
-people: [guido-van-rossum, tim-peters]
-code: |
-  import platform
-  import sys
+tracks:
+  - beginner
+concepts:
+  - python-language
+  - interpreter-runtime
+  - dynamic-strong-typing
+  - cross-platform-community
+  - python-philosophy
+  - python-versions
+  - import-syntax
+  - common-stdlib-modules
+  - string
+project: python-basics-lab
+projects:
+  - python-basics-lab
+libraries: []
+people:
+  - guido-van-rossum
+  - tim-peters
+codeVersions:
+  - label: standard
+    code: |
+      import platform
+      import sys
 
-  print(platform.python_version())
-  print(platform.system())
-  print(sys.executable)
+      print(platform.python_version())
+      print(platform.system())
+      print(sys.executable)
 ---
 
 这个案例不追求复杂，而是把“我到底在运行哪个 Python”变成第一个可观察事实。很多环境问题都从这里开始排查。

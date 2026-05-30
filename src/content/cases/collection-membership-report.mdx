@@ -3,21 +3,37 @@ title: 集合成员报告
 description: 用 tuple 表达固定记录，用 set 去重和比较，用 range 控制批量输出。
 scenario: 分析一组标签或文件类型时，需要找出缺失项、重复项，并按序号生成报告。
 difficulty: intro
-tracks: [beginner, data, automation]
-concepts: [tuple, set, range, operators, builtin-functions, break-continue-pass, for-loop]
-projects: [python-basics-lab]
-people: [raymond-hettinger]
-code: |
-  records = [("Ada", "python"), ("Guido", "python"), ("Wes", "data")]
-  seen_tags = {tag for _, tag in records}
-  required = {"python", "data", "web"}
+tracks:
+  - beginner
+  - data
+  - automation
+concepts:
+  - tuple
+  - set
+  - range
+  - operators
+  - builtin-functions
+  - break-continue-pass
+  - for-loop
+project: python-basics-lab
+projects:
+  - python-basics-lab
+libraries: []
+people:
+  - raymond-hettinger
+codeVersions:
+  - label: standard
+    code: |
+      records = [("Ada", "python"), ("Guido", "python"), ("Wes", "data")]
+      seen_tags = {tag for _, tag in records}
+      required = {"python", "data", "web"}
 
-  for index in range(1, 6):
-      if index == 3:
-          continue
-      print(index)
+      for index in range(1, 6):
+          if index == 3:
+              continue
+          print(index)
 
-  print("missing:", required - seen_tags)
+      print("missing:", required - seen_tags)
 ---
 
 这个案例让 tuple、set、range 不再是孤立类型，而是进入“记录、去重、序号、跳过”的真实数据处理动作。
