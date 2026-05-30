@@ -15,6 +15,27 @@ interface Props {
 
 const { entry, relations } = Astro.props as Props;
 const { Content } = await render(entry);
+
+const worksCount = entry.data.works.length + relations.projects.length;
+const facetCounts = {
+  definition: 1,
+  code: entry.data.codeExamples.length,
+  cases: relations.cases.length,
+  people: relations.people.length,
+  works: worksCount,
+  history: entry.data.history.length
+};
+const emptyFacets = Object.entries(facetCounts)
+  .filter(([, count]) => count === 0)
+  .map(([key]) => key);
+const tabs = [
+  { id: "definition", label: "概念定义" },
+  { id: "code", label: "代码示例" },
+  { id: "cases", label: "真实案例" },
+  { id: "people", label: "关键人物" },
+  { id: "works", label: "经典作品" },
+  { id: "history", label: "历史脉络" }
+];
 ---
 
 <BaseLayout title={entry.data.title} description={entry.data.description}>
@@ -33,108 +54,314 @@ const { Content } = await render(entry);
     tracks={entry.data.tracks}
   />
 
-  <FacetSection title="概念定义" eyebrow="Definition" tone="blue">
-    <div class="content-flow">
-      {entry.data.summary && <p class="summary">{entry.data.summary}</p>}
-      <p><strong>{entry.data.definition}</strong></p>
-      <p>{entry.data.mentalModel}</p>
-      {entry.data.whyImportant && (
-        <aside class="why-important">
-          <strong>为什么重要</strong>
-          <p>{entry.data.whyImportant}</p>
-        </aside>
-      )}
-      <Content />
-    </div>
-  </FacetSection>
-
-  <FacetSection title="可运行代码" eyebrow="Code" tone="green">
-    <CodeRunner examples={entry.data.codeExamples} client:visible />
-  </FacetSection>
-
-  <FacetSection title="真实案例" eyebrow="Cases" tone="amber">
-    <div class="grid cols-3">
-      {relations.cases.map((item) => (
-        <RelationCard
-          href={`/cases/${item.id}/`}
-          title={item.data.title}
-          description={item.data.description}
-          meta={item.data.level}
-        />
+  <div class="concept-workbench" data-empty-facets={JSON.stringify(emptyFacets)} data-concept-id={entry.id}>
+    <nav class="facet-tabs" aria-label="概念六维内容">
+      {tabs.map((tab, index) => (
+        <a href={`#${tab.id}`} class:list={["facet-tab", index === 0 && "is-active"]} data-tab-target={tab.id}>
+          {tab.label}
+        </a>
       ))}
-    </div>
-  </FacetSection>
+    </nav>
 
-  <FacetSection title="关键人物" eyebrow="People" tone="rose">
-    <div class="grid cols-3">
-      {relations.people.map((item) => (
-        <RelationCard
-          href={`/people/${item.id}/`}
-          title={item.data.name}
-          description={item.data.description}
-          meta="person"
-        />
-      ))}
-    </div>
-  </FacetSection>
+    <div class="concept-grid">
+      <div class="facet-panels">
+        <div id="definition" class="concept-panel is-active" data-tab-panel="definition">
+          <FacetSection title="概念定义" eyebrow="Definition" tone="blue">
+            <div class="content-flow">
+              {entry.data.summary && <p class="summary">{entry.data.summary}</p>}
+              <p><strong>{entry.data.definition}</strong></p>
+              <p>{entry.data.mentalModel}</p>
+              {entry.data.whyImportant && (
+                <aside class="why-important">
+                  <strong>为什么重要</strong>
+                  <p>{entry.data.whyImportant}</p>
+                </aside>
+              )}
+              <Content />
+            </div>
+          </FacetSection>
+        </div>
 
-  <FacetSection title="经典作品" eyebrow="Works" tone="violet">
-    <div class="grid cols-3">
-      {entry.data.works.map((work) => (
-        <RelationCard
-          href={work.url ?? "#"}
-          title={work.title}
-          description={work.role}
-          meta={work.type}
-        />
-      ))}
-      {relations.projects.map((item) => (
-        <RelationCard
-          href={`/projects/${item.id}/`}
-          title={item.data.title}
-          description={item.data.description}
-          meta="project"
-        />
-      ))}
-    </div>
-  </FacetSection>
+        <div id="code" class="concept-panel" data-tab-panel="code">
+          <FacetSection title="代码示例" eyebrow="Code" tone="green">
+            {entry.data.codeExamples.length > 0 ? (
+              <CodeRunner examples={entry.data.codeExamples} client:visible />
+            ) : (
+              <p class="empty-facet">暂未整理</p>
+            )}
+          </FacetSection>
+        </div>
 
-  <FacetSection title="历史脉络" eyebrow="History" tone="blue">
-    <ol class="timeline">
-      {entry.data.history.map((item) => (
-        <li>
-          <span>{item.year ?? item.pep}</span>
-          <div>
-            {item.pep && item.year && <strong>{item.pep}</strong>}
-            <p>{item.event}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
-  </FacetSection>
+        <div id="cases" class="concept-panel" data-tab-panel="cases">
+          <FacetSection title="真实案例" eyebrow="Cases" tone="amber">
+            {relations.cases.length > 0 ? (
+              <div class="grid cols-3">
+                {relations.cases.map((item) => (
+                  <RelationCard
+                    href={`/cases/${item.id}/`}
+                    title={item.data.title}
+                    description={item.data.description}
+                    meta={item.data.level}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p class="empty-facet">暂未整理</p>
+            )}
+          </FacetSection>
+        </div>
 
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <p class="eyebrow">Graph Neighbors</p>
-        <h2>前置与延伸</h2>
+        <div id="people" class="concept-panel" data-tab-panel="people">
+          <FacetSection title="关键人物" eyebrow="People" tone="rose">
+            {relations.people.length > 0 ? (
+              <div class="grid cols-3">
+                {relations.people.map((item) => (
+                  <RelationCard
+                    href={`/people/${item.id}/`}
+                    title={item.data.name}
+                    description={item.data.description}
+                    meta={item.data.field}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p class="empty-facet">暂未整理</p>
+            )}
+          </FacetSection>
+        </div>
+
+        <div id="works" class="concept-panel" data-tab-panel="works">
+          <FacetSection title="经典作品" eyebrow="Works" tone="violet">
+            {worksCount > 0 ? (
+              <div class="grid cols-3">
+                {entry.data.works.map((work) => (
+                  <RelationCard
+                    href={work.url ?? "#"}
+                    title={work.title}
+                    description={work.role}
+                    meta={work.type}
+                  />
+                ))}
+                {relations.projects.map((item) => (
+                  <RelationCard
+                    href={`/projects/${item.id}/`}
+                    title={item.data.title}
+                    description={item.data.description}
+                    meta="project"
+                  />
+                ))}
+              </div>
+            ) : (
+              <p class="empty-facet">暂未整理</p>
+            )}
+          </FacetSection>
+        </div>
+
+        <div id="history" class="concept-panel" data-tab-panel="history">
+          <FacetSection title="历史脉络" eyebrow="History" tone="blue">
+            {entry.data.history.length > 0 ? (
+              <ol class="timeline">
+                {entry.data.history.map((item) => (
+                  <li>
+                    <span>{item.year ?? item.pep}</span>
+                    <div>
+                      {item.pep && item.year && <strong>{item.pep}</strong>}
+                      <p>{item.event}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p class="empty-facet">暂未整理</p>
+            )}
+          </FacetSection>
+        </div>
       </div>
+
+      <aside class="concept-sidebar" aria-label="前置、相关和延伸">
+        <section>
+          <h2>前置</h2>
+          {relations.prerequisites.length > 0 ? (
+            <div class="sidebar-list">
+              {relations.prerequisites.map((item) => (
+                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="前置" />
+              ))}
+            </div>
+          ) : (
+            <p class="empty-facet">暂未整理</p>
+          )}
+        </section>
+        <section>
+          <h2>相关</h2>
+          {relations.related.length > 0 ? (
+            <div class="sidebar-list">
+              {relations.related.map((item) => (
+                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="相关" />
+              ))}
+            </div>
+          ) : (
+            <p class="empty-facet">暂未整理</p>
+          )}
+        </section>
+        <section>
+          <h2>延伸</h2>
+          {relations.extends.length > 0 ? (
+            <div class="sidebar-list">
+              {relations.extends.map((item) => (
+                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="延伸" />
+              ))}
+            </div>
+          ) : (
+            <p class="empty-facet">暂未整理</p>
+          )}
+        </section>
+      </aside>
     </div>
-    <div class="grid cols-3">
-      {relations.prerequisites.map((item) => (
-        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="前置" />
-      ))}
-      {relations.related.map((item) => (
-        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="相关" />
-      ))}
-      {relations.extends.map((item) => (
-        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="扩展" />
-      ))}
-    </div>
-  </section>
+  </div>
+
+  <script>
+    const workbench = document.querySelector(".concept-workbench");
+
+    if (workbench instanceof HTMLElement) {
+      const tabs = [...workbench.querySelectorAll<HTMLElement>("[data-tab-target]")];
+      const panels = [...workbench.querySelectorAll<HTMLElement>("[data-tab-panel]")];
+      const panelIds = new Set(panels.map((panel) => panel.dataset.tabPanel ?? ""));
+
+      function activate(id: string, updateHash = false) {
+        if (!panelIds.has(id)) {
+          id = "definition";
+        }
+
+        for (const tab of tabs) {
+          const active = tab.dataset.tabTarget === id;
+          tab.classList.toggle("is-active", active);
+          tab.setAttribute("aria-selected", String(active));
+        }
+
+        for (const panel of panels) {
+          panel.classList.toggle("is-active", panel.dataset.tabPanel === id);
+        }
+
+        if (updateHash) {
+          history.pushState(null, "", `#${id}`);
+        }
+      }
+
+      workbench.dataset.tabsReady = "true";
+
+      for (const tab of tabs) {
+        tab.setAttribute("role", "tab");
+        tab.addEventListener("click", (event) => {
+          event.preventDefault();
+          activate(tab.dataset.tabTarget ?? "definition", true);
+        });
+      }
+
+      for (const panel of panels) {
+        panel.setAttribute("role", "tabpanel");
+      }
+
+      activate(location.hash.replace("#", "") || "definition");
+      window.addEventListener("hashchange", () => activate(location.hash.replace("#", "") || "definition"));
+
+      const emptyFacets = JSON.parse(workbench.dataset.emptyFacets || "[]");
+      const conceptId = workbench.dataset.conceptId || "unknown";
+
+      for (const facet of emptyFacets) {
+        console.warn(`[python-brain] concept "${conceptId}" facet "${facet}" is empty`);
+      }
+    }
+  </script>
 </BaseLayout>
 
 <style>
+  .concept-workbench {
+    margin-top: 28px;
+  }
+
+  .facet-tabs {
+    position: sticky;
+    top: 65px;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    border-bottom: 1px solid var(--color-line);
+    padding: 8px 0;
+    background: rgb(251 252 254 / 94%);
+    backdrop-filter: blur(12px);
+  }
+
+  .facet-tab {
+    display: grid;
+    place-items: center;
+    min-height: 40px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    background: var(--color-panel);
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .facet-tab:hover,
+  .facet-tab.is-active {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+  }
+
+  .concept-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+    gap: 28px;
+    align-items: start;
+  }
+
+  .concept-workbench[data-tabs-ready="true"] .concept-panel {
+    display: none;
+  }
+
+  .concept-workbench[data-tabs-ready="true"] .concept-panel.is-active {
+    display: block;
+  }
+
+  .concept-sidebar {
+    position: sticky;
+    top: 130px;
+    display: grid;
+    gap: 18px;
+    max-height: calc(100vh - 150px);
+    overflow: auto;
+    padding-top: 24px;
+  }
+
+  .concept-sidebar section {
+    display: grid;
+    gap: 10px;
+  }
+
+  .concept-sidebar h2 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  .sidebar-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .empty-facet {
+    margin: 0;
+    border: 1px dashed var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    color: var(--color-muted);
+    background: var(--color-soft);
+  }
+
   .timeline {
     display: grid;
     gap: 14px;
@@ -174,5 +401,29 @@ const { Content } = await render(entry);
   .why-important p {
     margin: 4px 0 0;
     color: var(--color-muted);
+  }
+
+  @media (max-width: 980px) {
+    .facet-tabs {
+      position: static;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .concept-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .concept-sidebar {
+      position: static;
+      max-height: none;
+      overflow: visible;
+      padding-top: 0;
+    }
+  }
+
+  @media (max-width: 620px) {
+    .facet-tabs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 </style>

@@ -197,24 +197,23 @@ v1.0 仍缺：
 
 ## 概念页布局差距
 
-当前 `src/layouts/ConceptLayout.astro` 是连续 section，不是固定 Tab。
+当前 `src/layouts/ConceptLayout.astro` 已改为固定 6 Tab 工作台，默认保留完整 DOM，前端脚本只负责同页 anchor 切换和显隐。
 
 已满足：
 
-- 6 个维度已经按顺序渲染：定义、代码、案例、人物、作品、历史。
+- 6 个维度已经按固定顺序渲染：定义、代码、案例、人物、作品、历史。
+- Tab 使用同页 anchor；无 JS 时仍能抓取完整内容，JS 启动后只显示当前面板。
+- 空维度显示“暂未整理”，并在浏览器 console 输出对应 facet warning。
+- 前置、相关、延伸已移到右侧吸顶关系栏。
 - CodeRunner 使用 `client:visible`。
 - 案例、人物可由 relations 自动聚合。
 
 未满足：
 
-- 不是 Tab UI。
-- 没有同页 anchor + JS 显隐。
-- 空维度没有“暂未整理”和 console warning。
-- 右侧没有吸顶前置/相关/延伸。
 - 作品维度仍主要来自 concept frontmatter，不是后 3 维完全自动聚合。
 - 代码示例未体现 naive / standard / production 三版本。
 
-定位：页面已经验证了 6 维模型，但尚未达到 v1.0 固定布局契约。
+定位：页面布局已达到 v1.0 固定 6 维展示契约；剩余差距集中在 worksRegistry 迁移和代码示例版本分层。
 
 ## Islands 策略对照
 
@@ -256,7 +255,7 @@ localStorage：
 |---|---|---|---|
 | 1 | 完善 new-concept 脚手架 | 已完成第一版 | 后续随 schema 冻结微调 |
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
-| 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，后续可随 Tab 布局继续微调 |
+| 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，固定 6 Tab 布局已补 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；当前环境无 Vercel 登录态或 token |
 | 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
