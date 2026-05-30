@@ -199,9 +199,9 @@ localStorage：
 
 ## 内容编辑准则差距
 
-当前仓库没有 `docs/content-guidelines.md`。
+当前仓库已有 `docs/content-guidelines.md` 第一版。
 
-定位：本阶段第 2 优先级。没有编辑准则，后续新增案例和人物来源会继续变散。
+定位：本阶段第 2 项已完成基础交付。后续应在三页标杆打磨中继续补充更具体的案例来源、作品 role 和历史写法示例。
 
 ## 本阶段交付清单定位
 
@@ -209,7 +209,7 @@ localStorage：
 |---|---|---|---|
 | 1 | 完善 new-concept 脚手架 | 已完成第一版 | 后续随 schema 冻结微调 |
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
-| 3 | 打磨 3 个概念页为展示标杆 | 未完成 | 选 `decorator`、`python-language`、`function-parameters` |
+| 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，后续可随 Tab 布局继续微调 |
 | 4 | 部署 main 到 Vercel | 未完成 | 等 1-3 后做 |
 | 5 | 收紧校验（AND + DAG）+ 单测 | 部分完成 | 等标杆概念反向验证 schema 后做 |
 | 6 | 内容扩到 20/10/5/5 | 已超过 | 暂停扩内容 |
@@ -237,13 +237,18 @@ localStorage：
 
 ### P2：三页标杆反推 schema
 
-建议选择：
+已完成第一版：
 
 - `decorator`：验证六维模型、作品、历史、人物、框架案例。
 - `python-language`：验证 Foundation 层、版本、PSF、哲学。
 - `function-parameters`：验证 Basic Syntax 层、代码三版本、真实案例。
 
-打磨时如果发现 v1.0 schema 不够用，先改 schema，不通过内容绕过。
+反推发现：
+
+- `summary` 和 `whyImportant` 值得在概念页 Definition 区直接展示，否则 v1.0 字段只参与校验、不参与学习体验。
+- 现有 `works.note` 已经被用来承担 `works.role`，下一步 schema 迁移时应正式改名，避免语义含混。
+- 现有 `history` 数组能表达多事件时间线，比单对象 `{firstAppeared, pep, note}` 更适合历史脉络；建议 v1.0 schema 保留数组形态，但要求至少一项含 `firstAppeared` 或 `pep` 语义。
+- `extends` 与 `expandsTo` 需要尽快合并，当前只是过渡兼容。
 
 ### P3：收紧校验
 

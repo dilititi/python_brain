@@ -154,7 +154,7 @@ history:
     title: "TODO: firstAppeared 或相关 PEP"
     note: "TODO: 解释这个历史点为什么影响今天的写法。"
 tags: []
-updatedAt: ${today()}
+updatedAt: "${today()}"
 codeExamples:
   - title: naive
     description: "TODO: 新人容易写出的直接版本。"
