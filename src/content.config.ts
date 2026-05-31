@@ -160,6 +160,7 @@ const people = defineCollection({
     role: z.string(),
     field: z.string(),
     description: z.string(),
+    quote: z.string().optional(),
     roles: z.array(z.string()).default([]),
     concepts: z.array(slugRef).min(3),
     works: z.array(workLink).default([]),

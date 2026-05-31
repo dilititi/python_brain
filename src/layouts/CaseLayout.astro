@@ -32,6 +32,12 @@ const codeVersions = entry.data.codeVersions;
   </header>
   <section class="section content-flow">
     <p><strong>场景：</strong>{entry.data.scenario}</p>
+    {entry.data.sourceUrl && (
+      <p class="source-line">
+        <strong>来源：</strong>
+        <a href={entry.data.sourceUrl}>查看固定源码或资料</a>
+      </p>
+    )}
     <Content />
     {codeVersions.map((version) => (
       <article class="code-version">
@@ -99,6 +105,11 @@ const codeVersions = entry.data.codeVersions;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+  }
+
+  .source-line a {
+    color: var(--color-accent);
+    font-weight: 700;
   }
 
   h2 {

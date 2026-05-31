@@ -35,7 +35,7 @@
 | 原则 | 当前状态 | 判断 |
 |---|---|---|
 | 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`worksRef[].role`、`history[]`、`language` category、`extends`、Project v1 字段已对齐 v1.0 裁决 | 基本满足 |
-| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects | 基本满足 |
+| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects | 基本满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
 | 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works registry 已落地，concept 侧只保留 `worksRef[].role` | 基本满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，milestone 已包含 cases/projects；朴素拓扑规划已落地，默认路径会按 prerequisites 重排 | 基本满足 |
@@ -91,13 +91,13 @@ v1.0 状态：
 
 ### Person
 
-当前字段：`name`、`title`、`role`、`field`、`description`、`roles`、`concepts`、`works`、`sources`、`links`。
+当前字段：`name`、`title`、`role`、`field`、`description`、`quote`、`roles`、`concepts`、`works`、`sources`、`links`。
 
-v1.0 缺口：
+v1.0 状态：
 
-- 未明确 `quote?`。
+- `quote?` 已进入 schema 和人物页展示；若填写，关系校验要求非空、非 TODO-like。
 
-定位：人物页已补 `role`、`field`、`sources[]` 并进入阻塞校验；`title`/`roles` 作为兼容字段暂留，后续只需决定 `quote?` 是否进入展示面。
+定位：人物页已补 `role`、`field`、`sources[]`、`quote?` 并进入阻塞校验或展示契约；`title`/`roles` 作为兼容字段暂留。
 
 ### Path
 
@@ -130,6 +130,7 @@ v1.0 状态：
 - person 至少连接 3 个 concept。
 - project 至少连接 3 个 concept。
 - person 必须有 `role` 和 `field`。
+- person `quote?` 若填写必须有效。
 - person 必须包含至少一个 `sources[]`，且来源 URL 必须是 `https://`。
 - path milestone 必须包含至少一个 case 和 project。
 - 孤立节点和断开内容图只输出 warning，不阻塞本地校验；CI 可用 `--warning-exit-code=2` 标记。
@@ -234,7 +235,7 @@ localStorage：
 - 生成后默认运行关系校验，并列出待补字段。
 - 已加内容冻结闸门：写入新概念必须显式设置 `PKB_ALLOW_NEW_CONCEPTS=1`。
 
-定位：脚手架第一版已完成。后续随 person quote 和 path planner 继续微调。
+定位：脚手架第一版已完成。后续随兼容字段清理和 path planner 继续微调。
 
 ## 内容编辑准则差距
 
@@ -250,7 +251,7 @@ localStorage：
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，固定 6 Tab 布局已补 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；内部 link check、外部 URL 监控与三页 Lighthouse 已自动化，当前环境无 Vercel 登录态或 token |
-| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects |
+| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 已完成第一版 | 概念页写 `pkb:mastery`，路径页点亮节点 |
 | 8 | 测评题库化 | 已完成第一版 | `assessment-bank.ts` 提供 30 题场景题库，测试校验题库规模、唯一 id 和概念引用 |
@@ -302,6 +303,7 @@ localStorage：
 - project `concepts >= 3` 已进入 schema 和关系校验。
 - person `sources >= 1` 已进入 schema 和关系校验，且 URL 必须是 `https://`。
 - person `role` / `field` 已进入 schema 和关系校验。
+- person `quote?` 已进入 schema、展示和关系校验。
 - path milestone `cases[]` / `projects[]` 已进入 schema 和关系校验。
 
 剩余收紧项：
@@ -309,9 +311,8 @@ localStorage：
 - `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
 - concept 内联 `works[]` 兼容字段仍需后续删除；当前数据已迁移到 `worksRef[]` + `works-registry.yaml`。
 - 旧兼容字段清理：case `difficulty`、project `outcome` / `difficulty` / `milestones`、person `title` / `roles` / `links`。
-- person `quote?` 是否进入展示面。
 
-works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
+works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
 
 ## 审查同步清单
 

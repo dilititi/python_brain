@@ -417,6 +417,10 @@ for (const entry of people) {
     errors.push(`${relative(root, entry.path)}: person.field is required and must be useful`);
   }
 
+  if ("quote" in entry.data && !isUsefulString(entry.data.quote)) {
+    errors.push(`${relative(root, entry.path)}: person.quote must be useful when present`);
+  }
+
   const sources = asRecordArray(entry.data.sources);
   if (sources.length === 0) {
     errors.push(`${relative(root, entry.path)}: person.sources must contain at least one source`);
