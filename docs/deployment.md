@@ -35,6 +35,7 @@ npm run link:check
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
 | `npm run link:check` | `dist` 内部链接和 anchor 全部可解析 | 缺失页面、资源或 anchor 时返回 `1` 并阻断 |
+| `npm run link:external:inventory` | content 外链均为 `https://`，并输出去重清单规模 | 非 https 外链返回 `1`；不访问网络 |
 
 `npm run build` 会先运行 `build:relations` 生成 `src/generated/relations.json`，让概念页、路径页和图谱页在 Astro 静态构建期间消费同一份关系索引；静态构建结束后会再次运行 `build:relations`，把同一索引写入 `dist/relations.json` 作为部署产物。
 
@@ -55,12 +56,13 @@ npm run validate:relations -- --warning-exit-code=2
 
 Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命令；Vercel 只适合作为硬阻断部署 gate，继续使用 `npm run build`，并在合并前由本地或 GitHub Actions 跑完整前置检查。
 
-标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。Lighthouse >= 90 已接入 GitHub Actions 的 `lighthouse-beacons` job，覆盖 `/concepts/decorator/`、`/concepts/python-language/`、`/concepts/function-parameters/` 三个标杆页，检查 performance 和 accessibility。外部 URL 可访问性还没有自动化脚本，暂时仍是人工 gate。
+标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。Lighthouse >= 90 已接入 GitHub Actions 的 `lighthouse-beacons` job，覆盖 `/concepts/decorator/`、`/concepts/python-language/`、`/concepts/function-parameters/` 三个标杆页，检查 performance 和 accessibility。外部 URL 监控已自动化为 `npm run link:external`，但因为它依赖外部站点和网络状态，只在 GitHub Actions 的手动触发与每周定时任务中运行，不作为 PR/Vercel 部署硬阻断。
 
 GitHub Actions 工作流 `.github/workflows/v1-gates.yml` 会在 PR 和 `main` push 时运行：
 
 - static gates：`validate:relations`、`audit:concepts`、`test`、`build`、`link:check`
 - Lighthouse beacon pages：构建静态站、启动 Astro preview、跑三页标杆 Lighthouse
+- external URL monitor：手动或每周定时运行 `npm run link:external`
 
 ## CLI 部署
 
@@ -86,6 +88,7 @@ npx vercel --prod --token <VERCEL_TOKEN>
 - `npm.cmd run test`
 - `npm.cmd run build`
 - `npm.cmd run link:check`
+- `npm.cmd run link:external:inventory`
 - `npx.cmd --yes vercel --version`
 
 `vercel whoami` 在当前环境中等待交互式登录并超时，且 `VERCEL_TOKEN` 未设置。因此当前仓库已经具备 Vercel 部署配置，但线上发布仍需要 Vercel 登录态、token，或在 Vercel 控制台完成 GitHub 仓库导入。

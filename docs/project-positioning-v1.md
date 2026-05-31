@@ -28,7 +28,7 @@
 - 关系机制：已生成构建期关系索引，概念页、路径页和图谱页消费同一份 `src/generated/relations.json`，部署产物同步输出 `dist/relations.json`。
 - 最大风险：内容扩张速度已经超过 schema、校验、脚手架和页面布局契约。
 
-结论：项目当前处于“v1.0 工程契约基本落地，剩余体验项继续收口”的阶段。下一步不应继续扩内容，而应优先补齐部署外部确认和外部 URL 可访问性检查。
+结论：项目当前处于“v1.0 工程契约基本落地，剩余体验项继续收口”的阶段。下一步不应继续扩内容，而应优先补齐 Vercel 外部部署确认。
 
 ## 设计原则对照
 
@@ -181,7 +181,7 @@ works registry 已按低迁移成本路径 B 落地：
 - `title`：作品展示名。
 - `creator`：优先使用 `{ personId }` 指向 people collection；无法对应现有人物节点时允许 `{ name }` 字符串回退。
 - `type`：枚举，初始值为 `library`、`framework`、`tool`、`book`、`talk`、`project`。
-- `url`：必须是 `https://` URL；站内 link check 已自动化，外部可访问性仍进入后续网络型检查。
+- `url`：必须是 `https://` URL；站内 link check 已自动化，外部可访问性进入手动/每周 CI 网络型监控。
 
 迁移期规则：
 
@@ -252,7 +252,7 @@ localStorage：
 | 1 | 完善 new-concept 脚手架 | 已完成第一版 | 后续随 schema 冻结微调 |
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，固定 6 Tab 布局已补 |
-| 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；内部 link check 与三页 Lighthouse 已自动化，当前环境无 Vercel 登录态或 token |
+| 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；内部 link check、外部 URL 监控与三页 Lighthouse 已自动化，当前环境无 Vercel 登录态或 token |
 | 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 已完成第一版 | 概念页写 `pkb:mastery`，路径页点亮节点 |

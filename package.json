@@ -8,6 +8,8 @@
     "build": "npm run build:relations && astro check && astro build && npm run build:relations",
     "build:relations": "tsx scripts/build-relations.ts",
     "link:check": "tsx scripts/link-check.ts",
+    "link:external": "tsx scripts/external-link-check.ts --check",
+    "link:external:inventory": "tsx scripts/external-link-check.ts",
     "preview": "astro preview",
     "test": "tsx --test tests/*.test.ts",
     "validate:relations": "tsx scripts/validate-relations.ts",
