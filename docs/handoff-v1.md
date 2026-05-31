@@ -10,11 +10,18 @@
 
 - 仓库：`dilititi/python_brain`
 - 主分支：`main`
-- 最近已推送提交：`60d02df Remove v1 compatibility fields`
+- 最近提交：以 `git ls-remote origin refs/heads/main` 为准
 - 工作区状态：干净
 - 内容规模：52 concepts / 18 cases / 7 projects / 6 people / 5 paths
 - 技术栈：Astro + MDX + React Islands
 - 项目定位：v1.0 工程契约基本落地的 Python 知识外脑原型
+
+最新核查证据：
+
+- 远端 `origin/main` 已确认能通过 `git ls-remote origin refs/heads/main` 读取。
+- 本地 static gates 已通过：`validate:relations`、`audit:concepts`、`test`、`build`、`link:check`、`link:external:inventory`。
+- `.github/workflows/v1-gates.yml` 已配置 static gates、三页 Lighthouse beacon、手动/定时 external URL monitor。
+- 当前 Windows 环境未安装 `gh` CLI，无法从终端直接读取 GitHub Actions 运行状态；接手者仍需在 GitHub Actions 页面确认最新 workflow 是否绿灯。
 
 本阶段 9 项交付的状态：
 
