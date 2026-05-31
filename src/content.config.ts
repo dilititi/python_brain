@@ -118,7 +118,7 @@ const cases = defineCollection({
     projects: z.array(slugRef).default([]),
     libraries: z.array(z.string()).default([]),
     people: z.array(slugRef).default([]),
-    sourceUrl: url.optional(),
+    sourceUrl: httpsUrl.optional(),
     codeVersions: z
       .array(caseCodeVersion)
       .min(1)

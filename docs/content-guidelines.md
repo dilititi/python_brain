@@ -77,7 +77,7 @@
 - 至少说明一个常见坑 `pitfalls[]`。
 - 至少给出一个延伸方向 `extensions[]`。
 
-若引用开源项目，必须链接到 GitHub 固定 SHA 的具体行号，不能链接 `main` 分支。至少保留 1 个来自开源项目的案例作为标杆，用来校准“真实案例”的深度。
+若引用开源项目，必须链接到 GitHub 固定 SHA 的具体行号，不能链接 `main` 分支。至少保留 1 个来自开源项目的案例作为标杆，用来校准“真实案例”的深度；当前 `validate-relations` 会阻塞 GitHub `sourceUrl` 未使用 40 位提交 SHA 或缺少行号 anchor 的情况。
 
 ## 人物
 
@@ -138,7 +138,7 @@ works registry 已落地：`src/content/works-registry.yaml` 保存作品稳定�
 标杆概念页必须满足：
 
 - 6 维 Tab 全部有实质内容，不靠“暂未整理”占位。
-- 至少一段代码能在 CodeRunner 里跑通。
+- 必须包含 `naive` / `standard` / `production` 三段代码示例，且至少一段代码能在 CodeRunner 里跑通。
 - 至少一个 `worksRef` 对应的 registry 链接可打开；当前 `npm run link:check` 会检查静态站内链接，`npm run link:external` 会在手动或每周 CI 监控中检查 content 外部 URL 可访问性。
 - 概念页 Lighthouse performance + accessibility 均不低于 90；三页标杆由 GitHub Actions 的 `lighthouse-beacons` job 自动检查。
 - README 保留标杆页截图，作为 v1.0 视觉契约锚点。

@@ -124,17 +124,18 @@ v1.0 状态：
 - case 必须 `concepts >= 2`，且必须包含有用的 `standard` code version。
 - case 必须包含至少一个 `pitfalls[]` 和 `extensions[]`。
 - case 至少支撑一个 project。
+- GitHub `sourceUrl` 必须固定到 40 位提交 SHA 和具体行号，且案例库至少保留一个开源项目标杆。
+- `decorator`、`python-language`、`function-parameters` 三个标杆概念必须包含 `naive` / `standard` / `production` 三段有用代码示例。
 - project 必须包含 `type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]`。
 - person 至少连接 3 个 concept。
 - project 至少连接 3 个 concept。
 - person 必须有 `role` 和 `field`。
 - person 必须包含至少一个 `sources[]`，且来源 URL 必须是 `https://`。
 - path milestone 必须包含至少一个 case 和 project。
-- 整张内容图连通。
+- 孤立节点和断开内容图只输出 warning，不阻塞本地校验；CI 可用 `--warning-exit-code=2` 标记。
 
 v1.0 仍缺：
 
-- 孤立节点只 warning 不阻塞的输出分层；约定本地 warning 退出码保持 0，CI 可用 `--warning-exit-code=2` 标记 warning-only 状态并发送通知，但不阻断 merge。
 - 错误输出需要更系统地包含文件路径和具体字段。
 
 定位：现有校验已经覆盖核心关系完整性和主要内容质量门禁；剩余工作集中在 warning 分层、错误信息可读性和兼容字段清理。
@@ -203,9 +204,9 @@ works registry 已按低迁移成本路径 B 落地：
 
 未满足：
 
-- 代码示例未体现 naive / standard / production 三版本。
+- 代码示例三版本已在三页标杆上进入阻塞校验，但尚未扩展到 52 个概念的全量内容门禁。
 
-定位：页面布局已达到 v1.0 固定 6 维展示契约；剩余差距集中在代码示例版本分层。
+定位：页面布局已达到 v1.0 固定 6 维展示契约；剩余差距集中在是否把代码示例三版本从标杆页推广为全量概念门禁。
 
 ## Islands 策略对照
 
@@ -249,7 +250,7 @@ localStorage：
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，固定 6 Tab 布局已补 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；内部 link check、外部 URL 监控与三页 Lighthouse 已自动化，当前环境无 Vercel 登录态或 token |
-| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects |
+| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 已完成第一版 | 概念页写 `pkb:mastery`，路径页点亮节点 |
 | 8 | 测评题库化 | 已完成第一版 | `assessment-bank.ts` 提供 30 题场景题库，测试校验题库规模、唯一 id 和概念引用 |
@@ -293,8 +294,10 @@ localStorage：
 已完成：
 
 - `summary` / `whyImportant` 已从 warning 升级为 error，并在 schema 中改为 required。
+- 三页标杆概念的 `naive` / `standard` / `production` 代码示例已进入关系校验。
 - case `concepts >= 2` 与 `standard` code version 已进入 schema 和关系校验。
 - case `pitfalls[]` / `extensions[]` 已进入 schema 和关系校验。
+- GitHub case `sourceUrl` 固定 SHA + 行号、至少 1 个开源标杆案例已进入关系校验。
 - project `type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]` 已进入 schema 和关系校验。
 - project `concepts >= 3` 已进入 schema 和关系校验。
 - person `sources >= 1` 已进入 schema 和关系校验，且 URL 必须是 `https://`。
@@ -308,7 +311,7 @@ localStorage：
 - 旧兼容字段清理：case `difficulty`、project `outcome` / `difficulty` / `milestones`、person `title` / `roles` / `links`。
 - person `quote?` 是否进入展示面。
 
-works AND、prerequisites DAG、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
+works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
 
 ## 审查同步清单
 

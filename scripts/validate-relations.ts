@@ -111,9 +111,15 @@ function reportMissing(
 }
 
 const todoPattern = /TODO|待补|暂无说明/;
+const githubFixedLineUrlPattern =
+  /^https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/[0-9a-f]{40}\/.+#L\d+(?:-L\d+)?$/i;
 
 function isUsefulString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 && !todoPattern.test(value);
+}
+
+function isHttpsUrl(value: unknown) {
+  return typeof value === "string" && value.startsWith("https://");
 }
 
 const concepts = await readMdxCollection("concepts");
@@ -138,6 +144,8 @@ const mvpTargets = {
   projects: 5,
   people: 5
 };
+const showcaseConceptIds = new Set(["decorator", "python-language", "function-parameters"]);
+const requiredCodeExampleTitles = ["naive", "standard", "production"];
 
 if (concepts.length < mvpTargets.concepts) {
   errors.push(`MVP requires at least ${mvpTargets.concepts} concepts, found ${concepts.length}`);
@@ -211,6 +219,26 @@ for (const entry of concepts) {
     errors.push(`${relative(root, entry.path)}: expandsTo is removed; use extends`);
   }
 
+  if (showcaseConceptIds.has(entry.id)) {
+    const codeExamples = asRecordArray(entry.data.codeExamples);
+    const codeExampleTitles = new Set(codeExamples.map((example) => example.title));
+
+    for (const title of requiredCodeExampleTitles) {
+      const example = codeExamples.find((item) => item.title === title);
+      if (!example || !isUsefulString(example.description) || !isUsefulString(example.code)) {
+        errors.push(
+          `${relative(root, entry.path)}: showcase concept codeExamples must include useful ${title} example`
+        );
+      }
+    }
+
+    for (const title of codeExampleTitles) {
+      if (typeof title !== "string" || !requiredCodeExampleTitles.includes(title)) {
+        errors.push(`${relative(root, entry.path)}: codeExamples title must be naive, standard, or production`);
+      }
+    }
+  }
+
   const works = Array.isArray(entry.data.works)
     ? (entry.data.works as Record<string, unknown>[])
     : [];
@@ -276,6 +304,8 @@ for (const entry of concepts) {
   });
 }
 
+let openSourceCaseCount = 0;
+
 for (const entry of cases) {
   const caseConcepts = asStringArray(entry.data.concepts);
   reportMissing(errors, entry, "concepts", caseConcepts, conceptIds);
@@ -288,6 +318,22 @@ for (const entry of cases) {
 
   if (caseConcepts.length < 2) {
     errors.push(`${relative(root, entry.path)}: case.concepts must include at least two concepts`);
+  }
+
+  if (typeof entry.data.sourceUrl === "string") {
+    if (!isHttpsUrl(entry.data.sourceUrl)) {
+      errors.push(`${relative(root, entry.path)}: sourceUrl must be an https URL`);
+    }
+
+    if (entry.data.sourceUrl.includes("github.com/")) {
+      if (!githubFixedLineUrlPattern.test(entry.data.sourceUrl)) {
+        errors.push(
+          `${relative(root, entry.path)}: GitHub sourceUrl must use a fixed 40-character commit SHA and line anchor`
+        );
+      } else {
+        openSourceCaseCount += 1;
+      }
+    }
   }
 
   const codeVersions = asRecordArray(entry.data.codeVersions);
@@ -312,6 +358,10 @@ for (const entry of cases) {
   if (extensions.length === 0 || extensions.some((extension) => !isUsefulString(extension))) {
     errors.push(`${relative(root, entry.path)}: extensions must contain at least one useful item`);
   }
+}
+
+if (openSourceCaseCount === 0) {
+  errors.push("MVP cases must include at least one GitHub sourceUrl pinned to a commit SHA and line anchor");
 }
 
 for (const entry of projects) {
@@ -529,9 +579,14 @@ while (queue.length > 0) {
   }
 }
 
+const isolatedNodes = graphNodes.filter((node) => (graph.get(node)?.size ?? 0) === 0);
+if (isolatedNodes.length > 0) {
+  warnings.push(`MVP content graph has isolated nodes: ${isolatedNodes.join(", ")}`);
+}
+
 if (visited.size !== graphNodes.length) {
   const missing = graphNodes.filter((node) => !visited.has(node));
-  errors.push(`MVP content graph must be connected; disconnected nodes: ${missing.join(", ")}`);
+  warnings.push(`MVP content graph has disconnected nodes: ${missing.join(", ")}`);
 }
 
 if (warnings.length > 0) {
