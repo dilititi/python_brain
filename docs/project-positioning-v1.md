@@ -28,7 +28,7 @@
 - 关系机制：已有运行时聚合关系，并已新增构建期 `dist/relations.json` 索引产物。
 - 最大风险：内容扩张速度已经超过 schema、校验、脚手架和页面布局契约。
 
-结论：项目当前处于“内容外脑原型可运行，但 v1.0 工程契约未冻结”的阶段。下一步不应继续扩内容，而应先完成设计文档中的 1-3 项。
+结论：项目当前处于“v1.0 工程契约基本落地，剩余体验项继续收口”的阶段。下一步不应继续扩内容，而应优先完成测评题库和路径规划体验的最后闭环。
 
 ## 设计原则对照
 
@@ -38,7 +38,7 @@
 | 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects | 部分满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
 | 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works registry 已落地，concept 侧只保留 `worksRef[].role` | 基本满足 |
-| 学习路径连贯性 > 概念覆盖数 | 路径已扩展，milestone 已包含 cases/projects；仍缺拓扑规划 | 部分满足 |
+| 学习路径连贯性 > 概念覆盖数 | 路径已扩展，milestone 已包含 cases/projects；朴素拓扑规划已落地，默认路径会按 prerequisites 重排 | 基本满足 |
 
 ## Schema 差距
 
@@ -108,11 +108,11 @@ v1.0 缺口：
 
 当前 milestones 为 `{title, nodes[], cases[], projects[]}`。
 
-v1.0 缺口：
+v1.0 状态：
 
-- 仍缺朴素拓扑排序路径规划。
+- 已实现朴素拓扑排序路径规划：路径候选节点会按 `prerequisites` 重排，测评已知节点可作为已满足前置跳过。
 
-定位：路径已经形成“概念 -> 案例 -> 项目”的学习闭环；下一步是把测评结果和前置图结合，生成个性化拓扑序列。
+定位：路径已经形成“概念 -> 案例 -> 项目”的学习闭环；下一步是把 3 题原型扩成正式测评题库，让更多已知节点进入个性化拓扑序列。
 
 ## 校验差距
 
@@ -260,7 +260,7 @@ localStorage：
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 已完成第一版 | 概念页写 `pkb:mastery`，路径页点亮节点 |
 | 8 | 测评题库化 | 部分完成 | `pkb:assessment` 已持久化，题库仍需扩展 |
-| 9 | 路径规划拓扑排序 | 未完成 | 4-5 后做 |
+| 9 | 路径规划拓扑排序 | 已完成第一版 | `planLearningPath` 按 prerequisites 生成朴素拓扑序列，并支持跳过测评已知节点 |
 
 ## 近期执行顺序
 

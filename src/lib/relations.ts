@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { getCollection, type CollectionEntry } from "astro:content";
 import YAML from "yaml";
+import { planLearningPath } from "./path-planner";
 export {
   buildRelationIndex,
   caseUsedIn,
@@ -186,8 +187,16 @@ export async function getPathConcepts(pathId: string) {
     throw new Error(`Unknown path: ${pathId}`);
   }
 
+  const plan = planLearningPath({
+    concepts: concepts.map((entry) => ({
+      id: entry.id,
+      prerequisites: entry.data.prerequisites
+    })),
+    targetNodes: path.data.nodes
+  });
+
   return {
     path,
-    concepts: resolveMany(concepts, path.data.nodes)
+    concepts: resolveMany(concepts, plan.nodes)
   };
 }
