@@ -24,7 +24,7 @@ export type LearningPathPlan = {
   missing: string[];
 };
 
-const trackLabels = {
+export const trackLabels = {
   beginner: "零基础主路径",
   web: "Web 后端",
   data: "数据分析",

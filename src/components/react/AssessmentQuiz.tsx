@@ -1,37 +1,18 @@
 import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { scoreAssessment, type AssessmentAnswer } from "../../lib/path-planner";
+import {
+  ASSESSMENT_BANK_VERSION,
+  assessmentQuestions,
+  type AssessmentOption
+} from "../../lib/assessment-bank";
+import {
+  scoreAssessment,
+  trackLabels,
+  type AssessmentAnswer
+} from "../../lib/path-planner";
 import "./islands.css";
 
-const questions = [
-  {
-    id: "for-range",
-    title: "看到 for i in range(10):",
-    options: [
-      { label: "能想到重复 10 次", confidence: 2, knownConcepts: ["for-loop"] },
-      { label: "大概见过但说不清", confidence: 1, knownConcepts: [] },
-      { label: "完全陌生", confidence: 0, knownConcepts: [] }
-    ]
-  },
-  {
-    id: "data-goal",
-    title: "现在最想做哪类事情",
-    options: [
-      { label: "清洗 CSV 表格", confidence: 2, track: "data" },
-      { label: "写一个网站接口", confidence: 2, track: "web" },
-      { label: "批量处理文件", confidence: 2, track: "automation" }
-    ]
-  },
-  {
-    id: "function",
-    title: "函数最像什么",
-    options: [
-      { label: "可复用的小机器", confidence: 2, knownConcepts: ["function"] },
-      { label: "一段被命名的代码", confidence: 1, knownConcepts: ["function"] },
-      { label: "还没有概念", confidence: 0, knownConcepts: [] }
-    ]
-  }
-] as const;
+const questions = assessmentQuestions;
 
 const storageKey = "pkb:assessment";
 
@@ -43,8 +24,23 @@ function readStoredAnswers(): AssessmentAnswer[] {
   try {
     const raw = window.localStorage.getItem(storageKey);
     const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed?.bankVersion !== ASSESSMENT_BANK_VERSION) {
+      return [];
+    }
+
     const answers = Array.isArray(parsed?.answers) ? parsed.answers : [];
-    return answers.slice(0, questions.length);
+    const restored: AssessmentAnswer[] = [];
+
+    for (let index = 0; index < questions.length; index += 1) {
+      const answer = answers[index];
+      if (!answer || answer.questionId !== questions[index].id) {
+        break;
+      }
+
+      restored.push(answer);
+    }
+
+    return restored;
   } catch {
     return [];
   }
@@ -75,6 +71,7 @@ export default function AssessmentQuiz() {
     window.localStorage.setItem(
       storageKey,
       JSON.stringify({
+        bankVersion: ASSESSMENT_BANK_VERSION,
         answers,
         recommendation,
         updatedAt: new Date().toISOString()
@@ -82,7 +79,7 @@ export default function AssessmentQuiz() {
     );
   }, [answers, loaded, recommendation]);
 
-  function choose(option: (typeof questions)[number]["options"][number]) {
+  function choose(option: AssessmentOption) {
     if (!current) {
       return;
     }
@@ -92,8 +89,8 @@ export default function AssessmentQuiz() {
       {
         questionId: current.id,
         confidence: option.confidence as 0 | 1 | 2 | 3,
-        knownConcepts: "knownConcepts" in option ? [...option.knownConcepts] : [],
-        track: "track" in option ? option.track : undefined
+        knownConcepts: [...(option.knownConcepts ?? [])],
+        track: option.track
       }
     ]);
   }
@@ -120,8 +117,9 @@ export default function AssessmentQuiz() {
 
       {recommendation && (
         <>
-          <h2>{recommendation.track}</h2>
+          <h2>{trackLabels[recommendation.track]}</h2>
           <p>{recommendation.reason}</p>
+          <p>已识别 {recommendation.startAfter.length} 个可跳过或快速复习的起点知识点。</p>
           <div className="island-toolbar">
             <a className="button-link" href={`/path/${recommendation.track}/`}>
               <ArrowRight size={16} />
