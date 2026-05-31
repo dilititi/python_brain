@@ -55,7 +55,12 @@ npm run validate:relations -- --warning-exit-code=2
 
 Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命令；Vercel 只适合作为硬阻断部署 gate，继续使用 `npm run build`，并在合并前由本地或 GitHub Actions 跑完整前置检查。
 
-标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。外部 URL 可访问性与 Lighthouse >= 90 还没有自动化脚本；在接入 GitHub Actions 前，只能作为人工 gate。后续新增脚本后，部署前置条件应补充 `npm run lighthouse:beacons`，再把它接入 PR 检查。
+标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。Lighthouse >= 90 已接入 GitHub Actions 的 `lighthouse-beacons` job，覆盖 `/concepts/decorator/`、`/concepts/python-language/`、`/concepts/function-parameters/` 三个标杆页，检查 performance 和 accessibility。外部 URL 可访问性还没有自动化脚本，暂时仍是人工 gate。
+
+GitHub Actions 工作流 `.github/workflows/v1-gates.yml` 会在 PR 和 `main` push 时运行：
+
+- static gates：`validate:relations`、`audit:concepts`、`test`、`build`、`link:check`
+- Lighthouse beacon pages：构建静态站、启动 Astro preview、跑三页标杆 Lighthouse
 
 ## CLI 部署
 

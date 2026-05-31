@@ -1,0 +1,88 @@
+name: v1 gates
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  static-gates:
+    name: Static gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate relations
+        run: npm run validate:relations
+
+      - name: Audit concepts
+        run: npm run audit:concepts
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Check internal links
+        run: npm run link:check
+
+  lighthouse-beacons:
+    name: Lighthouse beacon pages
+    needs: static-gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Start Astro preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4321 > preview.log 2>&1 &
+          echo $! > preview.pid
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4321/concepts/decorator/ > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat preview.log
+          exit 1
+
+      - name: Run Lighthouse on beacon pages
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://127.0.0.1:4321/concepts/decorator/
+            http://127.0.0.1:4321/concepts/python-language/
+            http://127.0.0.1:4321/concepts/function-parameters/
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
