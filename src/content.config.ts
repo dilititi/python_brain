@@ -96,7 +96,6 @@ const concepts = defineCollection({
       .default({ cases: [], projects: [] }),
     people: z.array(slugRef).default([]),
     worksRef: z.array(workRef).default([]),
-    works: z.array(workLink).default([]),
     history: z.array(historyEvent).min(1),
     tags: z.array(z.string()).default([]),
     updatedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -111,7 +110,6 @@ const cases = defineCollection({
     description: z.string(),
     scenario: z.string(),
     level,
-    difficulty: level,
     tracks: z.array(track).default([]),
     concepts: z.array(slugRef).min(2),
     project: slugRef.optional(),
@@ -145,10 +143,7 @@ const projects = defineCollection({
     concepts: z.array(slugRef).min(3),
     cases: z.array(slugRef).default([]),
     people: z.array(slugRef).default([]),
-    upgradePath: nonEmptyStringArray,
-    outcome: z.string().optional(),
-    difficulty: level.optional(),
-    milestones: z.array(z.string()).default([])
+    upgradePath: nonEmptyStringArray
   })
 });
 
@@ -156,23 +151,13 @@ const people = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/people" }),
   schema: z.object({
     name: z.string(),
-    title: z.string(),
     role: z.string(),
     field: z.string(),
     description: z.string(),
     quote: z.string().optional(),
-    roles: z.array(z.string()).default([]),
     concepts: z.array(slugRef).min(3),
     works: z.array(workLink).default([]),
-    sources: z.array(sourceLink).min(1),
-    links: z
-      .array(
-        z.object({
-          label: z.string(),
-          url
-        })
-      )
-      .default([])
+    sources: z.array(sourceLink).min(1)
   })
 });
 

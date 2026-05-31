@@ -125,7 +125,6 @@ export async function getConceptRelations(
   const personIds = new Set(usedIn.people);
   const worksById = new Map(works.map((work) => [work.id, work]));
   const conceptWorks: ConceptWork[] = [];
-  const seenWorks = new Set<string>();
 
   for (const ref of concept.data.worksRef) {
     const work = worksById.get(ref.id);
@@ -138,28 +137,6 @@ export async function getConceptRelations(
       ...work,
       role: ref.role
     });
-    seenWorks.add(work.id);
-  }
-
-  for (const work of concept.data.works) {
-    const fallbackId = [
-      "inline",
-      work.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
-    ].filter(Boolean).join("-");
-
-    if (seenWorks.has(fallbackId)) {
-      continue;
-    }
-
-    conceptWorks.push({
-      id: fallbackId,
-      title: work.title,
-      creator: work.creator,
-      type: work.type,
-      url: work.url,
-      role: work.role
-    });
-    seenWorks.add(fallbackId);
   }
 
   return {

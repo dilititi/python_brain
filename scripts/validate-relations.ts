@@ -239,9 +239,6 @@ for (const entry of concepts) {
     }
   }
 
-  const works = Array.isArray(entry.data.works)
-    ? (entry.data.works as Record<string, unknown>[])
-    : [];
   const worksRef = asRecordArray(entry.data.worksRef);
   const worksRefIds = worksRef
     .map((work) => work.id)
@@ -249,12 +246,12 @@ for (const entry of concepts) {
 
   reportMissing(errors, entry, "worksRef.id", worksRefIds, workIds);
 
-  if (works.length + worksRef.length === 0) {
-    errors.push(`${relative(root, entry.path)}: concept must have at least one work`);
+  if ("works" in entry.data) {
+    errors.push(`${relative(root, entry.path)}: inline works[] is removed; use worksRef[] + works-registry.yaml`);
   }
 
-  if (works.length > 0) {
-    warnings.push(`${relative(root, entry.path)}: inline works[] is deprecated; use worksRef[] + works-registry.yaml`);
+  if (worksRef.length === 0) {
+    errors.push(`${relative(root, entry.path)}: concept must have at least one work`);
   }
 
   worksRef.forEach((work, index) => {
@@ -264,16 +261,6 @@ for (const entry of concepts) {
 
     if (!isUsefulString(work.role)) {
       errors.push(`${relative(root, entry.path)}: worksRef[${index}].role is required and must be useful`);
-    }
-  });
-
-  works.forEach((work, index) => {
-    if (!isUsefulString(work.role)) {
-      errors.push(`${relative(root, entry.path)}: works[${index}].role is required and must be useful`);
-    }
-
-    if ("note" in work) {
-      errors.push(`${relative(root, entry.path)}: works[${index}].note is removed; use role`);
     }
   });
 

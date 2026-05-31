@@ -42,11 +42,11 @@
 
 ## Schema 差距
 
-当前 `src/content.config.ts` 已落地 v1.0 的关键字段裁决，剩余差异主要是兼容字段和后续展示增强。
+当前 `src/content.config.ts` 已落地 v1.0 的关键字段裁决，剩余差异主要是 `description` 后续迁移和展示增强。
 
 ### Concept
 
-当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`worksRef`、`works`（兼容回退）、`history`、`tags`、`updatedAt`、`codeExamples`。
+当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`worksRef`、`history`、`tags`、`updatedAt`、`codeExamples`。
 
 v1.0 状态：
 
@@ -66,38 +66,35 @@ v1.0 状态：
 - `mentalModel` 是一句话心智模型或类比，可选但应避免和 `summary` 重复。
 - `whyImportant` 是必填的 200 字以内场景价值。
 
-定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张，后续优先清理兼容字段而不是继续扩内容。
+定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张，后续优先清理 `description` 语义冗余而不是继续扩内容。
 
 ### Case
 
-当前字段：`title`、`description`、`scenario`、`level`、`difficulty`、`tracks`、`concepts`、`project`、`projects`、`libraries`、`people`、`sourceUrl`、`codeVersions`、`pitfalls`、`extensions`。
+当前字段：`title`、`description`、`scenario`、`level`、`tracks`、`concepts`、`project`、`projects`、`libraries`、`people`、`sourceUrl`、`codeVersions`、`pitfalls`、`extensions`。
 
-v1.0 剩余：
-
-- 旧 `difficulty` 字段仍作为兼容别名保留，后续可删除，只保留 `level`。
-
-定位：Case 已完成 `level`、`concepts.length >= 2`、`standard` code version、`project?`、`pitfalls[]` 和 `extensions[]` 迁移；旧 `difficulty` 暂作兼容字段保留，后续可在页面和内容稳定后删除。
+定位：Case 已完成 `level`、`concepts.length >= 2`、`standard` code version、`project?`、`pitfalls[]` 和 `extensions[]` 迁移；旧 `difficulty` 字段已从 schema、脚手架和内容中删除。
 
 ### Project
 
-当前字段：`title`、`type`、`stage`、`description`、`youWillLearn`、`finalOutput`、`structure`、`coreFlow`、`tracks`、`concepts`、`cases`、`people`、`upgradePath`、`outcome`、`difficulty`、`milestones`。
+当前字段：`title`、`type`、`stage`、`description`、`youWillLearn`、`finalOutput`、`structure`、`coreFlow`、`tracks`、`concepts`、`cases`、`people`、`upgradePath`。
 
 v1.0 状态：
 
 - `type`、`stage`、`youWillLearn[]`、`finalOutput`、`structure`、`coreFlow[]`、`upgradePath[]` 已补齐，并进入 schema 与关系校验。
-- `outcome`、`difficulty`、`milestones` 作为旧页面/内容兼容字段暂留。
+- `outcome`、`difficulty`、`milestones` 已从 project schema 和内容中删除；路径 milestone 仍保留在 `paths/*.yaml`，两者语义不混用。
 
-定位：Project 已从“关系承载卡片”升级为可执行项目模板；后续可在确认页面稳定后删除 `outcome`、`difficulty`、`milestones` 兼容字段。
+定位：Project 已从“关系承载卡片”升级为可执行项目模板；Project v1 字段是当前唯一写法。
 
 ### Person
 
-当前字段：`name`、`title`、`role`、`field`、`description`、`quote`、`roles`、`concepts`、`works`、`sources`、`links`。
+当前字段：`name`、`role`、`field`、`description`、`quote`、`concepts`、`works`、`sources`。
 
 v1.0 状态：
 
 - `quote?` 已进入 schema 和人物页展示；若填写，关系校验要求非空、非 TODO-like。
+- `title`、`roles`、`links` 兼容字段已从 schema 和内容中删除。
 
-定位：人物页已补 `role`、`field`、`sources[]`、`quote?` 并进入阻塞校验或展示契约；`title`/`roles` 作为兼容字段暂留。
+定位：人物页已补 `role`、`field`、`sources[]`、`quote?` 并进入阻塞校验或展示契约。
 
 ### Path
 
@@ -117,7 +114,7 @@ v1.0 状态：
 - 最低内容数量。
 - prerequisites DAG 无环检测。
 - concept 至少被一个 case 覆盖。
-- concept 必须至少有一个 work，且每个 work 必须有有效 `role`。
+- concept 必须至少有一个 `worksRef`，且每个 `worksRef` 必须有有效 `role`。
 - summary / whyImportant 必须非空、非 TODO-like。
 - history 事件必须有 `event`，必须含 `year` 或 `pep`，`pep` 必须匹配 `PEP \d+`。
 - history `source` 若存在必须是 `https://` URL。
@@ -169,24 +166,22 @@ works registry 已按低迁移成本路径 B 落地：
 ```yaml
 - id: flask
   title: Flask
-  creator:
-    personId: armin-ronacher
+  creator: Armin Ronacher
   type: framework
   url: https://flask.palletsprojects.com/
 ```
 
 - `id`：稳定 slug，作为 `worksRef[].id` 的引用目标。
 - `title`：作品展示名。
-- `creator`：优先使用 `{ personId }` 指向 people collection；无法对应现有人物节点时允许 `{ name }` 字符串回退。
-- `type`：枚举，初始值为 `library`、`framework`、`tool`、`book`、`talk`、`project`。
+- `creator`：当前为字符串，后续若需要人物反向索引，再升级为 `personId` 引用。
+- `type`：枚举，初始值为 `library`、`framework`、`book`、`talk`、`pep`、`project`。
 - `url`：必须是 `https://` URL；站内 link check 已自动化，外部可访问性进入手动/每周 CI 网络型监控。
 
-迁移期规则：
+迁移结果：
 
-- 内联 `works[]` 当前只作为兼容回退保留；新增内容只使用 `worksRef[]`。
-- 若同一作品同时来自 `worksRef[]` 与 `works[]`，以 `worksRef[]` 的 registry 元数据为准，概念侧 `role` 仍必须保留。
-- 校验脚本同时检查 `worksRef[].id` 引用完整性和 `role` 质量。
-- 当前 52 个 concept 的内联 `works[]` 长度已经为 0；下一步可在确认无回退需求后从 schema 删除内联 `works` 字段。
+- 内联 `works[]` 已从 schema、关系聚合和现有内容中删除；新增内容只使用 `worksRef[]`。
+- 若旧内容重新出现内联 `works[]`，`audit:concepts` 和 `validate:relations` 都应将其视为迁移遗漏并阻断。
+- 校验脚本检查 `worksRef[].id` 引用完整性和 `role` 质量。
 
 这条路径让作品元数据写一次，概念侧只写“为什么这个作品能锚定当前知识点”。
 
@@ -309,10 +304,9 @@ localStorage：
 剩余收紧项：
 
 - `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
-- concept 内联 `works[]` 兼容字段仍需后续删除；当前数据已迁移到 `worksRef[]` + `works-registry.yaml`。
-- 旧兼容字段清理：case `difficulty`、project `outcome` / `difficulty` / `milestones`、person `title` / `roles` / `links`。
+- 错误输出仍可继续优化，让每条失败更稳定地包含文件路径、字段名和修复提示。
 
-works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
+works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是 `description` 迁移、错误信息可读性和展示体验，不再阻塞当前 v1.0 内容治理。
 
 ## 审查同步清单
 
@@ -321,10 +315,10 @@ works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExam
 - 内容规模数字保持 `52/18/7/6/5` 一致，不再残留旧快照。
 - 已完成校验项 `DAG` / `works AND` 在原则表、校验差距、交付清单、P3 列表中状态一致。
 - schema 字段名保持 `year` / `pep` / `event` / `source`，不再使用 `firstAppeared`。
-- works 路径 B 在原则表和策略段都表达为“已落地，内联 works 仅兼容回退”。
+- works 路径 B 在原则表和策略段都表达为“已落地，内联 works 已删除”。
 - `validate-relations` 退出码语义在脚本帮助文本和部署文档中一致。
 - 宣告字段进入 strict 前，必须同时核对 `src/content.config.ts`、`scripts/validate-relations.ts`、`scripts/audit-concepts.ts` 与 `docs/deployment.md` 命令语义表。
 
 ## 总结
 
-当前项目最准确的位置是：v1.0 工程契约已经基本落地的知识外脑原型。内容已超 MVP，主要交付项已完成第一版；下一阶段不应继续追求覆盖数，而应先完成 Vercel 外部部署确认，并把旧兼容字段作为 v1.x 清理项逐步移除。
+当前项目最准确的位置是：v1.0 工程契约已经基本落地的知识外脑原型。内容已超 MVP，主要交付项已完成第一版；下一阶段不应继续追求覆盖数，而应先完成 Vercel 外部部署确认，并处理 `description` 这类仍有语义重叠的遗留字段。

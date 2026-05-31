@@ -33,6 +33,10 @@ for (const file of files) {
   }
 
   const works = Array.isArray(data.works) ? data.works : [];
+  if ("works" in data) {
+    issues.push(`${label}: inline works[] is removed; use worksRef[] + works-registry.yaml`);
+  }
+
   works.forEach((work: Record<string, unknown>, index: number) => {
     if ("note" in work) {
       issues.push(`${label}: works[${index}].note is deprecated; use role`);

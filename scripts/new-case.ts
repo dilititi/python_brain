@@ -18,7 +18,7 @@ await writeFile(
 title: ${title}
 description: 
 scenario: 
-difficulty: intro
+level: intro
 tracks: [beginner]
 concepts: []
 projects: []

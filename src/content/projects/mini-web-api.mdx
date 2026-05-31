@@ -18,18 +18,10 @@ upgradePath:
   - 把数据校验迁移到 Pydantic 模型。
   - 增加测试客户端用例。
   - 拆分 routers、services 和 schemas 目录。
-outcome: 理解函数、装饰器、JSON 响应和框架路由之间的关系。
-difficulty: advanced
 tracks: [web, ai]
 concepts: [dict, function, decorator, closure, json, if-statement, try-except, module, package-structure, module-search-path, venv, pip]
 cases: [flask-routing, weather-api, input-validation, api-error-handling, package-install-workflow]
 people: [armin-ronacher, sebastian-ramirez, guido-van-rossum]
-milestones:
-  - 写出返回字典的普通函数。
-  - 用路由装饰器注册 URL。
-  - 把返回值序列化成 JSON。
-  - 增加输入校验和错误响应。
-  - 拆出业务函数，保持路由函数轻薄。
 ---
 
 这个项目把“装饰器不是玩具例子”讲透。一个普通函数怎样变成接口，正是 Flask、FastAPI 这类框架的核心体验。
