@@ -122,6 +122,19 @@ export function buildRelationIndex(
   }
 
   for (const concept of input.concepts) {
+    const usedIn = conceptUsedInMap.get(concept.id) ?? emptyUsedIn();
+    const appliedIn =
+      concept.data.appliedIn && typeof concept.data.appliedIn === "object"
+        ? (concept.data.appliedIn as Record<string, unknown>)
+        : {};
+
+    usedIn.cases = sorted([...usedIn.cases, ...stringArray(appliedIn.cases)]);
+    usedIn.projects = sorted([...usedIn.projects, ...stringArray(appliedIn.projects)]);
+    usedIn.people = sorted([...usedIn.people, ...stringArray(concept.data.people)]);
+    conceptUsedInMap.set(concept.id, usedIn);
+  }
+
+  for (const concept of input.concepts) {
     for (const prerequisite of stringArray(concept.data.prerequisites)) {
       const neighbor = conceptNeighborsMap.get(prerequisite) ?? emptyNeighbors();
       neighbor.successors = sorted([...neighbor.successors, concept.id]);

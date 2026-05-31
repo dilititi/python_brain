@@ -107,12 +107,19 @@ const index = buildRelationIndex(
   contentHash(allSources)
 );
 
+const generatedDir = join(root, "src", "generated");
 const distDir = join(root, "dist");
-const target = join(distDir, "relations.json");
+const generatedTarget = join(generatedDir, "relations.json");
+const distTarget = join(distDir, "relations.json");
+const json = `${JSON.stringify(index, null, 2)}\n`;
 
+await mkdir(generatedDir, { recursive: true });
 await mkdir(distDir, { recursive: true });
-await writeFile(target, `${JSON.stringify(index, null, 2)}\n`, "utf8");
+await Promise.all([
+  writeFile(generatedTarget, json, "utf8"),
+  writeFile(distTarget, json, "utf8")
+]);
 
 console.log(
-  `Built ${relative(root, target)} with ${Object.keys(index.concepts).length} concepts, ${Object.keys(index.cases).length} cases, ${Object.keys(index.people).length} people, ${worksCount} works.`
+  `Built ${relative(root, generatedTarget)} and ${relative(root, distTarget)} with ${Object.keys(index.concepts).length} concepts, ${Object.keys(index.cases).length} cases, ${Object.keys(index.people).length} people, ${worksCount} works.`
 );

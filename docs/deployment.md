@@ -34,6 +34,8 @@ npm run build
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
 
+`npm run build` 会先运行 `build:relations` 生成 `src/generated/relations.json`，让概念页、路径页和图谱页在 Astro 静态构建期间消费同一份关系索引；静态构建结束后会再次运行 `build:relations`，把同一索引写入 `dist/relations.json` 作为部署产物。
+
 当前 `summary` / `whyImportant`、concept `worksRef` 引用与 `role`、case `standard` code version / `pitfalls` / `extensions`、project `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值、TODO-like 内容或 registry 引用缺失会阻断审计、关系校验或 Astro content schema。当前不保留 `summary` / `whyImportant` 的 warning-only 过渡状态。
 
 后续 GitHub Actions 进入 production monitoring gate 时，可额外使用：

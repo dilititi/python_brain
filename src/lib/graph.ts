@@ -1,4 +1,9 @@
-import { getAllContent } from "./relations";
+import {
+  conceptNeighbors,
+  conceptUsedIn,
+  getAllContent,
+  getRelationIndex
+} from "./relations";
 
 export type GraphNode = {
   id: string;
@@ -30,11 +35,17 @@ function addEdge(edges: GraphEdge[], edge: Omit<GraphEdge, "id">) {
 }
 
 export async function buildGraph() {
-  const { concepts, cases, projects, people } = await getAllContent();
+  const [{ concepts, cases, projects, people }, relationIndex] = await Promise.all([
+    getAllContent(),
+    getRelationIndex()
+  ]);
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
 
   for (const entry of concepts) {
+    const neighbors = conceptNeighbors(relationIndex, entry.id);
+    const usedIn = conceptUsedIn(relationIndex, entry.id);
+
     nodes.push({
       id: `concept:${entry.id}`,
       label: entry.data.title,
@@ -43,7 +54,7 @@ export async function buildGraph() {
       href: `/concepts/${entry.id}/`
     });
 
-    for (const target of entry.data.prerequisites) {
+    for (const target of neighbors.prerequisites) {
       addEdge(edges, {
         source: `concept:${target}`,
         target: `concept:${entry.id}`,
@@ -51,7 +62,7 @@ export async function buildGraph() {
       });
     }
 
-    for (const target of entry.data.related) {
+    for (const target of neighbors.related) {
       addEdge(edges, {
         source: `concept:${entry.id}`,
         target: `concept:${target}`,
@@ -59,11 +70,35 @@ export async function buildGraph() {
       });
     }
 
-    for (const target of entry.data.extends) {
+    for (const target of neighbors.extends) {
       addEdge(edges, {
         source: `concept:${entry.id}`,
         target: `concept:${target}`,
         kind: "extends"
+      });
+    }
+
+    for (const caseId of usedIn.cases) {
+      addEdge(edges, {
+        source: `concept:${entry.id}`,
+        target: `case:${caseId}`,
+        kind: "applies"
+      });
+    }
+
+    for (const projectId of usedIn.projects) {
+      addEdge(edges, {
+        source: `concept:${entry.id}`,
+        target: `project:${projectId}`,
+        kind: "builds"
+      });
+    }
+
+    for (const personId of usedIn.people) {
+      addEdge(edges, {
+        source: `person:${personId}`,
+        target: `concept:${entry.id}`,
+        kind: "created-by"
       });
     }
   }
@@ -76,11 +111,11 @@ export async function buildGraph() {
       href: `/cases/${entry.id}/`
     });
 
-    for (const concept of entry.data.concepts) {
+    for (const projectId of relationIndex.cases[entry.id]?.projects ?? []) {
       addEdge(edges, {
-        source: `concept:${concept}`,
-        target: `case:${entry.id}`,
-        kind: "applies"
+        source: `case:${entry.id}`,
+        target: `project:${projectId}`,
+        kind: "builds"
       });
     }
   }
@@ -92,22 +127,6 @@ export async function buildGraph() {
       kind: "project",
       href: `/projects/${entry.id}/`
     });
-
-    for (const concept of entry.data.concepts) {
-      addEdge(edges, {
-        source: `concept:${concept}`,
-        target: `project:${entry.id}`,
-        kind: "builds"
-      });
-    }
-
-    for (const caseId of entry.data.cases) {
-      addEdge(edges, {
-        source: `case:${caseId}`,
-        target: `project:${entry.id}`,
-        kind: "builds"
-      });
-    }
   }
 
   for (const entry of people) {
@@ -117,14 +136,6 @@ export async function buildGraph() {
       kind: "person",
       href: `/people/${entry.id}/`
     });
-
-    for (const concept of entry.data.concepts) {
-      addEdge(edges, {
-        source: `person:${entry.id}`,
-        target: `concept:${concept}`,
-        kind: "created-by"
-      });
-    }
   }
 
   return { nodes, edges };

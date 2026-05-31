@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro check && astro build && npm run build:relations",
+    "dev": "npm run build:relations && astro dev",
+    "build": "npm run build:relations && astro check && astro build && npm run build:relations",
     "build:relations": "tsx scripts/build-relations.ts",
     "preview": "astro preview",
     "test": "tsx --test tests/*.test.ts",

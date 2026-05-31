@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .astro/
+src/generated/relations.json
 
 *.log
 dev-server.out.log

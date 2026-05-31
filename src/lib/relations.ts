@@ -3,6 +3,11 @@ import { join } from "node:path";
 import { getCollection, type CollectionEntry } from "astro:content";
 import YAML from "yaml";
 import { planLearningPath } from "./path-planner";
+import {
+  conceptNeighbors as indexedConceptNeighbors,
+  conceptUsedIn as indexedConceptUsedIn,
+  type RelationIndex
+} from "./relation-index";
 export {
   buildRelationIndex,
   caseUsedIn,
@@ -45,6 +50,24 @@ export type ConceptRelations = {
 };
 
 let worksRegistryCache: WorkRegistryEntry[] | undefined;
+let relationIndexCache: RelationIndex | undefined;
+
+async function getGeneratedRelationIndex() {
+  if (relationIndexCache) {
+    return relationIndexCache;
+  }
+
+  const raw = await readFile(
+    join(process.cwd(), "src", "generated", "relations.json"),
+    "utf8"
+  );
+  relationIndexCache = JSON.parse(raw) as RelationIndex;
+  return relationIndexCache;
+}
+
+export async function getRelationIndex() {
+  return getGeneratedRelationIndex();
+}
 
 async function getWorksRegistry() {
   if (worksRegistryCache) {
@@ -87,16 +110,19 @@ export function resolveMany<T extends AnyEntry>(entries: T[], ids: string[]) {
 export async function getConceptRelations(
   conceptId: string
 ): Promise<ConceptRelations> {
-  const { concepts, cases, projects, people, works } = await getAllContent();
+  const [{ concepts, cases, projects, people, works }, relationIndex] =
+    await Promise.all([getAllContent(), getGeneratedRelationIndex()]);
   const concept = concepts.find((entry) => entry.id === conceptId);
 
   if (!concept) {
     throw new Error(`Unknown concept: ${conceptId}`);
   }
 
-  const caseIds = new Set(concept.data.appliedIn.cases);
-  const projectIds = new Set(concept.data.appliedIn.projects);
-  const personIds = new Set(concept.data.people);
+  const usedIn = indexedConceptUsedIn(relationIndex, conceptId);
+  const neighbors = indexedConceptNeighbors(relationIndex, conceptId);
+  const caseIds = new Set(usedIn.cases);
+  const projectIds = new Set(usedIn.projects);
+  const personIds = new Set(usedIn.people);
   const worksById = new Map(works.map((work) => [work.id, work]));
   const conceptWorks: ConceptWork[] = [];
   const seenWorks = new Set<string>();
@@ -136,51 +162,24 @@ export async function getConceptRelations(
     seenWorks.add(fallbackId);
   }
 
-  for (const entry of cases) {
-    if (entry.data.concepts.includes(conceptId)) {
-      caseIds.add(entry.id);
-    }
-  }
-
-  for (const entry of projects) {
-    if (entry.data.concepts.includes(conceptId)) {
-      projectIds.add(entry.id);
-    }
-  }
-
-  for (const entry of people) {
-    if (entry.data.concepts.includes(conceptId)) {
-      personIds.add(entry.id);
-    }
-  }
-
-  const referencedBy = concepts.filter((entry) => {
-    if (entry.id === conceptId) {
-      return false;
-    }
-
-    return [
-      ...entry.data.prerequisites,
-      ...entry.data.related,
-      ...entry.data.extends
-    ].includes(conceptId);
-  });
-
   return {
     concept,
-    prerequisites: resolveMany(concepts, concept.data.prerequisites),
-    related: resolveMany(concepts, concept.data.related),
-    extends: resolveMany(concepts, concept.data.extends),
+    prerequisites: resolveMany(concepts, neighbors.prerequisites),
+    related: resolveMany(concepts, neighbors.related),
+    extends: resolveMany(concepts, neighbors.extends),
     cases: resolveMany(cases, [...caseIds]),
     projects: resolveMany(projects, [...projectIds]),
     people: resolveMany(people, [...personIds]),
     works: conceptWorks,
-    referencedBy
+    referencedBy: resolveMany(concepts, neighbors.successors)
   };
 }
 
 export async function getPathConcepts(pathId: string) {
-  const { concepts, paths } = await getAllContent();
+  const [{ concepts, paths }, relationIndex] = await Promise.all([
+    getAllContent(),
+    getGeneratedRelationIndex()
+  ]);
   const path = paths.find((entry) => entry.id === pathId);
 
   if (!path) {
@@ -190,7 +189,7 @@ export async function getPathConcepts(pathId: string) {
   const plan = planLearningPath({
     concepts: concepts.map((entry) => ({
       id: entry.id,
-      prerequisites: entry.data.prerequisites
+      prerequisites: indexedConceptNeighbors(relationIndex, entry.id).prerequisites
     })),
     targetNodes: path.data.nodes
   });

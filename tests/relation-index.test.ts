@@ -116,6 +116,30 @@ test("caseUsedIn and personPortfolio expose stable helper APIs", () => {
   });
 });
 
+test("buildRelationIndex includes concept-authored appliedIn and people refs", () => {
+  const input = fixture();
+  const functionEntry = input.concepts.find((entry) => entry.id === "function");
+  assert.ok(functionEntry);
+
+  functionEntry.data = {
+    ...functionEntry.data,
+    appliedIn: {
+      cases: ["function-call-playground"],
+      projects: ["python-basics-lab"]
+    },
+    people: ["guido-van-rossum"]
+  };
+
+  const index = buildRelationIndex(input, "concept-authored");
+
+  assert.deepEqual(conceptUsedIn(index, "function"), {
+    cases: ["flask-routing", "function-call-playground"],
+    projects: ["python-basics-lab"],
+    people: ["guido-van-rossum"],
+    paths: ["web"]
+  });
+});
+
 test("relation index updates when entries are added, removed, or changed", () => {
   const base = fixture();
   const baseIndex = buildRelationIndex(base, "base");
