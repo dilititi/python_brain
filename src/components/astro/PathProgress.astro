@@ -30,10 +30,13 @@ for (const milestone of milestones) {
 
 <ol class="path-progress">
   {nodes.map((node, index) => (
-    <li>
+    <li data-concept-id={node.id} data-mastery="unseen">
       <span class="step">{String(index + 1).padStart(2, "0")}</span>
       <a href={`/concepts/${node.id}/`}>
-        <strong>{node.data.title}</strong>
+        <span class="node-title">
+          <strong>{node.data.title}</strong>
+          <small data-mastery-label>未学</small>
+        </span>
         <span>{node.data.category} · {node.data.level}</span>
         {milestoneByNode.has(node.id) && (
           <em>{milestoneByNode.get(node.id)}</em>
@@ -42,6 +45,57 @@ for (const milestone of milestones) {
     </li>
   ))}
 </ol>
+
+<script>
+  const storageKey = "pkb:mastery";
+
+  function readMastery() {
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function applyMastery() {
+    const mastery = readMastery();
+
+    function labelFor(status: string) {
+      if (status === "learning") {
+        return "半掌握";
+      }
+
+      if (status === "mastered") {
+        return "已掌握";
+      }
+
+      return "未学";
+    }
+
+    for (const item of document.querySelectorAll("[data-concept-id]")) {
+      if (!(item instanceof HTMLElement)) {
+        continue;
+      }
+
+      const conceptId = item.dataset.conceptId ?? "";
+      const status = mastery[conceptId] === "mastered" || mastery[conceptId] === "learning"
+        ? mastery[conceptId]
+        : "unseen";
+      const label = item.querySelector("[data-mastery-label]");
+
+      item.dataset.mastery = status;
+      if (label) {
+        label.textContent = labelFor(status);
+      }
+    }
+  }
+
+  applyMastery();
+  window.addEventListener("storage", applyMastery);
+  window.addEventListener("pkb:mastery-change", applyMastery);
+</script>
 
 <style>
   .path-progress {
@@ -70,6 +124,14 @@ for (const milestone of milestones) {
     font-weight: 800;
   }
 
+  li[data-mastery="learning"] .step {
+    background: var(--color-amber);
+  }
+
+  li[data-mastery="mastered"] .step {
+    background: var(--color-green);
+  }
+
   a {
     display: grid;
     gap: 3px;
@@ -78,6 +140,36 @@ for (const milestone of milestones) {
     border-radius: var(--radius-md);
     padding: 12px 14px;
     background: var(--color-panel);
+  }
+
+  .node-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  small {
+    flex: 0 0 auto;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 2px 8px;
+    color: var(--color-muted);
+    background: var(--color-soft);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  li[data-mastery="learning"] small {
+    border-color: var(--color-amber);
+    color: var(--color-amber);
+    background: #fff8e6;
+  }
+
+  li[data-mastery="mastered"] small {
+    border-color: var(--color-green);
+    color: var(--color-green);
+    background: #eaf8f1;
   }
 
   a:hover {

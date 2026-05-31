@@ -219,16 +219,16 @@ works registry 已按低迁移成本路径 B 落地：
 | 组件 | 设计要求 | 当前状态 |
 |---|---|---|
 | SearchBox | `client:idle` | 满足 |
-| GraphView | `client:visible` | 当前为 `client:load`，需调整 |
+| GraphView | `client:visible` | 满足 |
 | CodeRunner | `client:visible` | 满足 |
 | AssessmentQuiz | `client:load` | 满足 |
 
 localStorage：
 
-- `pkb:mastery` 未实现。
-- `pkb:assessment` 未实现。
+- `pkb:mastery` 已实现：概念页写入掌握状态，路径页读取同一 key 点亮节点。
+- `pkb:assessment` 已实现基础持久化：保存测评答案和推荐结果。
 
-定位：加载策略基本正确，但进度点亮和测评持久化还没开始。
+定位：加载策略和本地持久化 key 已对齐 v1.0；测评题库仍是 3 题原型，尚未扩展为正式题库。
 
 ## 内容脚手架差距
 
@@ -258,8 +258,8 @@ localStorage：
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；当前环境无 Vercel 登录态或 token |
 | 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
-| 7 | 进度点亮 localStorage | 未完成 | 4-5 后做 |
-| 8 | 测评题库化 | 未完成 | 4-5 后做 |
+| 7 | 进度点亮 localStorage | 已完成第一版 | 概念页写 `pkb:mastery`，路径页点亮节点 |
+| 8 | 测评题库化 | 部分完成 | `pkb:assessment` 已持久化，题库仍需扩展 |
 | 9 | 路径规划拓扑排序 | 未完成 | 4-5 后做 |
 
 ## 近期执行顺序

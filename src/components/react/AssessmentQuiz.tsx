@@ -1,5 +1,5 @@
 import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { scoreAssessment, type AssessmentAnswer } from "../../lib/path-planner";
 import "./islands.css";
 
@@ -33,13 +33,60 @@ const questions = [
   }
 ] as const;
 
+const storageKey = "pkb:assessment";
+
+function readStoredAnswers(): AssessmentAnswer[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    const parsed = raw ? JSON.parse(raw) : null;
+    const answers = Array.isArray(parsed?.answers) ? parsed.answers : [];
+    return answers.slice(0, questions.length);
+  } catch {
+    return [];
+  }
+}
+
 export default function AssessmentQuiz() {
   const [answers, setAnswers] = useState<AssessmentAnswer[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const current = questions[answers.length];
   const done = answers.length === questions.length;
   const recommendation = done ? scoreAssessment(answers) : null;
 
+  useEffect(() => {
+    setAnswers(readStoredAnswers());
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) {
+      return;
+    }
+
+    if (answers.length === 0) {
+      window.localStorage.removeItem(storageKey);
+      return;
+    }
+
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        answers,
+        recommendation,
+        updatedAt: new Date().toISOString()
+      })
+    );
+  }, [answers, loaded, recommendation]);
+
   function choose(option: (typeof questions)[number]["options"][number]) {
+    if (!current) {
+      return;
+    }
+
     setAnswers((items) => [
       ...items,
       {

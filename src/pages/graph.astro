@@ -13,7 +13,7 @@ const graph = await buildGraph();
       <h1>知识图谱</h1>
     </div>
   </header>
-  <GraphView nodes={graph.nodes} edges={graph.edges} client:load />
+  <GraphView nodes={graph.nodes} edges={graph.edges} client:visible />
 </BaseLayout>
 
 <style>
