@@ -139,7 +139,7 @@ works registry 已落地：`src/content/works-registry.yaml` 保存作品稳定�
 
 - 6 维 Tab 全部有实质内容，不靠“暂未整理”占位。
 - 至少一段代码能在 CodeRunner 里跑通。
-- 至少一个 `worksRef` 对应的 registry 链接可打开，后续 CI 应加入 link check。
+- 至少一个 `worksRef` 对应的 registry 链接可打开；当前 `npm run link:check` 会检查静态站内链接，外部 URL 可访问性仍需后续网络型检查补齐。
 - 概念页源码 Lighthouse performance + accessibility 均不低于 90。
 - README 保留标杆页截图，作为 v1.0 视觉契约锚点。
 

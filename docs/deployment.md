@@ -23,6 +23,7 @@ npm run validate:relations
 npm run audit:concepts
 npm run test
 npm run build
+npm run link:check
 ```
 
 这些命令的通过条件和阻断语义如下：
@@ -33,6 +34,7 @@ npm run build
 | `npm run audit:concepts` | 无 concept audit issue | issue 时返回 `1` 并阻断 |
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
+| `npm run link:check` | `dist` 内部链接和 anchor 全部可解析 | 缺失页面、资源或 anchor 时返回 `1` 并阻断 |
 
 `npm run build` 会先运行 `build:relations` 生成 `src/generated/relations.json`，让概念页、路径页和图谱页在 Astro 静态构建期间消费同一份关系索引；静态构建结束后会再次运行 `build:relations`，把同一索引写入 `dist/relations.json` 作为部署产物。
 
@@ -53,7 +55,7 @@ npm run validate:relations -- --warning-exit-code=2
 
 Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命令；Vercel 只适合作为硬阻断部署 gate，继续使用 `npm run build`，并在合并前由本地或 GitHub Actions 跑完整前置检查。
 
-标杆页验收里的 link check 与 Lighthouse >= 90 还没有自动化脚本；在接入 GitHub Actions 前，只能作为人工 gate。后续新增脚本后，部署前置条件应补充 `npm run link:check` 和 `npm run lighthouse:beacons`，再把它们接入 PR 检查。
+标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。外部 URL 可访问性与 Lighthouse >= 90 还没有自动化脚本；在接入 GitHub Actions 前，只能作为人工 gate。后续新增脚本后，部署前置条件应补充 `npm run lighthouse:beacons`，再把它接入 PR 检查。
 
 ## CLI 部署
 
@@ -78,6 +80,7 @@ npx vercel --prod --token <VERCEL_TOKEN>
 - `npm.cmd run audit:concepts`
 - `npm.cmd run test`
 - `npm.cmd run build`
+- `npm.cmd run link:check`
 - `npx.cmd --yes vercel --version`
 
 `vercel whoami` 在当前环境中等待交互式登录并超时，且 `VERCEL_TOKEN` 未设置。因此当前仓库已经具备 Vercel 部署配置，但线上发布仍需要 Vercel 登录态、token，或在 Vercel 控制台完成 GitHub 仓库导入。
