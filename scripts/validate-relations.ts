@@ -320,6 +320,37 @@ for (const entry of projects) {
   reportMissing(errors, entry, "cases", asStringArray(entry.data.cases), caseIds);
   reportMissing(errors, entry, "people", asStringArray(entry.data.people), personIds);
 
+  if (!isUsefulString(entry.data.type)) {
+    errors.push(`${relative(root, entry.path)}: project.type is required and must be useful`);
+  }
+
+  if (!isUsefulString(entry.data.stage)) {
+    errors.push(`${relative(root, entry.path)}: project.stage is required and must be useful`);
+  }
+
+  if (!isUsefulString(entry.data.finalOutput)) {
+    errors.push(`${relative(root, entry.path)}: project.finalOutput is required and must be useful`);
+  }
+
+  if (!isUsefulString(entry.data.structure)) {
+    errors.push(`${relative(root, entry.path)}: project.structure is required and must be useful`);
+  }
+
+  const youWillLearn = asStringArray(entry.data.youWillLearn);
+  if (youWillLearn.length === 0 || youWillLearn.some((item) => !isUsefulString(item))) {
+    errors.push(`${relative(root, entry.path)}: project.youWillLearn must contain at least one useful item`);
+  }
+
+  const coreFlow = asStringArray(entry.data.coreFlow);
+  if (coreFlow.length === 0 || coreFlow.some((item) => !isUsefulString(item))) {
+    errors.push(`${relative(root, entry.path)}: project.coreFlow must contain at least one useful item`);
+  }
+
+  const upgradePath = asStringArray(entry.data.upgradePath);
+  if (upgradePath.length === 0 || upgradePath.some((item) => !isUsefulString(item))) {
+    errors.push(`${relative(root, entry.path)}: project.upgradePath must contain at least one useful item`);
+  }
+
   if (projectConcepts.length < 3) {
     errors.push(`${relative(root, entry.path)}: project.concepts must include at least three concepts`);
   }

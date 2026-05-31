@@ -25,15 +25,36 @@ const { Content } = await render(entry);
     ]}
   />
   <header class="detail-header">
-    <p class="eyebrow">{entry.data.difficulty}</p>
+    <p class="eyebrow">{entry.data.type} · {entry.data.stage}</p>
     <h1>{entry.data.title}</h1>
-    <p class="lead">{entry.data.outcome}</p>
+    <p class="lead">{entry.data.finalOutput}</p>
   </header>
   <section class="section content-flow">
     <Content />
-    <ol class="milestones">
-      {entry.data.milestones.map((item) => <li>{item}</li>)}
-    </ol>
+    <div class="project-brief">
+      <section>
+        <h2>你会学到</h2>
+        <ul>
+          {entry.data.youWillLearn.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+      <section>
+        <h2>结构</h2>
+        <p>{entry.data.structure}</p>
+      </section>
+      <section>
+        <h2>核心流程</h2>
+        <ol>
+          {entry.data.coreFlow.map((item) => <li>{item}</li>)}
+        </ol>
+      </section>
+      <section>
+        <h2>升级方向</h2>
+        <ul>
+          {entry.data.upgradePath.map((item) => <li>{item}</li>)}
+        </ul>
+      </section>
+    </div>
   </section>
   <section class="section">
     <div class="grid cols-3">
@@ -63,8 +84,25 @@ const { Content } = await render(entry);
     letter-spacing: 0;
   }
 
-  .milestones {
+  .project-brief {
     display: grid;
-    gap: 10px;
+    gap: 18px;
+  }
+
+  .project-brief section {
+    display: grid;
+    gap: 8px;
+  }
+
+  .project-brief h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+
+  .project-brief ul,
+  .project-brief ol {
+    display: grid;
+    gap: 8px;
+    margin: 0;
   }
 </style>

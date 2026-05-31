@@ -1,6 +1,23 @@
 ---
 title: 命令行通讯录
+type: cli
+stage: core
 description: 用 dataclass 保存联系人，用 JSON 文件持久化，并提供新增、搜索和校验。
+finalOutput: 做出一个小型 CLI 应用，串起输入校验、数据对象、文件读写和异常处理。
+youWillLearn:
+  - 用 dataclass 表达联系人这种固定结构数据。
+  - 用 JSON 文件保存和恢复列表数据。
+  - 用异常处理保护文件读取和输入校验。
+structure: 一个 contacts 模型、一个 JSON 存储层和一个命令行交互入口。
+coreFlow:
+  - 从 JSON 文件加载联系人列表。
+  - 校验用户输入的姓名和邮箱。
+  - 把联系人转成 dataclass 对象并追加保存。
+  - 搜索联系人并格式化显示结果。
+upgradePath:
+  - 增加删除、编辑和导入导出命令。
+  - 给存储层补覆盖率测试。
+  - 把 JSON 存储替换为 SQLite。
 outcome: 做出一个小型 CLI 应用，串起输入校验、数据对象、文件读写和异常处理。
 difficulty: core
 tracks: [automation, data]

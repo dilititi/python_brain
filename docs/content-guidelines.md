@@ -129,7 +129,7 @@
 
 v1.0 已移除 `expandsTo` 和 `works.note`。新增内容只使用 `extends` 和 `worksRef[].role`；如果在旧内容或脚本里看到旧字段，应视为迁移遗漏并修正。
 
-`summary` 和 `whyImportant` 已从 optional 升级为 required：`npm run audit:concepts` 必须返回 clean，缺字段或 TODO-like 内容会由审计和构建期校验阻塞。
+`summary` 和 `whyImportant` 已从 optional 升级为 required：`npm run audit:concepts` 必须返回 clean，缺字段或 TODO-like 内容会由审计和构建期校验阻塞。它们不是 warning 项；如果相关 warning 再次出现，应先核对 schema、`validate-relations` 和 `audit-concepts` 的真实行为。
 
 works registry 已落地：`src/content/works-registry.yaml` 保存作品稳定元数据，concept 使用 `worksRef[]` 引用。内联 `works[]` 只作为兼容回退保留，新内容不得再使用。同一作品重复出现时，以 registry 元数据为准，但概念侧 `role` 仍必须说明作品如何体现当前概念。
 

@@ -134,13 +134,20 @@ const projects = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
   schema: z.object({
     title: z.string(),
+    type: z.string(),
+    stage: level,
     description: z.string(),
-    outcome: z.string(),
-    difficulty: level,
+    youWillLearn: nonEmptyStringArray,
+    finalOutput: z.string(),
+    structure: z.string(),
+    coreFlow: nonEmptyStringArray,
     tracks: z.array(track).default([]),
     concepts: z.array(slugRef).min(3),
     cases: z.array(slugRef).default([]),
     people: z.array(slugRef).default([]),
+    upgradePath: nonEmptyStringArray,
+    outcome: z.string().optional(),
+    difficulty: level.optional(),
     milestones: z.array(z.string()).default([])
   })
 });

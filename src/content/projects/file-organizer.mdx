@@ -1,6 +1,23 @@
 ---
 title: 文件整理器
+type: automation
+stage: core
 description: 按后缀和日期扫描目录，把文件移动到不同文件夹。
+finalOutput: 得到一个安全预览、确认执行的本地自动化脚本。
+youWillLearn:
+  - 用 pathlib 遍历目录和识别文件后缀。
+  - 用函数把扫描、规划和执行拆开。
+  - 用 try-except 处理文件移动失败。
+structure: 一个扫描函数、一个整理计划生成函数和一个带确认步骤的执行入口。
+coreFlow:
+  - 扫描目标目录中的文件。
+  - 按后缀或日期生成移动计划。
+  - 打印预览，让用户确认。
+  - 执行移动并报告失败项。
+upgradePath:
+  - 增加 dry-run 和 undo 日志。
+  - 支持配置文件定义分类规则。
+  - 打包成可执行命令行工具。
 outcome: 得到一个安全预览、确认执行的本地自动化脚本。
 difficulty: core
 tracks: [automation]

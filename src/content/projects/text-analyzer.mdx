@@ -1,6 +1,23 @@
 ---
 title: 文本分析器
+type: data-tool
+stage: core
 description: 输入一段文本，输出词频、长度和高频词。
+finalOutput: 做出一个可复用的文本统计脚本，为后续 Web 页面或数据看板提供核心逻辑。
+youWillLearn:
+  - 用 list 和 dict 表达分词结果与词频表。
+  - 用 for 循环和推导式完成清洗与筛选。
+  - 把统计逻辑封装成可复用函数。
+structure: 一个文本清洗函数、一个词频统计函数、一个格式化输出入口。
+coreFlow:
+  - 接收原始文本输入。
+  - 清洗大小写和标点。
+  - 遍历词语并累计词频。
+  - 输出总词数、高频词和排序结果。
+upgradePath:
+  - 支持读取本地文本文件。
+  - 增加停用词配置。
+  - 暴露成 Web API 或小型数据看板。
 outcome: 做出一个可复用的文本统计脚本，为后续 Web 页面或数据看板提供核心逻辑。
 difficulty: core
 tracks: [beginner, data, ai]

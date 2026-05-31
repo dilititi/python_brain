@@ -24,6 +24,7 @@ npm run audit:concepts
 npm run test
 npm run build
 npm run link:check
+npm run link:external:inventory
 ```
 
 这些命令的通过条件和阻断语义如下：
@@ -31,7 +32,7 @@ npm run link:check
 | 命令 | 通过条件 | 阻断行为 |
 |---|---|---|
 | `npm run validate:relations` | 无 blocking error | error 时返回 `1` 并阻断；默认 warning-only 返回 `0` |
-| `npm run audit:concepts` | 无 concept audit issue | issue 时返回 `1` 并阻断 |
+| `npm run audit:concepts` | 无 concept audit issue | 脚本没有 warning-only 模式；任一 issue 返回 `1` 并阻断 |
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
 | `npm run link:check` | `dist` 内部链接和 anchor 全部可解析 | 缺失页面、资源或 anchor 时返回 `1` 并阻断 |
@@ -39,7 +40,9 @@ npm run link:check
 
 `npm run build` 会先运行 `build:relations` 生成 `src/generated/relations.json`，让概念页、路径页和图谱页在 Astro 静态构建期间消费同一份关系索引；静态构建结束后会再次运行 `build:relations`，把同一索引写入 `dist/relations.json` 作为部署产物。
 
-当前 `summary` / `whyImportant`、concept `worksRef` 引用与 `role`、case `standard` code version / `pitfalls` / `extensions`、project `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值、TODO-like 内容或 registry 引用缺失会阻断审计、关系校验或 Astro content schema。当前不保留 `summary` / `whyImportant` 的 warning-only 过渡状态。
+当前 `summary` / `whyImportant`、concept `worksRef` 引用与 `role`、case `standard` code version / `pitfalls` / `extensions`、project v1 字段（`type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]`）与 `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值、TODO-like 内容或 registry 引用缺失会阻断审计、关系校验或 Astro content schema。
+
+严格字段状态以源码和命令输出共同裁决：`src/content.config.ts` 必须声明 schema，`scripts/validate-relations.ts` 必须把缺失或无效内容作为 error，相关审计脚本必须返回非 0。当前 `summary` / `whyImportant` 不保留 warning-only 过渡状态；如果再次出现这两个字段的 warning 清单，应视为代码和文档脱节的回归，而不是可部署状态。
 
 后续 GitHub Actions 进入 production monitoring gate 时，可额外使用：
 
@@ -90,5 +93,7 @@ npx vercel --prod --token <VERCEL_TOKEN>
 - `npm.cmd run link:check`
 - `npm.cmd run link:external:inventory`
 - `npx.cmd --yes vercel --version`
+
+其中 `validate:relations` 输出 `Relations valid`，`audit:concepts` 输出 `Concept audit clean`；当前不存在 `summary` / `whyImportant` warning 库存。
 
 `vercel whoami` 在当前环境中等待交互式登录并超时，且 `VERCEL_TOKEN` 未设置。因此当前仓库已经具备 Vercel 部署配置，但线上发布仍需要 Vercel 登录态、token，或在 Vercel 控制台完成 GitHub 仓库导入。

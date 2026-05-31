@@ -1,6 +1,23 @@
 ---
 title: 天气提醒器
+type: automation
+stage: core
 description: 读取本地配置，调用天气接口，处理失败路径，并输出每日提醒。
+finalOutput: 得到一个能体现环境管理、配置读取、JSON 解析和异常处理的自动化脚本。
+youWillLearn:
+  - 用 venv 和 pip 管理接口请求依赖。
+  - 用 JSON 配置保存城市和接口参数。
+  - 用异常处理覆盖网络失败和脏响应。
+structure: 一个配置读取模块、一个天气请求函数、一个提醒格式化函数和一个 CLI 入口。
+coreFlow:
+  - 创建虚拟环境并安装请求库。
+  - 从 JSON 文件读取城市配置。
+  - 调用天气接口并解析响应。
+  - 在失败路径返回可理解的提醒。
+upgradePath:
+  - 增加定时任务。
+  - 支持多个城市和通知渠道。
+  - 把接口访问封装成可测试的服务层。
 outcome: 得到一个能体现环境管理、配置读取、JSON 解析和异常处理的自动化脚本。
 difficulty: core
 tracks: [automation, web, ai]

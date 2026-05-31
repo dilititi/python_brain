@@ -1,6 +1,23 @@
 ---
 title: 迷你 Web API
+type: web-api
+stage: advanced
 description: 用装饰器风格的路由写出几个可访问的接口。
+finalOutput: 理解函数、装饰器、JSON 响应和框架路由之间的关系，并做出一个小型 API 原型。
+youWillLearn:
+  - 用函数定义请求处理逻辑。
+  - 用装饰器把函数注册到路由。
+  - 用 JSON 和异常处理组织响应边界。
+structure: 一个应用入口、若干路由函数、一个业务函数模块和一个错误响应辅助函数。
+coreFlow:
+  - 创建应用并注册路由。
+  - 在路由函数中读取参数。
+  - 调用业务函数生成字典结果。
+  - 返回 JSON 响应并处理错误输入。
+upgradePath:
+  - 把数据校验迁移到 Pydantic 模型。
+  - 增加测试客户端用例。
+  - 拆分 routers、services 和 schemas 目录。
 outcome: 理解函数、装饰器、JSON 响应和框架路由之间的关系。
 difficulty: advanced
 tracks: [web, ai]

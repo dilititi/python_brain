@@ -21,12 +21,12 @@
 
 ## 当前定位
 
-当前项目已经不是 12/5/3/5 的初始 MVP，而是一个内容规模已经提前扩张、治理层尚未收紧的原型：
+当前项目已经不是 12/5/3/5 的初始 MVP，而是一个内容规模已经提前扩张、v1.0 工程契约基本落地的知识外脑原型：
 
 - 内容规模：52 concepts / 18 cases / 7 projects / 6 people / 5 paths。
 - 架构形态：Astro + MDX + React Islands 已成立。
 - 关系机制：已生成构建期关系索引，概念页、路径页和图谱页消费同一份 `src/generated/relations.json`，部署产物同步输出 `dist/relations.json`。
-- 最大风险：内容扩张速度已经超过 schema、校验、脚手架和页面布局契约。
+- 主要外部风险：Vercel 发布仍需要登录态、token，或在 Vercel 控制台完成 GitHub 仓库导入。
 
 结论：项目当前处于“v1.0 工程契约基本落地，剩余体验项继续收口”的阶段。下一步不应继续扩内容，而应优先补齐 Vercel 外部部署确认。
 
@@ -34,21 +34,21 @@
 
 | 原则 | 当前状态 | 判断 |
 |---|---|---|
-| 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`worksRef[].role`、`history[]`、`language` category、`extends` 已对齐 v1.0 裁决 | 部分满足 |
-| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects | 部分满足 |
+| 内容模型清晰性 > 功能丰富度 | 内容量已经较多，`worksRef[].role`、`history[]`、`language` category、`extends`、Project v1 字段已对齐 v1.0 裁决 | 基本满足 |
+| 构建期校验 > 运行时容错 | 已有 `validate-relations.ts`，已覆盖 DAG、works AND、history/pep、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects | 基本满足 |
 | 静态优先 > 交互优先 | Astro 静态页面为主，Islands 局部交互 | 满足 |
 | 数据写一次，关系自动算 | 概念页反向聚合 cases/projects/people 已成立；works registry 已落地，concept 侧只保留 `worksRef[].role` | 基本满足 |
 | 学习路径连贯性 > 概念覆盖数 | 路径已扩展，milestone 已包含 cases/projects；朴素拓扑规划已落地，默认路径会按 prerequisites 重排 | 基本满足 |
 
 ## Schema 差距
 
-当前 `src/content.config.ts` 与 v1.0 目标差距较大。
+当前 `src/content.config.ts` 已落地 v1.0 的关键字段裁决，剩余差异主要是兼容字段和后续展示增强。
 
 ### Concept
 
 当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`worksRef`、`works`（兼容回退）、`history`、`tags`、`updatedAt`、`codeExamples`。
 
-v1.0 缺口：
+v1.0 状态：
 
 - `summary` 已补齐 52 个概念并升级为 required，限制 80 字。
 - `whyImportant` 已补齐 52 个概念并升级为 required，限制 200 字。
@@ -66,7 +66,7 @@ v1.0 缺口：
 - `mentalModel` 是一句话心智模型或类比，可选但应避免和 `summary` 重复。
 - `whyImportant` 是必填的 200 字以内场景价值。
 
-定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张，优先继续收紧 case 和 person 质量门禁。
+定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张，后续优先清理兼容字段而不是继续扩内容。
 
 ### Case
 
@@ -80,19 +80,14 @@ v1.0 剩余：
 
 ### Project
 
-当前字段：`title`、`description`、`outcome`、`difficulty`、`tracks`、`concepts`、`cases`、`people`、`milestones`。
+当前字段：`title`、`type`、`stage`、`description`、`youWillLearn`、`finalOutput`、`structure`、`coreFlow`、`tracks`、`concepts`、`cases`、`people`、`upgradePath`、`outcome`、`difficulty`、`milestones`。
 
-v1.0 缺口：
+v1.0 状态：
 
-- 缺 `type`。
-- 缺 `stage`。
-- `outcome` 应迁移为 `finalOutput` 或保留为别名。
-- 缺 `youWillLearn[]`。
-- 缺 `structure`。
-- 缺 `coreFlow[]`。
-- 缺 `upgradePath[]`。
+- `type`、`stage`、`youWillLearn[]`、`finalOutput`、`structure`、`coreFlow[]`、`upgradePath[]` 已补齐，并进入 schema 与关系校验。
+- `outcome`、`difficulty`、`milestones` 作为旧页面/内容兼容字段暂留。
 
-定位：Project 已强制 `concepts.length >= 3`，能做关系承载；下一步是补 type/stage/structure/coreFlow/upgradePath，让它成为可执行项目模板。
+定位：Project 已从“关系承载卡片”升级为可执行项目模板；后续可在确认页面稳定后删除 `outcome`、`difficulty`、`milestones` 兼容字段。
 
 ### Person
 
@@ -129,6 +124,7 @@ v1.0 状态：
 - case 必须 `concepts >= 2`，且必须包含有用的 `standard` code version。
 - case 必须包含至少一个 `pitfalls[]` 和 `extensions[]`。
 - case 至少支撑一个 project。
+- project 必须包含 `type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]`。
 - person 至少连接 3 个 concept。
 - project 至少连接 3 个 concept。
 - person 必须有 `role` 和 `field`。
@@ -141,7 +137,7 @@ v1.0 仍缺：
 - 孤立节点只 warning 不阻塞的输出分层；约定本地 warning 退出码保持 0，CI 可用 `--warning-exit-code=2` 标记 warning-only 状态并发送通知，但不阻断 merge。
 - 错误输出需要更系统地包含文件路径和具体字段。
 
-定位：现有校验方向正确，但还停留在“关系完整性校验”，未达到“内容质量门禁”。
+定位：现有校验已经覆盖核心关系完整性和主要内容质量门禁；剩余工作集中在 warning 分层、错误信息可读性和兼容字段清理。
 
 ## 双向索引差距
 
@@ -253,7 +249,7 @@ localStorage：
 | 2 | 写 content-guidelines.md | 已完成第一版 | 后续随标杆页补细则 |
 | 3 | 打磨 3 个概念页为展示标杆 | 已完成第一版 | 已选 `decorator`、`python-language`、`function-parameters`，固定 6 Tab 布局已补 |
 | 4 | 部署 main 到 Vercel | 配置已补，待外部部署确认 | 已添加 `vercel.json` 和部署说明；内部 link check、外部 URL 监控与三页 Lighthouse 已自动化，当前环境无 Vercel 登录态或 token |
-| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects |
+| 5 | 收紧校验（AND + DAG）+ 单测 | 核心 strict 项已完成 | 已覆盖 AND、DAG、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects |
 | 6 | 内容扩到 20/10/5/5 | 已远超（concepts 2.6x） | 当前 52/18/7/6/5，暂停扩内容 |
 | 7 | 进度点亮 localStorage | 已完成第一版 | 概念页写 `pkb:mastery`，路径页点亮节点 |
 | 8 | 测评题库化 | 已完成第一版 | `assessment-bank.ts` 提供 30 题场景题库，测试校验题库规模、唯一 id 和概念引用 |
@@ -299,6 +295,7 @@ localStorage：
 - `summary` / `whyImportant` 已从 warning 升级为 error，并在 schema 中改为 required。
 - case `concepts >= 2` 与 `standard` code version 已进入 schema 和关系校验。
 - case `pitfalls[]` / `extensions[]` 已进入 schema 和关系校验。
+- project `type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]` 已进入 schema 和关系校验。
 - project `concepts >= 3` 已进入 schema 和关系校验。
 - person `sources >= 1` 已进入 schema 和关系校验，且 URL 必须是 `https://`。
 - person `role` / `field` 已进入 schema 和关系校验。
@@ -308,10 +305,10 @@ localStorage：
 
 - `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
 - concept 内联 `works[]` 兼容字段仍需后续删除；当前数据已迁移到 `worksRef[]` + `works-registry.yaml`。
-- 旧兼容字段清理：case `difficulty`、person `title` / `roles` / `links`。
+- 旧兼容字段清理：case `difficulty`、project `outcome` / `difficulty` / `milestones`、person `title` / `roles` / `links`。
 - person `quote?` 是否进入展示面。
 
-works AND、prerequisites DAG、summary/whyImportant、case standard/pitfalls/extensions、project concepts、person sources/role/field、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
+works AND、prerequisites DAG、summary/whyImportant、case standard/pitfalls/extensions、project v1 字段、project concepts、person sources/role/field、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是兼容字段清理和展示体验，不再阻塞当前 v1.0 内容治理。
 
 ## 审查同步清单
 
@@ -326,4 +323,4 @@ works AND、prerequisites DAG、summary/whyImportant、case standard/pitfalls/ex
 
 ## 总结
 
-当前项目最准确的位置是：可运行的知识外脑原型，内容已超 MVP，但工程契约未冻结。下一阶段不是继续追求覆盖数，而是把 v1.0 的 schema、脚手架、编辑准则和 3 个标杆概念页做实。否则后续内容越多，迁移成本越高。
+当前项目最准确的位置是：v1.0 工程契约已经基本落地的知识外脑原型。内容已超 MVP，主要交付项已完成第一版；下一阶段不应继续追求覆盖数，而应先完成 Vercel 外部部署确认，并把旧兼容字段作为 v1.x 清理项逐步移除。
