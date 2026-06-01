@@ -37,8 +37,21 @@ history:
     pep: PEP 557
     event: Python 3.7 引入 dataclasses：PEP 557 让数据类进入标准库，减少样板代码。
 codeExamples:
-  - title: 数据记录
-    description: dataclass 适合表达结构明确的数据对象。
+  - title: naive
+    description: 手写数据类样板时，__init__ 和 __repr__ 会淹没真正的字段。
+    code: |
+      class Contact:
+          def __init__(self, name, email):
+              self.name = name
+              self.email = email
+
+          def __repr__(self):
+              return f"Contact(name={self.name!r}, email={self.email!r})"
+
+      contact = Contact("Ada", "ada@example.com")
+      print(contact)
+  - title: standard
+    description: dataclass 让字段成为主角，常见样板方法自动生成。
     code: |
       from dataclasses import dataclass
 
@@ -49,5 +62,21 @@ codeExamples:
 
       contact = Contact("Ada", "ada@example.com")
       print(contact)
+  - title: production
+    description: 工程版使用冻结对象和 __post_init__ 校验，让数据记录更可靠。
+    code: |
+      from dataclasses import dataclass
+
+      @dataclass(frozen=True)
+      class Contact:
+          name: str
+          email: str
+
+          def __post_init__(self) -> None:
+              if "@" not in self.email:
+                  raise ValueError("email must contain @")
+
+      contact = Contact("Ada", "ada@example.com")
+      print(contact.email)
 ---
 dataclass 把装饰器和 OOP 连在一起。它让新人看到：装饰器不只服务 Web 路由，也可以直接改善普通数据对象的写法。
