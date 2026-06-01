@@ -57,7 +57,7 @@ const tabs = [
   <MasteryToggle conceptId={entry.id} client:idle />
 
   <div class="concept-workbench" data-empty-facets={JSON.stringify(emptyFacets)} data-concept-id={entry.id}>
-    <nav class="facet-tabs" aria-label="概念六维内容">
+    <nav class="facet-tabs" aria-label="概念六维内容" role="tablist">
       {tabs.map((tab, index) => (
         <a href={`#${tab.id}`} class:list={["facet-tab", index === 0 && "is-active"]} data-tab-target={tab.id}>
           {tab.label}
