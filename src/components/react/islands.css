@@ -1,6 +1,5 @@
 .island-toolbar button,
 .button-link,
-.example-tabs button,
 .quiz-options button {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm);
@@ -15,7 +14,6 @@
 }
 
 .graph-shell,
-.code-runner,
 .quiz-panel,
 .review-card {
   border: 1px solid var(--color-line);
@@ -44,7 +42,6 @@
 
 .island-toolbar button,
 .button-link,
-.example-tabs button,
 .quiz-options button {
   display: inline-flex;
   align-items: center;
@@ -55,8 +52,7 @@
   font-size: 14px;
 }
 
-.island-toolbar button.active,
-.example-tabs button.active {
+.island-toolbar button.active {
   border-color: var(--color-blue);
   color: var(--color-blue);
   background: #eff6ff;
@@ -66,38 +62,10 @@
   text-decoration: none;
 }
 
-.code-runner p,
 .quiz-panel p,
 .review-card p {
   margin: 0 0 12px;
   color: var(--color-muted);
-}
-
-.example-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.code-runner textarea {
-  width: 100%;
-  min-height: 220px;
-  resize: vertical;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  color: #f8fafc;
-  background: #101828;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.55;
-}
-
-.runner-output {
-  min-height: 90px;
-  margin: 0;
-  white-space: pre-wrap;
 }
 
 .quiz-progress {

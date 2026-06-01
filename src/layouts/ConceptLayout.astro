@@ -1,11 +1,11 @@
 ---
 import { render } from "astro:content";
 import Breadcrumb from "../components/astro/Breadcrumb.astro";
+import CodeRunner from "../components/astro/CodeRunner.astro";
 import ConceptHeader from "../components/astro/ConceptHeader.astro";
 import FacetSection from "../components/astro/FacetSection.astro";
 import MasteryToggle from "../components/astro/MasteryToggle.astro";
 import RelationCard from "../components/astro/RelationCard.astro";
-import CodeRunner from "../components/react/CodeRunner";
 import type { ConceptEntry, ConceptRelations } from "../lib/relations";
 import BaseLayout from "./BaseLayout.astro";
 
@@ -87,7 +87,7 @@ const tabs = [
         <div id="code" class="concept-panel" data-tab-panel="code">
           <FacetSection title="代码示例" eyebrow="Code" tone="green">
             {entry.data.codeExamples.length > 0 ? (
-              <CodeRunner examples={entry.data.codeExamples} client:visible />
+              <CodeRunner examples={entry.data.codeExamples} />
             ) : (
               <p class="empty-facet">暂未整理</p>
             )}
