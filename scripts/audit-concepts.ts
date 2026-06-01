@@ -20,6 +20,10 @@ for (const file of files) {
   const data = matter(raw).data;
   const label = relative(root, path);
 
+  if ("description" in data) {
+    issues.push(`${label}: description is removed; use summary for concept card text`);
+  }
+
   if (!isUsefulString(data.summary)) {
     issues.push(`${label}: summary is missing, empty, or TODO-like`);
   }
@@ -60,7 +64,7 @@ for (const file of files) {
 }
 
 if (issues.length === 0) {
-  console.log("Concept audit clean: no summary/whyImportant, worksRef, or transition-field issues.");
+  console.log("Concept audit clean: no description, summary/whyImportant, worksRef, or transition-field issues.");
 } else {
   console.error(`Concept audit issues (${issues.length}):`);
   console.error(issues.join("\n"));

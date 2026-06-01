@@ -1,6 +1,5 @@
 ---
 title: sys.path 与模块查找路径
-description: import 会沿着 sys.path 查找模块，路径顺序决定了 Python 能导入什么。
 summary: sys.path 是 import 的路线图；导入失败时先看解释器正在搜索哪些目录。
 whyImportant: “明明安装了包却 import 不了”常常不是语法错，而是解释器、虚拟环境或运行目录和你想的不一样。
 definition: sys.path 是 Python 导入系统用于查找模块和包的路径列表，由脚本位置、环境变量、标准库、site-packages 等来源组成。

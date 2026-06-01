@@ -131,7 +131,6 @@ function today() {
 function template(options: Required<Options>) {
   return `---
 title: ${options.title}
-description: "TODO: 用一句话说明这个知识点解决什么问题。"
 summary: "TODO: 80 字以内说明最小心智模型。"
 whyImportant: "TODO: 200 字以内说明它在真实场景里为什么重要。"
 definition: "TODO: 写清楚定义。"

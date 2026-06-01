@@ -15,7 +15,7 @@ const concepts = await getCollection("concepts");
   </header>
   <div class="grid cols-3">
     {concepts.map((entry) => (
-      <RelationCard href={`/concepts/${entry.id}/`} title={entry.data.title} description={entry.data.description} meta={entry.data.category} />
+      <RelationCard href={`/concepts/${entry.id}/`} title={entry.data.title} description={entry.data.summary} meta={entry.data.category} />
     ))}
   </div>
 </BaseLayout>

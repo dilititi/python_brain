@@ -66,7 +66,6 @@ const concepts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/concepts" }),
   schema: z.object({
     title: z.string(),
-    description: z.string(),
     summary: z.string().max(80),
     whyImportant: z.string().max(200),
     definition: z.string(),

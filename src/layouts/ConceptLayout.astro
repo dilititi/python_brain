@@ -39,7 +39,7 @@ const tabs = [
 ];
 ---
 
-<BaseLayout title={entry.data.title} description={entry.data.description}>
+<BaseLayout title={entry.data.title} description={entry.data.summary}>
   <Breadcrumb
     items={[
       { label: "首页", href: "/" },
@@ -49,7 +49,7 @@ const tabs = [
   />
   <ConceptHeader
     title={entry.data.title}
-    description={entry.data.description}
+    description={entry.data.summary}
     category={entry.data.category}
     level={entry.data.level}
     tracks={entry.data.tracks}
@@ -186,7 +186,7 @@ const tabs = [
           {relations.prerequisites.length > 0 ? (
             <div class="sidebar-list">
               {relations.prerequisites.map((item) => (
-                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="前置" />
+                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.summary} meta="前置" />
               ))}
             </div>
           ) : (
@@ -198,7 +198,7 @@ const tabs = [
           {relations.related.length > 0 ? (
             <div class="sidebar-list">
               {relations.related.map((item) => (
-                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="相关" />
+                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.summary} meta="相关" />
               ))}
             </div>
           ) : (
@@ -210,7 +210,7 @@ const tabs = [
           {relations.extends.length > 0 ? (
             <div class="sidebar-list">
               {relations.extends.map((item) => (
-                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="延伸" />
+                <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.summary} meta="延伸" />
               ))}
             </div>
           ) : (

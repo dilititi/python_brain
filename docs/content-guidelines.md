@@ -37,13 +37,12 @@
 
 概念页文本字段的边界如下：
 
-- `description`：旧列表页/SEO 描述字段，标记为 deprecated；后续由 `scripts/migrate-description-to-summary.ts` 清理仍依赖 `description` 的内容，并从 schema 删除。
 - `summary`：必填，80 字以内，一句话定义或最小心智模型。
 - `definition`：概念页定义区的核心解释，保持短而准；更长解释放 MDX 正文。
 - `mentalModel`：一句话心智模型或类比，可选但应具体，避免和 `summary` 重复。
 - `whyImportant`：必填，200 字以内，落到具体场景。
 
-如果 `definition` 和 `mentalModel` 难以区分，优先让 `definition` 写边界和反例，让 `mentalModel` 只保留一句可记忆的类比。
+concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜索摘要统一使用 `summary`，避免同一个概念同时维护两句相近短描述。如果 `definition` 和 `mentalModel` 难以区分，优先让 `definition` 写边界和反例，让 `mentalModel` 只保留一句可记忆的类比。
 
 ## 六维内容边界
 
@@ -83,6 +82,7 @@
 
 人物不是装饰，而是记忆锚点。人物页必须满足：
 
+- 当前人物字段全集为：`name`、`role`、`field`、`description`、`quote?`、`concepts[]`、`works[]`、`sources[]`。
 - `role` 说明这个人和 Python 生态的核心关系。
 - `field` 说明主要领域，避免只写头衔。
 - `quote?` 可选；若填写，必须是能帮助记住此人风格或贡献的短句，不能拿普通头衔凑数。

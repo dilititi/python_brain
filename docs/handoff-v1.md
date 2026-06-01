@@ -51,6 +51,7 @@
 当前最重要的设计事实：
 
 - `summary` / `whyImportant` 已是严格字段，不是 warning。
+- concept frontmatter 已移除 `description`，列表卡片、SEO 描述和搜索摘要统一使用 `summary`。
 - concept 侧作品只使用 `worksRef[]`，内联 `works[]` 已删除。
 - `works.note` 已删除，统一使用 `worksRef[].role`。
 - `history` 是事件数组，每项用 `year?`、`pep?`、`event`、`source?`，不是单对象。
@@ -94,10 +95,8 @@ rg -n "expandsTo|works.note|works\\[\\]|difficulty|outcome|firstAppeared|roles|l
 
 1. 完成 Vercel 外部部署确认。
 2. 在 Vercel/GitHub Actions 上确认 static gates、Lighthouse beacon、external URL monitor 的运行状态。
-3. 清理 concept `description` 的语义重叠：先写迁移脚本 `scripts/migrate-description-to-summary.ts`，确认页面仍能显示合适摘要后，再考虑从 schema 删除。
-4. 优化 `validate-relations.ts` 的错误输出，让每条失败都稳定包含文件路径、字段名和修复建议。
-5. 决定是否把三页标杆的 `naive` / `standard` / `production` 代码示例要求推广到全部 52 个概念。
-6. 继续打磨页面体验：图谱分层、搜索体验、测评推荐落地页，但这些都不是 v1.0 阻塞项。
+3. 决定是否把三页标杆的 `naive` / `standard` / `production` 代码示例要求推广到全部 52 个概念。
+4. 继续打磨页面体验：图谱分层、搜索体验、测评推荐落地页，但这些都不是 v1.0 阻塞项。
 
 ## 常用验证命令
 
@@ -144,7 +143,6 @@ npm run validate:relations -- --warning-exit-code=2
 
 - Vercel 无法在当前环境直接完成登录发布。
 - 内容已超 MVP，任何新增内容都可能放大维护成本。
-- `description` / `summary` / `definition` / `mentalModel` / `whyImportant` 仍有语义相邻问题，虽已文档化，但还未做最终字段瘦身。
 - 三版本代码示例目前只对三页标杆强制，不代表全部概念都达到同等展示质量。
 - 外部 URL 可访问性依赖网络，只适合作为手动或定时监控，不应作为 Vercel build 的硬阻断。
 

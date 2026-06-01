@@ -7,7 +7,7 @@ export async function getSearchDocuments() {
     ...concepts.map((entry) => ({
       id: `concept:${entry.id}`,
       title: entry.data.title,
-      description: entry.data.description,
+      description: entry.data.summary,
       href: `/concepts/${entry.id}/`,
       kind: "知识点"
     })),

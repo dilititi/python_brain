@@ -63,7 +63,7 @@ const codeVersions = entry.data.codeVersions;
   <section class="section">
     <div class="grid cols-3">
       {concepts.map((item) => (
-        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.description} meta="concept" />
+        <RelationCard href={`/concepts/${item.id}/`} title={item.data.title} description={item.data.summary} meta="concept" />
       ))}
       {projects.map((item) => (
         <RelationCard href={`/projects/${item.id}/`} title={item.data.title} description={item.data.description} meta="project" />

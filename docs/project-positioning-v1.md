@@ -42,11 +42,11 @@
 
 ## Schema 差距
 
-当前 `src/content.config.ts` 已落地 v1.0 的关键字段裁决，剩余差异主要是 `description` 后续迁移和展示增强。
+当前 `src/content.config.ts` 已落地 v1.0 的关键字段裁决，剩余差异主要是展示增强和错误输出体验。
 
 ### Concept
 
-当前字段：`title`、`description`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`worksRef`、`history`、`tags`、`updatedAt`、`codeExamples`。
+当前字段：`title`、`summary`、`whyImportant`、`definition`、`mentalModel`、`category`、`level`、`tracks`、`prerequisites`、`related`、`extends`、`appliedIn`、`people`、`worksRef`、`history`、`tags`、`updatedAt`、`codeExamples`。
 
 v1.0 状态：
 
@@ -57,16 +57,16 @@ v1.0 状态：
 - `history` 保留数组形态，每项为 `{year?, pep?, event, source?}`，用真实标杆页反向验证后裁决优于单对象；`source` 若填写必须为 `https://` URL。
 - `tags` 已作为可选默认字段加入，但未全量补内容。
 - `updatedAt` 已作为可选日期字段加入，但旧内容未全量补齐。
+- `description` 已通过 `scripts/migrate-description-to-summary.ts` 从 concept frontmatter 中移除；概念卡片、搜索摘要和 SEO 描述统一使用 `summary`。
 
 字段语义边界仍需继续收敛：
 
-- `description` 是旧列表页/SEO 描述字段，标记为 deprecated；后续迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的内容，再从 schema 删除。
 - `summary` 是必填的 80 字以内一句话定义。
 - `definition` 承载核心解释；更长解释进入 MDX 正文。
 - `mentalModel` 是一句话心智模型或类比，可选但应避免和 `summary` 重复。
 - `whyImportant` 是必填的 200 字以内场景价值。
 
-定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张，后续优先清理 `description` 语义冗余而不是继续扩内容。
+定位：Concept schema 已完成关键字段裁决，`summary` / `whyImportant` 已进入阻塞校验，`description` 语义冗余已清理；但 52 个概念远超 20 个 MVP 目标，仍必须冻结扩张。
 
 ### Case
 
@@ -132,11 +132,11 @@ v1.0 状态：
 - path milestone 必须包含至少一个 case 和 project。
 - 孤立节点和断开内容图只输出 warning，不阻塞本地校验；CI 可用 `--warning-exit-code=2` 标记。
 
-v1.0 仍缺：
+v1.0 状态：
 
-- 错误输出需要更系统地包含文件路径和具体字段。
+- 阻塞错误输出已标准化为 `file | field | problem | fix` 三件套，便于内容作者直接定位和修复。
 
-定位：现有校验已经覆盖核心关系完整性和主要内容质量门禁；剩余工作集中在 warning 分层、错误信息可读性和兼容字段清理。
+定位：现有校验已经覆盖核心关系完整性和主要内容质量门禁；剩余工作集中在 warning 分层和展示体验。
 
 ## 双向索引差距
 
@@ -230,7 +230,7 @@ localStorage：
 - 生成后默认运行关系校验，并列出待补字段。
 - 已加内容冻结闸门：写入新概念必须显式设置 `PKB_ALLOW_NEW_CONCEPTS=1`。
 
-定位：脚手架第一版已完成。后续随兼容字段清理和 path planner 继续微调。
+定位：脚手架第一版已完成。后续随 schema 演进和 path planner 继续微调。
 
 ## 内容编辑准则差距
 
@@ -303,10 +303,9 @@ localStorage：
 
 剩余收紧项：
 
-- `description` 字段仍需后续删除；迁移脚本 `scripts/migrate-description-to-summary.ts` 负责清理仍依赖 `description` 的概念。
-- 错误输出仍可继续优化，让每条失败更稳定地包含文件路径、字段名和修复提示。
+- 可继续为 warning-only 项补更细的字段路径和行动建议。
 
-works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是 `description` 迁移、错误信息可读性和展示体验，不再阻塞当前 v1.0 内容治理。
+works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExamples、case standard/pitfalls/extensions/sourceUrl、project v1 字段、project concepts、person sources/role/field/quote、path milestone cases/projects 已经是阻塞校验。剩余收紧项主要是 warning 分层和展示体验，不再阻塞当前 v1.0 内容治理。
 
 ## 审查同步清单
 
@@ -321,4 +320,4 @@ works AND、prerequisites DAG、summary/whyImportant、showcase concept codeExam
 
 ## 总结
 
-当前项目最准确的位置是：v1.0 工程契约已经基本落地的知识外脑原型。内容已超 MVP，主要交付项已完成第一版；下一阶段不应继续追求覆盖数，而应先完成 Vercel 外部部署确认，并处理 `description` 这类仍有语义重叠的遗留字段。
+当前项目最准确的位置是：v1.0 工程契约已经基本落地的知识外脑原型。内容已超 MVP，主要交付项已完成第一版；下一阶段不应继续追求覆盖数，而应先完成 Vercel 外部部署确认，并继续打磨展示体验与 warning 分层。
