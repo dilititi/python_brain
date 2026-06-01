@@ -1,6 +1,6 @@
 # 内容编辑准则
 
-本准则用于 Python 知识外脑 v1.0 内容生产。
+本准则用于 Python 知识外脑 v1.x 内容生产。
 
 ## 目录
 
@@ -59,11 +59,25 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 
 ## 代码示例
 
-案例代码应优先提供三种版本：
+概念页继续使用 `codeExamples` 字段。`codeVersions` 只属于 case，不要迁移到 concept。
+
+非 `language` 概念在 v1.1 目标状态下必须提供三种版本：
 
 - `naive`：新人容易写出的直接版本，用来暴露问题。
 - `standard`：推荐教学版本，必须存在。
 - `production`：更接近真实项目的版本，可以加入异常处理、类型注解、日志或边界条件。
+
+当前处于 v1.1 warning 阶段：`npm run audit:concepts` 会列出 `codeExamples` 缺口，但默认不阻断；`npm run audit:concepts -- --strict-code-examples` 用于发布前模拟 strict gate。等 52 个概念补齐后，再把 codeExamples 升级为阻塞校验。
+
+`language` 概念豁免三版本，不强行凑 `naive` / `standard` / `production`。它们只要求至少一段可在 Pyodide 跑通且有可观察输出的展示性代码，例如 `import this` 或 `import sys; print(sys.version_info)`；禁止只写注释或不可执行演示文本。
+
+三版本质量标准：
+
+- `naive` 必须暴露真实新人问题，不能只是把 `standard` 写差。
+- `standard` 是推荐教学版本，清楚展示当前概念。
+- `production` 必须从 `standard` 演进，并至少包含异常处理、类型注解、日志或边界条件之一。
+- 三版本必须围绕同一场景逐步演进；`production` 不能换成无关实现思路。
+- 所有 `runnable !== false` 的代码必须通过 `npm run test:code-examples`。
 
 代码应短到能在页面里读完，复杂上下文放到案例页或项目页。
 
@@ -139,7 +153,7 @@ works registry 已落地：`src/content/works-registry.yaml` 保存作品稳定�
 标杆概念页必须满足：
 
 - 6 维 Tab 全部有实质内容，不靠“暂未整理”占位。
-- 必须包含 `naive` / `standard` / `production` 三段代码示例，且至少一段代码能在 CodeRunner 里跑通。
+- 非 `language` 标杆必须包含 `naive` / `standard` / `production` 三段代码示例；`language` 标杆至少要有一段有可观察输出的展示性代码。所有 runnable 示例必须通过 `npm run test:code-examples`。
 - 至少一个 `worksRef` 对应的 registry 链接可打开；当前 `npm run link:check` 会检查静态站内链接，`npm run link:external` 会在手动或每周 CI 监控中检查 content 外部 URL 可访问性。
 - 概念页 Lighthouse performance + accessibility 均不低于 90；三页标杆由 GitHub Actions 的 `lighthouse-beacons` job 自动检查。
 - README 保留标杆页截图，作为 v1.0 视觉契约锚点。

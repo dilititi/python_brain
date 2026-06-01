@@ -12,6 +12,7 @@
     "link:external:inventory": "tsx scripts/external-link-check.ts",
     "preview": "astro preview",
     "test": "tsx --test tests/*.test.ts",
+    "test:code-examples": "tsx scripts/test-code-examples.ts",
     "validate:relations": "tsx scripts/validate-relations.ts",
     "audit:concepts": "tsx scripts/audit-concepts.ts",
     "migrate:works-role": "tsx scripts/migrate-works-note-to-role.ts",
@@ -35,6 +36,7 @@
     "@astrojs/check": "^0.9.9",
     "@types/node": "^25.9.1",
     "gray-matter": "^4.0.3",
+    "pyodide": "^0.29.4",
     "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   }
