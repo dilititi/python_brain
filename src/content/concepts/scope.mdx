@@ -35,17 +35,56 @@ history:
     pep: PEP 227
     event: 嵌套作用域：PEP 227 让 Python 的嵌套函数作用域模型更完整。
 codeExamples:
-  - title: LEGB
-    description: 内层函数可以读取外层函数里的名字。
+  - title: naive
+    description: 在函数里给同名变量赋值时，Python 会把它当作局部变量，导致读取外层值失败。
     code: |
-      def outer():
-          label = "outer"
+      count = 0
 
-          def inner():
-              return label
+      def increment():
+          try:
+              count = count + 1
+          except UnboundLocalError as error:
+              print(type(error).__name__)
 
-          return inner()
+      increment()
+  - title: standard
+    description: nonlocal 让内层函数明确修改外层函数作用域里的名字。
+    code: |
+      def make_counter():
+          count = 0
 
-      print(outer())
+          def increment():
+              nonlocal count
+              count += 1
+              return count
+
+          return increment
+
+      counter = make_counter()
+      print(counter())
+      print(counter())
+  - title: production
+    description: 工程版把作用域状态藏在闭包里，并为起始值和步长设置边界。
+    code: |
+      from collections.abc import Callable
+
+      def make_counter(start: int = 0) -> Callable[[int], int]:
+          if start < 0:
+              raise ValueError("start cannot be negative")
+
+          count = start
+
+          def increment(step: int = 1) -> int:
+              nonlocal count
+              if step <= 0:
+                  raise ValueError("step must be positive")
+              count += step
+              return count
+
+          return increment
+
+      counter = make_counter()
+      print(counter())
+      print(counter(2))
 ---
 作用域是闭包、装饰器和全局变量问题的前置节点。很多“变量为什么不是我想的值”都和作用域有关。

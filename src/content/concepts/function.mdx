@@ -36,16 +36,47 @@ history:
   - year: 1991
     event: def 语法随语言发布：函数一直是 Python 把脚本组织成可维护程序的核心机制。
 codeExamples:
-  - title: 返回值
-    description: 函数把过程包装成可以命名和测试的单元。
+  - title: naive
+    description: 没有函数时，同一段求和逻辑会在脚本里反复复制。
     code: |
-      def total(numbers):
+      morning_scores = [3, 5, 8]
+      morning_total = 0
+      for score in morning_scores:
+          morning_total += score
+
+      evening_scores = [2, 4]
+      evening_total = 0
+      for score in evening_scores:
+          evening_total += score
+
+      print(morning_total, evening_total)
+  - title: standard
+    description: 函数把过程包装成可以命名、复用和测试的单元。
+    code: |
+      def total(scores):
           result = 0
-          for number in numbers:
-              result += number
+          for score in scores:
+              result += score
           return result
 
       print(total([3, 5, 8]))
+      print(total([2, 4]))
+  - title: production
+    description: 工程版用类型注解和边界检查明确函数契约。
+    code: |
+      from typing import Iterable
+
+      def total_scores(scores: Iterable[int]) -> int:
+          result = 0
+
+          for score in scores:
+              if score < 0:
+                  raise ValueError("score cannot be negative")
+              result += score
+
+          return result
+
+      print(total_scores([3, 5, 8]))
 extends:
   - decorator
   - class

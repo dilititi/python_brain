@@ -37,13 +37,39 @@ history:
   - year: 1991
     event: 内置命名空间：Python 通过内置命名空间提供最基础的函数和异常。
 codeExamples:
-  - title: enumerate 和 zip
-    description: 内置函数能减少手写索引循环。
+  - title: naive
+    description: 手写索引循环很容易在两组数据长度不一致时越界。
+    code: |
+      names = ["Ada", "Guido", "Grace"]
+      scores = [98, 91]
+
+      for index in range(len(names)):
+          try:
+              print(index + 1, names[index], scores[index])
+          except IndexError as error:
+              print(type(error).__name__)
+  - title: standard
+    description: enumerate 和 zip 把“编号 + 配对遍历”交给内置函数。
     code: |
       names = ["Ada", "Guido"]
       scores = [98, 91]
 
       for index, (name, score) in enumerate(zip(names, scores), start=1):
           print(index, name, score)
+  - title: production
+    description: 工程版先检查输入长度，再组合 enumerate、zip、sum 和 sorted 生成稳定报告。
+    code: |
+      def score_report(names: list[str], scores: list[int]) -> list[str]:
+          if len(names) != len(scores):
+              raise ValueError("names and scores must have the same length")
+
+          rows = sorted(zip(names, scores), key=lambda row: row[1], reverse=True)
+          total = sum(scores)
+          return [
+              f"{rank}. {name}: {score}/{total}"
+              for rank, (name, score) in enumerate(rows, start=1)
+          ]
+
+      print(score_report(["Ada", "Guido"], [98, 91]))
 ---
 很多 Pythonic 写法不是来自更复杂的语法，而是来自合适的内置函数。`enumerate` 和 `zip` 是替代手动索引循环的典型例子。
