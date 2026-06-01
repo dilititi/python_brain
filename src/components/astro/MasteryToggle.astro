@@ -1,0 +1,156 @@
+---
+interface Props {
+  conceptId: string;
+}
+
+const { conceptId } = Astro.props;
+const statuses = [
+  {
+    value: "unseen",
+    label: "未学",
+    icon: '<circle cx="12" cy="12" r="10"></circle>'
+  },
+  {
+    value: "learning",
+    label: "半掌握",
+    icon: '<circle cx="12" cy="12" r="10"></circle><path d="M12 6v6h4"></path>'
+  },
+  {
+    value: "mastered",
+    label: "已掌握",
+    icon: '<circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path>'
+  }
+];
+---
+
+<div class="mastery-toggle" aria-label="掌握状态" data-mastery-toggle data-concept-id={conceptId}>
+  {statuses.map((item) => (
+    <button type="button" data-status={item.value} aria-pressed={item.value === "unseen" ? "true" : "false"} class:list={[item.value === "unseen" && "active"]}>
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" set:html={item.icon} />
+      <span>{item.label}</span>
+    </button>
+  ))}
+</div>
+
+<script is:inline>
+  (() => {
+    const storageKey = "pkb:mastery";
+    const labels = {
+      unseen: "未学",
+      learning: "半掌握",
+      mastered: "已掌握"
+    };
+
+    function readMastery() {
+      try {
+        const raw = window.localStorage.getItem(storageKey);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function writeMastery(values) {
+      window.localStorage.setItem(storageKey, JSON.stringify(values));
+      window.dispatchEvent(new CustomEvent("pkb:mastery-change", { detail: values }));
+    }
+
+    function setStatus(root, status) {
+      const normalized = labels[status] ? status : "unseen";
+
+      for (const button of root.querySelectorAll("[data-status]")) {
+        if (!(button instanceof HTMLButtonElement)) {
+          continue;
+        }
+
+        const active = button.dataset.status === normalized;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      }
+    }
+
+    for (const root of document.querySelectorAll("[data-mastery-toggle]")) {
+      if (!(root instanceof HTMLElement) || root.dataset.bound === "true") {
+        continue;
+      }
+
+      root.dataset.bound = "true";
+      const conceptId = root.dataset.conceptId || "";
+      setStatus(root, readMastery()[conceptId] || "unseen");
+
+      root.addEventListener("click", (event) => {
+        const button = event.target instanceof Element ? event.target.closest("[data-status]") : null;
+        if (!(button instanceof HTMLButtonElement)) {
+          return;
+        }
+
+        const nextStatus = labels[button.dataset.status] ? button.dataset.status : "unseen";
+        const values = readMastery();
+
+        if (nextStatus === "unseen") {
+          delete values[conceptId];
+        } else {
+          values[conceptId] = nextStatus;
+        }
+
+        writeMastery(values);
+        setStatus(root, nextStatus);
+      });
+    }
+  })();
+</script>
+
+<style>
+  .mastery-toggle {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    background: var(--color-panel);
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    background: var(--color-panel);
+    color: var(--color-ink);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  button.active {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+    background: #eff6ff;
+  }
+
+  button[data-status="learning"].active {
+    border-color: var(--color-amber);
+    color: var(--color-amber);
+    background: #fff8e6;
+  }
+
+  button[data-status="mastered"].active {
+    border-color: var(--color-green);
+    color: var(--color-green);
+    background: #eaf8f1;
+  }
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

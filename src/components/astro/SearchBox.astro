@@ -1,0 +1,202 @@
+---
+type SearchDoc = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  kind: string;
+};
+
+interface Props {
+  docs: SearchDoc[];
+}
+
+const { docs } = Astro.props;
+---
+
+<div class="search-box" data-search-box>
+  <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16">
+    <path d="m21 21-4.34-4.34"></path>
+    <circle cx="11" cy="11" r="8"></circle>
+  </svg>
+  <input data-search-input placeholder="搜索概念、案例、人物" aria-label="搜索" autocomplete="off" />
+  <button type="button" data-search-clear aria-label="清空搜索" hidden>
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="14" height="14">
+      <path d="M18 6 6 18"></path>
+      <path d="m6 6 12 12"></path>
+    </svg>
+  </button>
+  <div class="search-results" data-search-results hidden></div>
+  <script is:inline type="application/json" data-search-docs set:html={JSON.stringify(docs)} />
+</div>
+
+<script is:inline>
+  (() => {
+    for (const root of document.querySelectorAll("[data-search-box]")) {
+      if (!(root instanceof HTMLElement) || root.dataset.bound === "true") {
+        continue;
+      }
+
+      root.dataset.bound = "true";
+
+      const input = root.querySelector("[data-search-input]");
+      const clear = root.querySelector("[data-search-clear]");
+      const results = root.querySelector("[data-search-results]");
+      const docsSource = root.querySelector("[data-search-docs]");
+
+      if (!(input instanceof HTMLInputElement) || !(clear instanceof HTMLButtonElement) || !(results instanceof HTMLElement) || !docsSource) {
+        continue;
+      }
+
+      let docs = [];
+      try {
+        docs = JSON.parse(docsSource.textContent || "[]");
+      } catch {
+        docs = [];
+      }
+
+      function render() {
+        const query = input.value.trim().toLowerCase();
+        clear.hidden = query.length === 0;
+        results.replaceChildren();
+
+        if (!query) {
+          results.hidden = true;
+          return;
+        }
+
+        const matches = docs
+          .filter((doc) => `${doc.title} ${doc.description} ${doc.kind}`.toLowerCase().includes(query))
+          .slice(0, 6);
+
+        results.hidden = matches.length === 0;
+
+        for (const item of matches) {
+          const link = document.createElement("a");
+          link.href = item.href;
+
+          const kind = document.createElement("span");
+          kind.textContent = item.kind;
+
+          const title = document.createElement("strong");
+          title.textContent = item.title;
+
+          const description = document.createElement("small");
+          description.textContent = item.description;
+
+          link.append(kind, title, description);
+          results.append(link);
+        }
+      }
+
+      input.addEventListener("input", render);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          input.value = "";
+          render();
+        }
+      });
+      clear.addEventListener("click", () => {
+        input.value = "";
+        input.focus();
+        render();
+      });
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Node) || !root.contains(target)) {
+          results.hidden = true;
+        }
+      });
+    }
+  })();
+</script>
+
+<style>
+  .search-box {
+    position: relative;
+    display: grid;
+    grid-template-columns: 18px minmax(120px, 1fr) 24px;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    width: min(320px, 100%);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 0 10px;
+    background: var(--color-panel);
+    color: var(--color-muted);
+  }
+
+  svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: var(--color-ink);
+    background: transparent;
+    font-size: 14px;
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 0;
+    background: var(--color-panel);
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 40;
+    display: grid;
+    width: min(420px, calc(100vw - 32px));
+    gap: 6px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    background: var(--color-panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .search-results[hidden] {
+    display: none;
+  }
+
+  .search-results a {
+    display: grid;
+    gap: 3px;
+    border-radius: var(--radius-sm);
+    padding: 10px;
+  }
+
+  .search-results a:hover {
+    background: var(--color-soft);
+  }
+
+  .search-results span,
+  .search-results small {
+    color: var(--color-muted);
+    font-size: 12px;
+  }
+
+  @media (max-width: 860px) {
+    .search-box {
+      width: 100%;
+    }
+  }
+</style>

@@ -1,5 +1,5 @@
 ---
-import SearchBox from "../components/react/SearchBox";
+import SearchBox from "../components/astro/SearchBox.astro";
 import { getSearchDocuments } from "../lib/search-index";
 import "../styles/global.css";
 
@@ -39,7 +39,7 @@ const nav = [
           <div class="nav-links">
             {nav.map((item) => <a href={item.href}>{item.label}</a>)}
           </div>
-          <SearchBox docs={searchDocs} client:idle />
+          <SearchBox docs={searchDocs} />
         </nav>
       </header>
       <main class="page">

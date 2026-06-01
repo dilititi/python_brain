@@ -1,31 +1,4 @@
-.search-box {
-  position: relative;
-  display: grid;
-  grid-template-columns: 18px minmax(120px, 1fr) 24px;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  width: min(320px, 100%);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  padding: 0 10px;
-  background: var(--color-panel);
-  color: var(--color-muted);
-}
-
-.search-box input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  color: var(--color-ink);
-  background: transparent;
-  font-size: 14px;
-}
-
-.search-box button,
 .island-toolbar button,
-.mastery-toggle button,
 .button-link,
 .example-tabs button,
 .quiz-options button {
@@ -36,42 +9,6 @@
   cursor: pointer;
 }
 
-.search-box button {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-}
-
-.search-results {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  width: min(420px, calc(100vw - 32px));
-  display: grid;
-  gap: 6px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  padding: 8px;
-  background: var(--color-panel);
-  box-shadow: var(--shadow-panel);
-  z-index: 40;
-}
-
-.search-results a {
-  display: grid;
-  gap: 3px;
-  padding: 10px;
-  border-radius: var(--radius-sm);
-}
-
-.search-results a:hover {
-  background: var(--color-soft);
-}
-
-.search-results span,
-.search-results small,
 .review-card small {
   color: var(--color-muted);
   font-size: 12px;
@@ -106,7 +43,6 @@
 }
 
 .island-toolbar button,
-.mastery-toggle button,
 .button-link,
 .example-tabs button,
 .quiz-options button {
@@ -120,34 +56,10 @@
 }
 
 .island-toolbar button.active,
-.mastery-toggle button.active,
 .example-tabs button.active {
   border-color: var(--color-blue);
   color: var(--color-blue);
   background: #eff6ff;
-}
-
-.mastery-toggle {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  padding: 8px;
-  background: var(--color-panel);
-}
-
-.mastery-toggle button[data-status="learning"].active {
-  border-color: var(--color-amber);
-  color: var(--color-amber);
-  background: #fff8e6;
-}
-
-.mastery-toggle button[data-status="mastered"].active {
-  border-color: var(--color-green);
-  color: var(--color-green);
-  background: #eaf8f1;
 }
 
 .button-link {
@@ -222,10 +134,6 @@
 }
 
 @media (max-width: 860px) {
-  .search-box {
-    width: 100%;
-  }
-
   .graph-canvas {
     min-height: 360px;
   }
