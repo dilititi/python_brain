@@ -31,13 +31,44 @@ history:
   - year: 1991
     event: 内置序列类型：列表作为 Python 核心数据结构随语言早期版本出现。
 codeExamples:
-  - title: 增删查
-    description: 列表适合保存一串同类或同流程的数据。
+  - title: naive
+    description: 遍历列表时原地删除元素，容易因为位置移动而漏掉数据。
     code: |
-      names = ["Ada", "Guido"]
-      names.append("Grace")
-      print(names[0])
-      print(len(names))
+      scores = [10, -1, -2, 5]
+
+      for score in scores:
+          if score < 0:
+              scores.remove(score)
+
+      print(scores)
+  - title: standard
+    description: 需要过滤列表时，构造一个新列表通常更清楚。
+    code: |
+      scores = [10, -1, -2, 5]
+      valid_scores = []
+
+      for score in scores:
+          if score >= 0:
+              valid_scores.append(score)
+
+      print(valid_scores)
+  - title: production
+    description: 工程版把列表处理写成函数，并用边界检查拒绝不合理分数。
+    code: |
+      from typing import Iterable
+
+      def clean_scores(scores: Iterable[int]) -> list[int]:
+          valid_scores: list[int] = []
+
+          for score in scores:
+              if score > 100:
+                  raise ValueError("score cannot exceed 100")
+              if score >= 0:
+                  valid_scores.append(score)
+
+          return valid_scores
+
+      print(clean_scores([10, -1, -2, 5]))
 extends:
   - comprehension
 ---

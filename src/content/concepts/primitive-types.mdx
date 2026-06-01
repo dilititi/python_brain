@@ -36,13 +36,40 @@ history:
   - year: 1991
     event: 内置对象模型：Python 从早期就用对象和类型统一表示语言里的值。
 codeExamples:
-  - title: 查看类型
-    description: type 可以查看对象的类型。
+  - title: naive
+    description: 把字符串当布尔值用时，非空文本 "False" 也会被判断为真。
     code: |
-      values = [42, 3.14, "Python", True, None]
+      raw_enabled = "False"
 
-      for value in values:
-          print(value, type(value).__name__)
+      if raw_enabled:
+          print("send report")
+  - title: standard
+    description: 基础类型要先按语义转换，再进入条件判断和计算。
+    code: |
+      raw_enabled = "False"
+      enabled = raw_enabled.lower() == "true"
+
+      if enabled:
+          print("send report")
+      else:
+          print("skip report")
+  - title: production
+    description: 工程版显式解析布尔文本，并对未知值抛出清楚错误。
+    code: |
+      def parse_bool(raw: str | bool | None) -> bool:
+          if raw is None:
+              return False
+          if isinstance(raw, bool):
+              return raw
+
+          normalized = raw.strip().lower()
+          if normalized in {"true", "1", "yes"}:
+              return True
+          if normalized in {"false", "0", "no"}:
+              return False
+          raise ValueError(f"cannot parse boolean value: {raw}")
+
+      print(parse_bool("False"))
 extends:
   - list
   - dict

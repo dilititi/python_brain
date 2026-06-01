@@ -31,12 +31,38 @@ history:
   - year: 2003
     event: set 类型进入 Python：Python 2.3 引入内置 set 类型，集合运算成为常用数据处理工具。
 codeExamples:
-  - title: 去重和交集
-    description: 集合能快速表达成员关系。
+  - title: naive
+    description: 用列表做名单比对时，重复项和手写判断会让结果变得噪声很大。
     code: |
-      seen = {"python", "data", "python"}
+      completed = ["python", "data", "python"]
+      required = ["python", "git"]
+      missing = []
+
+      for topic in required:
+          if topic not in completed:
+              missing.append(topic)
+
+      print(completed)
+      print(missing)
+  - title: standard
+    description: set 直接表达去重、成员测试和差集。
+    code: |
+      completed = {"python", "data", "python"}
       required = {"python", "git"}
-      print(seen)
-      print(required - seen)
+
+      print(completed)
+      print(required - completed)
+  - title: production
+    description: 工程版规范化输入，并用 frozenset 表达不可变的必修集合。
+    code: |
+      from typing import Iterable
+
+      REQUIRED_TOPICS = frozenset({"python", "git"})
+
+      def missing_topics(completed: Iterable[str]) -> set[str]:
+          normalized = {topic.strip().lower() for topic in completed if topic.strip()}
+          return set(REQUIRED_TOPICS - normalized)
+
+      print(missing_topics([" Python ", "data", "python"]))
 ---
 集合适合回答“有没有”“重复不重复”“两组数据差在哪”。它不是列表的替代品，而是另一种问题模型。

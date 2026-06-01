@@ -31,11 +31,37 @@ history:
   - year: 1991
     event: 序列模型：元组作为不可变序列参与 Python 早期对象模型。
 codeExamples:
-  - title: 解包
-    description: 固定结构的数据可以直接解包成多个名字。
+  - title: naive
+    description: 列表是可变对象，不能直接当作字典键表达坐标。
+    code: |
+      point = [3, 5]
+
+      try:
+          labels = {point: "home"}
+      except TypeError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: tuple 适合固定结构数据，也可以直接解包成多个名字。
     code: |
       point = (3, 5)
+      labels = {point: "home"}
       x, y = point
+
+      print(labels[(3, 5)])
       print(x + y)
+  - title: production
+    description: 工程版把固定结构写进类型别名，并在运行时检查长度边界。
+    code: |
+      Point = tuple[int, int]
+
+      def move(point: Point, delta: Point) -> Point:
+          if len(point) != 2 or len(delta) != 2:
+              raise ValueError("point and delta must contain two integers")
+
+          x, y = point
+          dx, dy = delta
+          return (x + dx, y + dy)
+
+      print(move((3, 5), (1, -2)))
 ---
 如果数据长度固定、位置有明确意义，元组比列表更能表达意图。match-case 也常用元组模式解析命令。

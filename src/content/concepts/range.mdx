@@ -32,10 +32,31 @@ history:
   - year: 2008
     event: Python 3 中 range 变为惰性序列：Python 3 的 range 替代了 Python 2 中常见的 xrange 使用方式。
 codeExamples:
-  - title: 步长
-    description: 'range(start, stop, step) 可以表达整数规律。'
+  - title: naive
+    description: 忘记 range 的 stop 不包含终点时，最后一项会被漏掉。
     code: |
-      for number in range(2, 10, 2):
-          print(number)
+      total_pages = 3
+      pages = []
+
+      for page in range(1, total_pages):
+          pages.append(page)
+
+      print(pages)
+  - title: standard
+    description: range 的右边界是开区间，需要把包含的终点加一。
+    code: |
+      total_pages = 3
+      pages = list(range(1, total_pages + 1))
+
+      print(pages)
+  - title: production
+    description: 工程版保留 range 的惰性序列特性，并在入口检查边界。
+    code: |
+      def page_numbers(total_pages: int) -> range:
+          if total_pages < 1:
+              raise ValueError("total_pages must be positive")
+          return range(1, total_pages + 1)
+
+      print(list(page_numbers(3)))
 ---
 `range(10)` 不是“列表 0 到 9”，而是一个可迭代的范围对象。这个区别在大范围数据时很重要。
