@@ -249,8 +249,6 @@ const tabs = [
         }
       }
 
-      workbench.dataset.tabsReady = "true";
-
       for (const tab of tabs) {
         tab.setAttribute("role", "tab");
         tab.addEventListener("click", (event) => {
@@ -274,6 +272,14 @@ const tabs = [
       }
     }
   </script>
+
+  <noscript>
+    <style>
+      .concept-panel {
+        display: block;
+      }
+    </style>
+  </noscript>
 </BaseLayout>
 
 <style>
@@ -321,11 +327,11 @@ const tabs = [
     align-items: start;
   }
 
-  .concept-workbench[data-tabs-ready="true"] .concept-panel {
+  .concept-panel {
     display: none;
   }
 
-  .concept-workbench[data-tabs-ready="true"] .concept-panel.is-active {
+  .concept-panel.is-active {
     display: block;
   }
 
