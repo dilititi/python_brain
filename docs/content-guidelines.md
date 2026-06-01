@@ -92,6 +92,8 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 
 若引用开源项目，必须链接到 GitHub 固定 SHA 的具体行号，不能链接 `main` 分支。至少保留 1 个来自开源项目的案例作为标杆，用来校准“真实案例”的深度；当前 `validate-relations` 会阻塞 GitHub `sourceUrl` 未使用 40 位提交 SHA 或缺少行号 anchor 的情况。
 
+`pitfalls[]` 应该写“代价”，不是只写语法注意事项。优先记录实际项目里这个坑会造成什么后果，例如线上事故、性能退化、调试损耗、数据误删或维护成本上升；如果能引用真实 issue、commit 或官方文档，应把来源放到案例正文或 `sourceUrl`。
+
 ## 人物
 
 人物不是装饰，而是记忆锚点。人物页必须满足：

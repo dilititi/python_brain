@@ -23,7 +23,7 @@ const { concepts } = await getPathConcepts(entry.id);
     <p class="lead">{entry.data.description}</p>
   </header>
   <section class="section">
-    <PathProgress nodes={concepts} milestones={entry.data.milestones} />
+    <PathProgress nodes={concepts} milestones={entry.data.milestones} pathId={entry.id} />
   </section>
 </BaseLayout>
 

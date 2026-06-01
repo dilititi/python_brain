@@ -35,6 +35,21 @@ export type ConceptWork = WorkRegistryEntry & {
   role: string;
 };
 
+export type ConceptPathContext = {
+  id: string;
+  title: string;
+  currentIndex: number;
+  total: number;
+  previous?: {
+    id: string;
+    title: string;
+  };
+  next?: {
+    id: string;
+    title: string;
+  };
+};
+
 type AnyEntry = ConceptEntry | CaseEntry | ProjectEntry | PersonEntry | PathEntry;
 
 export type ConceptRelations = {
@@ -47,6 +62,7 @@ export type ConceptRelations = {
   people: PersonEntry[];
   works: ConceptWork[];
   referencedBy: ConceptEntry[];
+  pathContexts: ConceptPathContext[];
 };
 
 let worksRegistryCache: WorkRegistryEntry[] | undefined;
@@ -110,7 +126,7 @@ export function resolveMany<T extends AnyEntry>(entries: T[], ids: string[]) {
 export async function getConceptRelations(
   conceptId: string
 ): Promise<ConceptRelations> {
-  const [{ concepts, cases, projects, people, works }, relationIndex] =
+  const [{ concepts, cases, projects, people, paths, works }, relationIndex] =
     await Promise.all([getAllContent(), getGeneratedRelationIndex()]);
   const concept = concepts.find((entry) => entry.id === conceptId);
 
@@ -124,7 +140,9 @@ export async function getConceptRelations(
   const projectIds = new Set(usedIn.projects);
   const personIds = new Set(usedIn.people);
   const worksById = new Map(works.map((work) => [work.id, work]));
+  const conceptById = byId(concepts);
   const conceptWorks: ConceptWork[] = [];
+  const pathContexts: ConceptPathContext[] = [];
 
   for (const ref of concept.data.worksRef) {
     const work = worksById.get(ref.id);
@@ -139,6 +157,37 @@ export async function getConceptRelations(
     });
   }
 
+  const planNodes = concepts.map((item) => ({
+    id: item.id,
+    prerequisites: indexedConceptNeighbors(relationIndex, item.id).prerequisites
+  }));
+
+  for (const path of paths) {
+    const plan = planLearningPath({
+      concepts: planNodes,
+      targetNodes: path.data.nodes
+    });
+    const currentIndex = plan.nodes.indexOf(conceptId);
+
+    if (currentIndex < 0) {
+      continue;
+    }
+
+    const previousId = plan.nodes[currentIndex - 1];
+    const nextId = plan.nodes[currentIndex + 1];
+    const previous = previousId ? conceptById.get(previousId) : undefined;
+    const next = nextId ? conceptById.get(nextId) : undefined;
+
+    pathContexts.push({
+      id: path.id,
+      title: path.data.title,
+      currentIndex: currentIndex + 1,
+      total: plan.nodes.length,
+      previous: previous ? { id: previous.id, title: previous.data.title } : undefined,
+      next: next ? { id: next.id, title: next.data.title } : undefined
+    });
+  }
+
   return {
     concept,
     prerequisites: resolveMany(concepts, neighbors.prerequisites),
@@ -148,7 +197,8 @@ export async function getConceptRelations(
     projects: resolveMany(projects, [...projectIds]),
     people: resolveMany(people, [...personIds]),
     works: conceptWorks,
-    referencedBy: resolveMany(concepts, neighbors.successors)
+    referencedBy: resolveMany(concepts, neighbors.successors),
+    pathContexts
   };
 }
 

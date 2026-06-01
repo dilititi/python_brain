@@ -25,7 +25,7 @@ export type LearningPathPlan = {
 };
 
 export const trackLabels = {
-  beginner: "零基础主路径",
+  beginner: "零基础入门",
   web: "Web 后端",
   data: "数据分析",
   automation: "自动化办公",
@@ -55,7 +55,7 @@ export function scoreAssessment(
     return {
       track: "beginner",
       startAfter: [...known],
-      reason: "测评显示基础概念还没有形成稳定连接，先走零基础主路径更稳。"
+      reason: "测评显示基础概念还没有形成稳定连接，先走零基础入门方向更稳。"
     };
   }
 
@@ -65,7 +65,7 @@ export function scoreAssessment(
   return {
     track,
     startAfter: [...known],
-    reason: `你已经能识别若干核心概念，可以从${trackLabels[track]}路径进入。`
+    reason: `你已经能识别若干核心概念，可以从${trackLabels[track]}方向进入。`
   };
 }
 

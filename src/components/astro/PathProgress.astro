@@ -16,9 +16,10 @@ interface Milestone {
 interface Props {
   nodes: NodeItem[];
   milestones: Milestone[];
+  pathId: string;
 }
 
-const { nodes, milestones } = Astro.props;
+const { nodes, milestones, pathId } = Astro.props;
 const milestoneByNode = new Map<string, string>();
 
 for (const milestone of milestones) {
@@ -32,7 +33,7 @@ for (const milestone of milestones) {
   {nodes.map((node, index) => (
     <li data-concept-id={node.id} data-mastery="unseen">
       <span class="step">{String(index + 1).padStart(2, "0")}</span>
-      <a href={`/concepts/${node.id}/`}>
+      <a href={`/concepts/${node.id}/?fromPath=${pathId}`}>
         <span class="node-title">
           <strong>{node.data.title}</strong>
           <small data-mastery-label>未学</small>

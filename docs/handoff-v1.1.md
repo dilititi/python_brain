@@ -67,6 +67,21 @@ Week 9 复核标准：
 
 每周完成后新增 `docs/v1.1-batch-notes/week-N.md`，记录本周概念、难点、复用范式、下一周提醒和跑过的命令。
 
+## 用户反馈处理与建议审核
+
+2026-06-01 的用户反馈分成两类：
+
+- P0 体验缺陷：入口测评选项顺序暴露答案、从应用方向进入概念后缺少下一条/返回、图谱过密、`Paths` 文案生硬。这些属于当前产品体验问题，应直接修。
+- Schema/内容建议：`requiresMindset`、`pitfalls` 质量、`earlyCareer`、path `forWhom/notForWhom/opportunityCost`、历史事件集合。这些需要按 v1.1 范围控制，不应一次性全塞进 codeExamples 主线。
+
+审核结论：
+
+- `requiresMindset`：方向成立，但不进当前 v1.1 主线。可在 `decorator`、`python-language`、`function-parameters` 三页标杆先试写，v1.2 再决定是否全量 schema 化。
+- `cases.pitfalls`：已有字段，问题是写作质量。已在 `content-guidelines.md` 补充“写代价而不是语法注意事项”的准则；18 个 cases 的 pitfalls 复核可放到 Week 9。
+- `people.earlyCareer`：适合 v1.2。先选 Guido van Rossum 和 Wes McKinney 做可验证来源的示范，不接受第三方传记式二手描述作为唯一来源。
+- path `forWhom/notForWhom/opportunityCost`：产品价值高，但它是 schema 扩展。若 v1.1 Week 9 仍有余量，可作为单独 PR 加到 5 个 paths；不要和 codeExamples strict 发布日混在同一个 PR。
+- `historicalEvents` collection：先不建 collection。更轻的试探方案是给 concept `history[]` 增加可选 `eventId`，当复用超过 10 次再考虑独立集合和页面。
+
 ## 非目标边界
 
 v1.1 不做这些事：

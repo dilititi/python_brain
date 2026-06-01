@@ -25,8 +25,8 @@
 
 .graph-canvas {
   width: 100%;
-  height: min(68vh, 680px);
-  min-height: 420px;
+  height: min(76vh, 860px);
+  min-height: 560px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: #f8fafc;
@@ -103,6 +103,6 @@
 
 @media (max-width: 860px) {
   .graph-canvas {
-    min-height: 360px;
+    min-height: 430px;
   }
 }

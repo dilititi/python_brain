@@ -37,7 +37,7 @@ export async function getSearchDocuments() {
       title: entry.data.title,
       description: entry.data.description,
       href: `/path/${entry.id}/`,
-      kind: "路径"
+      kind: "方向"
     }))
   ];
 }
