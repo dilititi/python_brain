@@ -33,11 +33,43 @@ history:
   - year: 1991
     event: 表达式语法：运算符构成 Python 表达式系统的基础。
 codeExamples:
-  - title: 成员和逻辑
-    description: in、and、or 常用于条件判断。
+  - title: naive
+    description: 初学者常把 or 写成自然语言，导致条件比想象中更宽。
     code: |
-      tags = {"python", "data"}
-      is_ready = "python" in tags and len(tags) > 1
-      print(is_ready)
+      role = "viewer"
+      active = True
+
+      if role == "admin" or "editor" and active:
+          print("allow")
+      else:
+          print("deny")
+  - title: standard
+    description: 用 in 表达成员关系，再用 and 组合必要条件。
+    code: |
+      role = "viewer"
+      active = True
+
+      if role in {"admin", "editor"} and active:
+          print("allow")
+      else:
+          print("deny")
+  - title: production
+    description: 工程版把规则封装成函数，并把 locked 这类边界条件写进判断。
+    code: |
+      from typing import Literal
+
+      Role = Literal["admin", "editor", "viewer"]
+
+      def can_edit(role: Role, active: bool, locked: bool) -> bool:
+          return role in {"admin", "editor"} and active and not locked
+
+      checks = [
+          ("editor", True, False),
+          ("viewer", True, False),
+          ("admin", True, True),
+      ]
+
+      for role, active, locked in checks:
+          print(role, can_edit(role, active, locked))
 ---
 学习运算符时不要只背符号，还要理解对象类型决定了运算含义。`+` 对数字是加法，对字符串是拼接。

@@ -34,11 +34,34 @@ history:
   - year: 2016
     event: Python 3.6 引入 f-string：f-string 成为现代 Python 最常用的字符串格式化方式。
 codeExamples:
-  - title: 嵌入表达式
-    description: 花括号里可以放变量或简单表达式。
+  - title: naive
+    description: 手动拼接文本时，数字和字符串混在一起很容易出错。
     code: |
       name = "Ada"
-      score = 98
-      print(f"{name} scored {score}/100")
+      file_count = 3
+
+      try:
+          message = "User " + name + " has " + file_count + " files"
+      except TypeError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: f-string 让变量和表达式直接留在模板里，避免手动转换噪音。
+    code: |
+      name = "Ada"
+      file_count = 3
+
+      message = f"User {name} has {file_count} files"
+      print(message)
+  - title: production
+    description: 真实输出通常还要处理格式、边界条件和函数签名。
+    code: |
+      from datetime import date
+
+      def format_report(owner: str, file_count: int, generated_on: date) -> str:
+          if file_count < 0:
+              raise ValueError("file_count cannot be negative")
+          return f"{owner} has {file_count:,} files on {generated_on:%Y-%m-%d}"
+
+      print(format_report("Ada", 1200, date(2026, 6, 1)))
 ---
 f-string 的价值是让“文本模板”和“变量来源”贴在一起。它比字符串拼接更可读，也比许多旧式格式化写法更直接。

@@ -33,14 +33,31 @@ history:
   - year: 2015
     event: Python 3.5 引入 typing：类型注解生态逐步成为大型 Python 项目的工程基础。
 codeExamples:
-  - title: 函数签名
-    description: 注解让函数输入和输出更清楚。
+  - title: naive
+    description: 没有注解时，调用者可能传入看似能用、实际语义错误的数据。
     code: |
-      def greet(name: str, age: int | None = None) -> str:
-          if age is None:
-              return f"Hello, {name}"
-          return f"Hello, {name}, age {age}"
+      def minutes_to_seconds(minutes):
+          return minutes * 60
 
-      print(greet("Ada"))
+      print(minutes_to_seconds("5"))
+  - title: standard
+    description: 注解把参数和返回值的预期类型写进函数签名。
+    code: |
+      def minutes_to_seconds(minutes: int) -> int:
+          return minutes * 60
+
+      print(minutes_to_seconds(5))
+  - title: production
+    description: 工程版在注解之外补上边界检查，因为注解本身不负责运行时校验。
+    code: |
+      def minutes_to_seconds(minutes: int) -> int:
+          if minutes < 0:
+              raise ValueError("minutes cannot be negative")
+          return minutes * 60
+
+      durations = [5, 0, 90]
+
+      for duration in durations:
+          print(minutes_to_seconds(duration))
 ---
 类型注解不是把 Python 变成静态语言。它保留运行时灵活性，同时给编辑器、mypy、pyright 和团队协作更多上下文。
