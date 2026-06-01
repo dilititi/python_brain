@@ -33,16 +33,50 @@ history:
   - year: 1991
     event: 异常模型进入语言：Python 从早期就鼓励用异常表达失败，而不是只靠返回码。
 codeExamples:
-  - title: 捕获失败
-    description: 把可能失败的转换包起来，并给出兜底结果。
+  - title: naive
+    description: 裸 except 会把所有失败都吞掉，调用者看不出哪些输入坏了。
     code: |
-      raw = "42"
+      raw_ids = ["42", "bad", "0"]
 
-      try:
-          value = int(raw)
-      except ValueError:
-          value = 0
+      for raw in raw_ids:
+          try:
+              print(int(raw))
+          except:
+              print(0)
+  - title: standard
+    description: 只捕获预期异常，并让恢复策略保持可见。
+    code: |
+      raw_ids = ["42", "bad", "0"]
 
-      print(value)
+      for raw in raw_ids:
+          try:
+              value = int(raw)
+          except ValueError:
+              print(f"skip invalid id: {raw}")
+              continue
+
+          print(value)
+  - title: production
+    description: 工程版把异常处理、业务边界和可观察日志放进同一个解析函数。
+    code: |
+      def parse_positive_ids(raw_ids: list[str]) -> list[int]:
+          ids: list[int] = []
+
+          for raw in raw_ids:
+              try:
+                  value = int(raw)
+              except ValueError:
+                  print(f"skip invalid id: {raw}")
+                  continue
+
+              if value <= 0:
+                  print(f"skip non-positive id: {value}")
+                  continue
+
+              ids.append(value)
+
+          return ids
+
+      print(parse_positive_ids(["42", "bad", "0", "7"]))
 ---
 异常处理不是把错误吞掉。好的 `except` 应该尽量具体，并且让调用者知道程序采取了什么恢复策略。

@@ -30,12 +30,52 @@ history:
   - year: 1991
     event: 循环控制：break、continue 和 pass 是 Python 基础控制流的一部分。
 codeExamples:
-  - title: 跳过空值
-    description: continue 常用于跳过不需要处理的数据。
+  - title: naive
+    description: 没有 break 和 continue 时，空值和终止标记也会被当成正常数据处理。
     code: |
-      for name in ["Ada", "", "Guido"]:
-          if not name:
+      raw_names = [" Ada ", "", "Guido", "STOP", "Grace"]
+      names = []
+
+      for raw in raw_names:
+          names.append(raw.strip().title())
+
+      print(names)
+  - title: standard
+    description: break 表达“到此为止”，continue 表达“这一项跳过”。
+    code: |
+      raw_names = [" Ada ", "", "Guido", "STOP", "Grace"]
+      names = []
+
+      for raw in raw_names:
+          text = raw.strip()
+          if text == "STOP":
+              break
+          if not text:
               continue
-          print(name)
+          names.append(text.title())
+
+      print(names)
+  - title: production
+    description: 工程版把循环控制写进函数，并把未来要处理的分支用 pass 明确留位。
+    code: |
+      from typing import Iterable
+
+      def collect_names(raw_names: Iterable[str]) -> list[str]:
+          names: list[str] = []
+
+          for raw in raw_names:
+              text = raw.strip()
+              if text == "STOP":
+                  break
+              if not text:
+                  continue
+              if text.startswith("#"):
+                  pass
+              else:
+                  names.append(text.title())
+
+          return names
+
+      print(collect_names([" Ada ", "", "# metadata", "Guido", "STOP", "Grace"]))
 ---
 这三个关键字都很小，但能显著改变阅读顺序。用它们时要让读者很快看懂“为什么停下”或“为什么跳过”。

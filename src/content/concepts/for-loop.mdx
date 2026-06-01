@@ -34,17 +34,40 @@ history:
   - year: 2001
     event: 迭代器协议成熟：Python 2.2 引入迭代器协议，for 循环可以统一消费更多对象。
 codeExamples:
-  - title: range
-    description: range 生成一串整数，适合明确次数的重复。
+  - title: naive
+    description: 把 for 循环当索引机器用，容易写出越界问题。
     code: |
-      for i in range(3):
-          print("第", i, "轮")
-  - title: 遍历列表
-    description: 更多时候，for 直接遍历已有数据。
+      tasks = ["read", "clean", "save"]
+
+      for index in range(len(tasks) + 1):
+          try:
+              print(tasks[index])
+          except IndexError as error:
+              print(type(error).__name__)
+  - title: standard
+    description: Python 的 for 循环通常直接遍历对象，需要位置时再用 enumerate。
     code: |
-      tasks = ["读取", "清洗", "保存"]
-      for task in tasks:
-          print(task)
+      tasks = ["read", "clean", "save"]
+
+      for position, task in enumerate(tasks, start=1):
+          print(f"{position}. {task}")
+  - title: production
+    description: 工程版把遍历逻辑封装成函数，并处理空白任务这类边界。
+    code: |
+      from typing import Iterable
+
+      def format_tasks(tasks: Iterable[str]) -> list[str]:
+          lines: list[str] = []
+
+          for position, task in enumerate(tasks, start=1):
+              cleaned = task.strip()
+              if not cleaned:
+                  continue
+              lines.append(f"{position}. {cleaned}")
+
+          return lines
+
+      print(format_tasks(["read", " ", "save"]))
 extends:
   - function
 ---

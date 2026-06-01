@@ -30,14 +30,42 @@ history:
   - year: 1991
     event: 异常控制流：Python 早期就使用异常表达错误路径和恢复路径。
 codeExamples:
-  - title: 主动失败
-    description: raise 让函数明确拒绝不合法输入。
+  - title: naive
+    description: 用默认值掩盖非法输入，会让调用者以为业务真的成功了。
     code: |
-      def require_positive(number):
-          if number <= 0:
-              raise ValueError("number must be positive")
-          return number
+      def invoice_total(quantity):
+          if quantity <= 0:
+              return 0
+          return quantity * 20
 
-      print(require_positive(3))
+      print(invoice_total(-2))
+  - title: standard
+    description: raise 明确拒绝非法状态，assert 守住开发期不变量。
+    code: |
+      def invoice_total(quantity: int) -> int:
+          if quantity <= 0:
+              raise ValueError("quantity must be positive")
+          assert quantity < 1000, "bulk orders need a separate flow"
+          return quantity * 20
+
+      print(invoice_total(3))
+  - title: production
+    description: 工程版用 finally 保证收尾动作发生，即使中途抛错也不会跳过清理。
+    code: |
+      def invoice_total(quantity: int) -> tuple[int, list[str]]:
+          audit_log: list[str] = []
+          audit_log.append("open")
+
+          try:
+              if quantity <= 0:
+                  raise ValueError("quantity must be positive")
+              assert quantity < 1000, "bulk orders need a separate flow"
+              total = quantity * 20
+          finally:
+              audit_log.append("close")
+
+          return total, audit_log
+
+      print(invoice_total(3))
 ---
 `try-except` 是处理错误，`raise` 是制造清楚的错误，`finally` 是清理现场。它们合在一起，才是完整的异常控制流。

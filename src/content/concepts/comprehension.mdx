@@ -31,11 +31,39 @@ history:
     pep: PEP 202
     event: 列表推导式进入 Python 2.0：PEP 202 引入列表推导式，让映射和过滤更紧凑。
 codeExamples:
-  - title: 过滤
-    description: 推导式适合把“遍历、判断、收集”写成一条表达式。
+  - title: naive
+    description: 普通循环可以完成清洗去重，但一进一出的转换意图被拆散了。
     code: |
-      numbers = [1, 2, 3, 4, 5]
-      even_squares = [n * n for n in numbers if n % 2 == 0]
-      print(even_squares)
+      tags = [" Python ", "", "data", "PYTHON"]
+      cleaned = []
+
+      for tag in tags:
+          text = tag.strip().lower()
+          if text and text not in cleaned:
+              cleaned.append(text)
+
+      print(cleaned)
+  - title: standard
+    description: 推导式把“清洗、过滤、构造容器”的意图集中到一行。
+    code: |
+      tags = [" Python ", "", "data", "PYTHON"]
+
+      cleaned = sorted({tag.strip().lower() for tag in tags if tag.strip()})
+
+      print(cleaned)
+  - title: production
+    description: 工程版保留推导式表达核心转换，同时把边界条件放进函数入口。
+    code: |
+      from typing import Iterable
+
+      def normalize_tags(tags: Iterable[str], min_length: int = 1) -> list[str]:
+          if min_length < 1:
+              raise ValueError("min_length must be positive")
+
+          normalized = [tag.strip().lower() for tag in tags]
+          unique_tags = {tag for tag in normalized if len(tag) >= min_length}
+          return sorted(unique_tags)
+
+      print(normalize_tags([" Python ", "", "data", "PYTHON"], min_length=2))
 ---
 推导式不是越短越好。它适合表达简单的数据变换；一旦条件和嵌套过多，普通循环反而更清楚。

@@ -31,17 +31,49 @@ history:
   - year: 2021
     event: Python 3.10 引入 match-case：结构化模式匹配进入 Python 语法。
 codeExamples:
-  - title: 命令分发
-    description: match-case 可以让命令解析比长串 if 更清晰。
+  - title: naive
+    description: 用 if 链解析结构化数据时，取字段和判断形状会散在每个分支里。
     code: |
-      command = ("open", "README.md")
+      event = {"type": "open", "path": "README.md"}
 
-      match command:
-          case ("open", filename):
-              print(f"open {filename}")
-          case ("quit",):
-              print("bye")
+      if event.get("type") == "open":
+          print(f"open {event.get('path')}")
+      elif event.get("type") == "save":
+          print(f"save {event.get('path')}")
+      else:
+          print("unknown event")
+  - title: standard
+    description: match-case 直接匹配数据形状，让分支围绕结构展开。
+    code: |
+      event = {"type": "open", "path": "README.md"}
+
+      match event:
+          case {"type": "open", "path": path}:
+              print(f"open {path}")
+          case {"type": "save", "path": path}:
+              print(f"save {path}")
           case _:
-              print("unknown command")
+              print("unknown event")
+  - title: production
+    description: 工程版加入类型守卫和错误分支，让不合格事件尽早暴露。
+    code: |
+      from typing import Any
+
+      def dispatch(event: dict[str, Any]) -> str:
+          match event:
+              case {"type": "open", "path": str(path)} if path:
+                  return f"open {path}"
+              case {"type": "save", "path": str(path)} if path:
+                  return f"save {path}"
+              case {"type": unknown}:
+                  raise ValueError(f"unsupported event type: {unknown}")
+              case _:
+                  raise ValueError("malformed event")
+
+      for event in [
+          {"type": "open", "path": "README.md"},
+          {"type": "save", "path": "report.csv"},
+      ]:
+          print(dispatch(event))
 ---
 match-case 不是 switch 的简单替代。它更强的地方在于“匹配结构”，比如元组、字典、类实例和嵌套数据。

@@ -27,12 +27,45 @@ history:
   - year: 1991
     event: 基础控制流：while 是 Python 早期就具备的基础控制结构。
 codeExamples:
-  - title: 计数
-    description: while 适合“不知道确切次数，只知道停止条件”的循环。
+  - title: naive
+    description: 用 while 手动控制状态时，索引、退出和业务条件容易缠在一起。
     code: |
-      count = 3
-      while count > 0:
-          print(count)
-          count -= 1
+      responses = ["timeout", "timeout", "ok"]
+      index = 0
+
+      while index < len(responses):
+          print(f"try {index + 1}: {responses[index]}")
+          if responses[index] == "ok":
+              break
+          index += 1
+  - title: standard
+    description: while 的核心是明确“继续条件”和“终止条件”。
+    code: |
+      responses = ["timeout", "timeout", "ok"]
+      index = 0
+      status = "timeout"
+
+      while status != "ok" and index < len(responses):
+          status = responses[index]
+          print(f"try {index + 1}: {status}")
+          index += 1
+  - title: production
+    description: 工程版把最大重试次数和输入边界写进函数，避免无限等待。
+    code: |
+      def wait_until_ok(responses: list[str], max_attempts: int = 3) -> bool:
+          if max_attempts <= 0:
+              raise ValueError("max_attempts must be positive")
+
+          attempts = 0
+          while attempts < max_attempts and attempts < len(responses):
+              status = responses[attempts]
+              print(f"try {attempts + 1}: {status}")
+              if status == "ok":
+                  return True
+              attempts += 1
+
+          return False
+
+      print(wait_until_ok(["timeout", "timeout", "ok"], max_attempts=3))
 ---
 大部分“遍历一组数据”的任务更适合 `for`，而 `while` 更适合等待条件、重试、交互循环等场景。
