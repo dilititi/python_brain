@@ -53,7 +53,7 @@ tags:
   - closure
   - framework
   - routing
-updatedAt: '2026-05-30'
+updatedAt: '2026-06-02'
 codeExamples:
   - title: naive
     description: 先不用 @ 语法，直接把函数传给包装函数，看到“函数名被重新绑定”的本质。
@@ -84,14 +84,18 @@ codeExamples:
 
       print(greet())
   - title: production
-    description: 真实项目里通常要支持任意参数，并用 functools.wraps 保留原函数元信息。
+    description: 真实项目里通常要支持任意参数、保留元信息，并用 logging 记录横切行为。
     code: |
+      import logging
       from functools import wraps
+
+      logging.basicConfig(level=logging.INFO, format="%(message)s")
+      logger = logging.getLogger("decorator-demo")
 
       def trace(func):
           @wraps(func)
           def wrapper(*args, **kwargs):
-              print("calling", func.__name__)
+              logger.info("calling %s", func.__name__)
               return func(*args, **kwargs)
           return wrapper
 

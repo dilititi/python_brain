@@ -41,7 +41,7 @@ tags:
   - sys
   - math
   - datetime
-updatedAt: '2026-05-30'
+updatedAt: '2026-06-02'
 codeExamples:
   - title: naive
     description: 先导入一个模块，调用其中的函数。
@@ -60,13 +60,23 @@ codeExamples:
       print(os.name)
       print(sys.version_info.major)
   - title: production
-    description: 用标准库处理结构化数据和文本匹配。
+    description: 用标准库处理结构化数据和文本匹配，并把解析错误转成清晰异常。
     code: |
       import json
       import re
 
-      payload = json.dumps({"email": "ada@example.com"})
-      print(bool(re.search(r"@", payload)))
+      raw = '{"email": "ada@example.com"}'
+
+      try:
+          payload = json.loads(raw)
+      except json.JSONDecodeError as error:
+          raise ValueError("配置不是合法 JSON") from error
+
+      email = payload.get("email", "")
+      if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+          raise ValueError("email 格式不正确")
+
+      print(email)
 extends:
   - pathlib
   - json

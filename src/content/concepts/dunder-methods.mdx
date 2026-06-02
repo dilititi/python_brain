@@ -39,7 +39,7 @@ tags:
   - dunder
   - data-model
   - protocol
-updatedAt: '2026-05-30'
+updatedAt: '2026-06-02'
 codeExamples:
   - title: naive
     description: 没有 __repr__ 时，打印对象只看到默认地址信息。
@@ -64,16 +64,33 @@ codeExamples:
       print(Contact("Ada"))
       print([Contact("Ada")])
   - title: production
-    description: 定义 __contains__ 让 in 语法接入自定义对象。
+    description: 在同一个 Contact 类上继续增加 __eq__，让对象接入相等性协议。
     code: |
-      class Tags:
-          def __init__(self, values):
-              self.values = set(values)
+      class Contact:
+          def __init__(self, name, email):
+              self.name = name
+              self.email = email
 
-          def __contains__(self, item):
-              return item in self.values
+          def __str__(self):
+              return f"{self.name} <{self.email}>"
 
-      print("python" in Tags(["python", "data"]))
+          def __repr__(self):
+              return f"Contact(name={self.name!r}, email={self.email!r})"
+
+          def __eq__(self, other):
+              if not isinstance(other, Contact):
+                  return NotImplemented
+
+              return self.email.lower() == other.email.lower()
+
+      ada = Contact("Ada", "ada@example.com")
+      duplicate = Contact("Ada Lovelace", "ADA@example.com")
+      grace = Contact("Grace", "grace@example.com")
+
+      print(ada)
+      print([ada])
+      print(ada == duplicate)
+      print(ada == grace)
 extends:
   - dataclass
 ---
