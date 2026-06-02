@@ -40,12 +40,24 @@ tags:
   - readability
   - explicit
   - practical
-updatedAt: '2026-05-30'
+updatedAt: '2026-06-02'
 codeExamples:
-  - title: import this
-    description: Python 里可以直接打印 The Zen of Python。
+  - title: 读取 Zen 关键句
+    description: 从 The Zen of Python 中抽出几条会直接影响代码取舍的原则。
     code: |
-      import this
+      import contextlib
+      import io
+
+      with contextlib.redirect_stdout(io.StringIO()):
+          import this
+
+      zen_text = "".join(this.d.get(char, char) for char in this.s)
+      lines = [line for line in zen_text.splitlines() if line.strip()]
+      keywords = ("readability", "explicit", "simple", "practicality")
+
+      for keyword in keywords:
+          match = next(line for line in lines if keyword in line.lower())
+          print(match)
 ---
 “优美胜于丑陋”“显式胜于隐式”“简单胜于复杂”“实用胜于纯粹”这些原则不是口号。它们会影响你是否拆函数、是否写清楚变量名、是否为了炫技牺牲可读性。
 

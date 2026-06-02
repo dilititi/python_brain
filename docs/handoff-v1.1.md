@@ -1,6 +1,6 @@
 # Python 知识外脑 v1.1 接手文档
 
-更新日期：2026-06-01
+更新日期：2026-06-02
 
 本文件接在 v1.0 工程契约之后，专门记录“工作 1：概念代码示例补齐计划”。v1.1 的目标不是继续扩知识点，而是把现有 52 个概念的代码示例质量拉齐，让概念页的“代码”维度从可展示变成可验证。
 
@@ -9,7 +9,7 @@
 - 内容规模：52 个 concepts。
 - 字段边界：concept 使用 `codeExamples`；case 使用 `codeVersions`。不要把 `codeVersions` 引入 concept。
 - 已有三版本概念：13 个。
-- v1.1 批次待处理概念：39 个。其中 37 个非 `language` 概念需要补齐三版本，并会在当前 audit 中触发 codeExamples warning；2 个 `language` 概念已各有一段展示代码，但仍安排在 Week 8 复核并按需要补写。
+- v1.1 批次待处理概念：Week 1-8 已完成 39 个；Week 9 剩余 13 个已有完整概念复核与发布收尾。
 - 当前阶段：warning 阶段。`npm run audit:concepts` 列出 codeExamples 缺口但不阻断；`npm run audit:concepts -- --strict-code-examples` 用于模拟 v1.1 strict gate。
 - 已新增运行测试：`npm run test:code-examples` 会用 Pyodide 运行所有 `runnable !== false` 的 concept codeExamples。
 
@@ -25,7 +25,7 @@ v1.1 完成时必须满足：
 
 ## 批次清单
 
-Week 1-7 共补 37 个非 `language` 概念，Week 8 复核并按需要补写 2 个 `language` 展示性代码，Week 9 复核已有 13 个，合计 52 个。
+Week 1-7 共补 37 个非 `language` 概念，Week 8 复核并打磨 2 个 `language` 展示性代码，Week 9 复核已有 13 个并完成发布收尾，合计 52 个。
 
 | 周次 | category | 概念 |
 |---|---|---|
@@ -37,7 +37,7 @@ Week 1-7 共补 37 个非 `language` 概念，Week 8 复核并按需要补写 2 
 | Week 6 | `oop` | `class`、`dataclass`、`inheritance` |
 | Week 7 | `stdlib` | `json`、`pathlib`、`regular-expression` |
 | Week 8 | `language` | `python-philosophy`、`python-versions` |
-| Week 9 | 复核已有 13 个 | `common-stdlib-modules`、`cross-platform-community`、`decorator`、`dunder-methods`、`dynamic-strong-typing`、`encapsulation`、`function-parameters`、`interpreter-runtime`、`module-search-path`、`package-structure`、`polymorphism`、`programming-paradigms`、`python-language` |
+| Week 9 | 复核与发布 | 复核已有 13 个：`common-stdlib-modules`、`cross-platform-community`、`decorator`、`dunder-methods`、`dynamic-strong-typing`、`encapsulation`、`function-parameters`、`interpreter-runtime`、`module-search-path`、`package-structure`、`polymorphism`、`programming-paradigms`、`python-language`；再完成 paths/cases/标杆字段试写、Lighthouse 减负、codeExamples strict 化和 `v1.1.0` tag |
 
 Week 8 的关系要提前守住：`python-language` 是总枢节点；`python-philosophy` 和 `python-versions` 是其下游元层级节点，分别承接设计哲学和版本生命周期，不重复解释语言身份总览。
 
@@ -65,6 +65,15 @@ Week 9 复核标准：
 - 三版本之间是否连贯，`production` 必须是 `standard` 的演进。
 - 文案风格是否和 Week 1-8 新补内容一致。
 
+Week 9 收尾范围：
+
+- 复核 13 个已有完整概念，防止早期三版本成为质量洼地。
+- 给 5 条 paths 补 `forWhom` / `notForWhom` / `opportunityCost`，明确路径适合谁、不适合谁、机会成本是什么。
+- 复核 18 个 cases 的 `pitfalls`，重点检查是否写出真实代价，而不是语法注意事项。
+- 做小规模标杆字段试写：`decorator` 试写 `requiresMindset`，Guido van Rossum 试写 `earlyCareer`，只作为 v1.2 字段验证样本，不全量铺开。
+- 排查 `decorator` 页首屏负担，把 Lighthouse Performance 余量从 88-91 抬到 93+。优先检查 CodeRunner 是否可延迟到代码区挂载、三版本代码块是否默认只展示 `standard`、works/media 是否 lazy load。
+- 完成 codeExamples strict 化，跑全量 gates，推 `v1.1-rc` PR，绿灯后合并并打 `v1.1.0` annotated tag。
+
 每周完成后新增 `docs/v1.1-batch-notes/week-N.md`，记录本周概念、难点、复用范式、下一周提醒和跑过的命令。
 
 ## 用户反馈处理与建议审核
@@ -79,7 +88,7 @@ Week 9 复核标准：
 - `requiresMindset`：方向成立，但不进当前 v1.1 主线。可在 `decorator`、`python-language`、`function-parameters` 三页标杆先试写，v1.2 再决定是否全量 schema 化。
 - `cases.pitfalls`：已有字段，问题是写作质量。已在 `content-guidelines.md` 补充“写代价而不是语法注意事项”的准则；18 个 cases 的 pitfalls 复核可放到 Week 9。
 - `people.earlyCareer`：适合 v1.2。先选 Guido van Rossum 和 Wes McKinney 做可验证来源的示范，不接受第三方传记式二手描述作为唯一来源。
-- path `forWhom/notForWhom/opportunityCost`：产品价值高，但它是 schema 扩展。若 v1.1 Week 9 仍有余量，可作为单独 PR 加到 5 个 paths；不要和 codeExamples strict 发布日混在同一个 PR。
+- path `forWhom/notForWhom/opportunityCost`：产品价值高，放进 Week 9 复核范围，5 条 paths 全量补齐；仍需避免和 codeExamples strict 发布日混成不可回滚的大补丁。
 - `historicalEvents` collection：先不建 collection。更轻的试探方案是给 concept `history[]` 增加可选 `eventId`，当复用超过 10 次再考虑独立集合和页面。
 
 ## 非目标边界
@@ -114,10 +123,10 @@ v1.1 不做这些事：
 - [x] `docs/deployment.md` 已加入 `test:code-examples` 部署前置条件。
 - [x] `docs/content-guidelines.md` 已写入三版本质量标准和 `language` 展示性代码规则。
 - [x] `docs/v1.1-batch-notes/` 已加入周批次笔记模板。
-- [ ] Week 1-7 的 37 个非 `language` 概念补齐三版本。
-- [ ] Week 8 的 2 个 `language` 概念完成展示性代码复核。
+- [x] Week 1-7 的 37 个非 `language` 概念补齐三版本。
+- [x] Week 8 的 2 个 `language` 概念完成展示性代码复核。
 - [ ] Week 9 的 13 个已有完整概念复核完成。
-- [ ] `npm run audit:concepts -- --strict-code-examples` 返回 0。
+- [x] `npm run audit:concepts -- --strict-code-examples` 返回 0。
 - [ ] `src/content.config.ts` strict 化完成。
 - [ ] `scripts/validate-relations.ts` strict 化完成。
 - [ ] GitHub Actions v1 gates 在 `v1.1-rc` PR 绿灯。
@@ -137,4 +146,4 @@ npm run link:check
 npm run link:external:inventory
 ```
 
-当前预期：默认 `audit:concepts` 不因 codeExamples warning 阻断；strict 模式在 37 个非 `language` 概念补齐前应该失败。Week 8 的 2 个 `language` 概念不一定触发 audit warning，但仍要按展示性代码标准复核。
+当前预期：默认 `audit:concepts` 不因 codeExamples warning 阻断；Week 8 结束后 `npm run audit:concepts -- --strict-code-examples` 应返回 0。Week 9 strict 化前仍需把这一事实写回 schema、`validate-relations` 和部署文档。

@@ -43,14 +43,25 @@ tags:
   - python-2
   - python-3
   - lifecycle
-updatedAt: '2026-05-30'
+updatedAt: '2026-06-02'
 codeExamples:
-  - title: 查看版本
-    description: 在代码里查看当前解释器版本。
+  - title: 检查语法特性边界
+    description: 用当前解释器版本判断几个现代 Python 特性是否可用。
     code: |
       import sys
 
-      print(sys.version_info)
+      current = sys.version_info[:2]
+      features = {
+          "f-string": (3, 6),
+          "walrus operator": (3, 8),
+          "match-case": (3, 10),
+          "tomllib in stdlib": (3, 11),
+      }
+
+      print(f"running Python {current[0]}.{current[1]}")
+      for name, required in features.items():
+          status = "available" if current >= required else "not available"
+          print(f"{name}: {status} (needs {required[0]}.{required[1]}+)")
 ---
 版本节点会连接到具体语言特性：Python 3.6 的 f-string、Python 3.8 的 walrus 运算符、Python 3.10 的 match-case、以及逐步成熟的类型注解生态。
 
