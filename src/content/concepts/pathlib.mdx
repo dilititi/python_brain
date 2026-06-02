@@ -30,13 +30,41 @@ history:
     pep: PEP 428
     event: Python 3.4 引入 pathlib：PEP 428 推动面向对象的文件系统路径进入标准库。
 codeExamples:
-  - title: 遍历文件
-    description: Path.glob 可以按模式找到文件。
+  - title: naive
+    description: 用字符串拼路径时，少一个分隔符就会拼出错误路径。
     code: |
-      from pathlib import Path
+      folder = "reports"
+      filename = "summary.csv"
 
-      folder = Path(".")
-      for file in folder.glob("*.py"):
-          print(file.name)
+      path = folder + filename
+      print(path)
+  - title: standard
+    description: Path 对象用 / 拼接路径，文件名、后缀和父目录都有清楚的方法。
+    code: |
+      from pathlib import PurePosixPath
+
+      path = PurePosixPath("reports") / "2026" / "summary.csv"
+
+      print(path.name)
+      print(path.suffix)
+      print(path.parent)
+  - title: production
+    description: 工程版把路径构造写成函数，并拒绝空文件名、路径穿越和错误后缀。
+    code: |
+      from pathlib import PurePosixPath
+
+      def report_path(folder: str, filename: str) -> PurePosixPath:
+          if not filename:
+              raise ValueError("filename is required")
+
+          candidate = PurePosixPath(filename)
+          if candidate.name != filename:
+              raise ValueError("filename must not contain directories")
+          if candidate.suffix != ".csv":
+              raise ValueError("report file must be .csv")
+
+          return PurePosixPath(folder) / candidate
+
+      print(report_path("reports/2026", "summary.csv"))
 ---
 自动化办公和数据处理里，路径处理往往比算法更先劝退新人。`pathlib` 把这件事变得更像普通 Python 对象操作。

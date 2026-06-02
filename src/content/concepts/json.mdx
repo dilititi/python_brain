@@ -32,14 +32,49 @@ history:
   - year: 2006
     event: json 进入标准库：Python 2.6 加入 json 模块，简化 Web 数据交换。
 codeExamples:
-  - title: loads 和 dumps
-    description: 字符串转对象用 loads，对象转字符串用 dumps。
+  - title: naive
+    description: 手拼 JSON 文本很容易因为引号、逗号或类型格式出错。
     code: |
       import json
 
-      raw = '{"city": "Hangzhou", "temp": 26}'
+      city = "Hangzhou"
+      temp = 26
+      raw = "{city: " + city + ", temp: " + str(temp) + "}"
+
+      try:
+          data = json.loads(raw)
+      except json.JSONDecodeError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: dumps 负责生成 JSON 文本，loads 负责把 JSON 文本读回 Python 对象。
+    code: |
+      import json
+
+      payload = {"city": "Hangzhou", "temp": 26}
+      raw = json.dumps(payload, ensure_ascii=False)
       data = json.loads(raw)
+
       print(data["city"])
-      print(json.dumps(data, ensure_ascii=False))
+      print(raw)
+  - title: production
+    description: 工程版在解析 JSON 后继续校验字段和类型，避免错误数据进入后续流程。
+    code: |
+      import json
+      from typing import Any
+
+      def parse_weather(raw: str) -> dict[str, Any]:
+          try:
+              data = json.loads(raw)
+          except json.JSONDecodeError as error:
+              raise ValueError("invalid JSON payload") from error
+
+          if not isinstance(data.get("city"), str):
+              raise ValueError("city must be a string")
+          if not isinstance(data.get("temp"), int | float):
+              raise ValueError("temp must be a number")
+
+          return data
+
+      print(parse_weather('{"city": "Hangzhou", "temp": 26}'))
 ---
 只要进入 Web API、数据采集或 AI 工程，JSON 就会反复出现。它是 Python 对外交换结构化数据的日常格式。

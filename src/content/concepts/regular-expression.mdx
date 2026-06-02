@@ -29,12 +29,40 @@ history:
   - year: 1998
     event: re 模块成为常用文本工具：正则长期作为 Python 文本处理和数据清洗的重要工具。
 codeExamples:
-  - title: 提取邮箱
-    description: re.findall 可以找出所有匹配片段。
+  - title: naive
+    description: 只靠 split 和 in 判断邮箱，会把标点也一起带进结果。
+    code: |
+      text = "contact ada@example.com, guido@example.org."
+      emails = []
+
+      for word in text.split():
+          if "@" in word:
+              emails.append(word)
+
+      print(emails)
+  - title: standard
+    description: re.findall 可以按文本模式提取所有匹配片段。
     code: |
       import re
 
-      text = "contact ada@example.com or guido@example.org"
-      print(re.findall(r"[\w.-]+@[\w.-]+", text))
+      text = "contact ada@example.com, guido@example.org."
+      emails = re.findall(r"[\w.-]+@[\w.-]+\.\w+", text)
+
+      print(emails)
+  - title: production
+    description: 工程版预编译模式、过滤空输入，并把提取结果去重排序。
+    code: |
+      import re
+
+      EMAIL_PATTERN = re.compile(r"[\w.-]+@[\w.-]+\.\w+")
+
+      def extract_emails(text: str) -> list[str]:
+          if not text.strip():
+              return []
+
+          emails = {match.group(0).lower() for match in EMAIL_PATTERN.finditer(text)}
+          return sorted(emails)
+
+      print(extract_emails("Ada: ADA@example.com, Guido: guido@example.org."))
 ---
 正则很强，但不是所有字符串问题都要用正则。简单分割、替换和前后缀判断，优先用字符串方法会更清楚。
