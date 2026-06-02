@@ -44,3 +44,4 @@
 - `npm run link:check`：通过，97 个 HTML 文件检查干净。
 - `npm run link:external:inventory`：通过，64 个 unique https URLs。
 - `git diff --check`：通过。
+- GitHub Actions Lighthouse（run `26802269881` 重跑通过）：`decorator` Performance 91 / Accessibility 100，`python-language` 100 / 100，`function-parameters` 100 / 100；`decorator` 首次曾抖到 Performance 85，v1.1 strict 化发布前应把 beacon 页余量做到 93+，避免 90-92 贴边导致 PR 偶发红灯。
