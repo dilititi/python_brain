@@ -1,19 +1,3 @@
----
-type SearchDoc = {
-  id: string;
-  title: string;
-  description: string;
-  href: string;
-  kind: string;
-};
-
-interface Props {
-  docs: SearchDoc[];
-}
-
-const { docs } = Astro.props;
----
-
 <div class="search-box" data-search-box>
   <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16">
     <path d="m21 21-4.34-4.34"></path>
@@ -27,7 +11,6 @@ const { docs } = Astro.props;
     </svg>
   </button>
   <div class="search-results" data-search-results hidden></div>
-  <script is:inline type="application/json" data-search-docs set:html={JSON.stringify(docs)} />
 </div>
 
 <script is:inline>
@@ -42,20 +25,46 @@ const { docs } = Astro.props;
       const input = root.querySelector("[data-search-input]");
       const clear = root.querySelector("[data-search-clear]");
       const results = root.querySelector("[data-search-results]");
-      const docsSource = root.querySelector("[data-search-docs]");
 
-      if (!(input instanceof HTMLInputElement) || !(clear instanceof HTMLButtonElement) || !(results instanceof HTMLElement) || !docsSource) {
+      if (!(input instanceof HTMLInputElement) || !(clear instanceof HTMLButtonElement) || !(results instanceof HTMLElement)) {
         continue;
       }
 
       let docs = [];
-      try {
-        docs = JSON.parse(docsSource.textContent || "[]");
-      } catch {
-        docs = [];
+      let docsPromise = null;
+
+      async function loadDocs() {
+        if (docs.length > 0) {
+          return docs;
+        }
+
+        if (!docsPromise) {
+          docsPromise = fetch("/search-docs.json")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("搜索索引加载失败");
+              }
+
+              return response.json();
+            })
+            .then((items) => {
+              docs = Array.isArray(items) ? items : [];
+              return docs;
+            });
+        }
+
+        return docsPromise;
       }
 
-      function render() {
+      function renderMessage(text) {
+        results.replaceChildren();
+        const message = document.createElement("small");
+        message.textContent = text;
+        results.append(message);
+        results.hidden = false;
+      }
+
+      async function render() {
         const query = input.value.trim().toLowerCase();
         clear.hidden = query.length === 0;
         results.replaceChildren();
@@ -63,6 +72,23 @@ const { docs } = Astro.props;
         if (!query) {
           results.hidden = true;
           return;
+        }
+
+        if (docs.length === 0) {
+          renderMessage("搜索中");
+          try {
+            await loadDocs();
+          } catch {
+            renderMessage("搜索暂不可用");
+            return;
+          }
+
+          if (input.value.trim().toLowerCase() !== query) {
+            await render();
+            return;
+          }
+
+          results.replaceChildren();
         }
 
         const matches = docs
@@ -93,13 +119,13 @@ const { docs } = Astro.props;
       input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
           input.value = "";
-          render();
+          void render();
         }
       });
       clear.addEventListener("click", () => {
         input.value = "";
         input.focus();
-        render();
+        void render();
       });
       document.addEventListener("click", (event) => {
         const target = event.target;

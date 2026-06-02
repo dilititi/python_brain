@@ -1,6 +1,5 @@
 ---
 import SearchBox from "../components/astro/SearchBox.astro";
-import { getSearchDocuments } from "../lib/search-index";
 import "../styles/global.css";
 
 interface Props {
@@ -9,7 +8,6 @@ interface Props {
 }
 
 const { title, description = "Python 知识外脑" } = Astro.props;
-const searchDocs = await getSearchDocuments();
 const nav = [
   { href: "/path/", label: "应用方向" },
   { href: "/concepts/", label: "概念" },
@@ -39,7 +37,7 @@ const nav = [
           <div class="nav-links">
             {nav.map((item) => <a href={item.href}>{item.label}</a>)}
           </div>
-          <SearchBox docs={searchDocs} />
+          <SearchBox />
         </nav>
       </header>
       <main class="page">
