@@ -15,6 +15,7 @@
     "test:code-examples": "tsx scripts/test-code-examples.ts",
     "validate:relations": "tsx scripts/validate-relations.ts",
     "audit:concepts": "tsx scripts/audit-concepts.ts",
+    "audit:assessments": "tsx scripts/audit-assessments.ts",
     "migrate:works-role": "tsx scripts/migrate-works-note-to-role.ts",
     "migrate:works-registry": "tsx scripts/migrate-works-registry.ts",
     "migrate:description": "tsx scripts/migrate-description-to-summary.ts",

@@ -1,0 +1,32 @@
+title: 限时实现姓名清洗函数
+description: 在限定时间内写出一个可复用的字符串清洗函数。
+category: function
+kind: timed-coding
+targetTier: tier2
+concepts:
+  - function
+  - string
+  - if-statement
+timeLimit: 600
+prompt: |
+  实现 normalize_name(name)，去掉首尾空白，并把每个单词首字母大写。空输入返回 "Anonymous"。
+starterCode: |
+  def normalize_name(name):
+      pass
+testCases:
+  - name: trims and title-cases a normal name
+    code: |
+      assert normalize_name("  ada lovelace ") == "Ada Lovelace"
+  - name: falls back for empty input
+    code: |
+      assert normalize_name("   ") == "Anonymous"
+referenceSolution: |
+  def normalize_name(name):
+      cleaned = name.strip()
+      if not cleaned:
+          return "Anonymous"
+      return cleaned.title()
+rubric:
+  - 能把逻辑封装进函数并返回结果。
+  - 能处理空白输入的边界情况。
+  - 通过给定测试用例。

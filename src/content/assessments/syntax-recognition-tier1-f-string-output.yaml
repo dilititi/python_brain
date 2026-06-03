@@ -1,0 +1,31 @@
+title: 读懂 f-string 输出
+description: 判断 f-string 如何把变量和表达式放进字符串。
+category: syntax
+kind: recognition
+targetTier: tier1
+concepts:
+  - f-string
+  - string
+  - variable
+prompt: |
+  阅读代码，选择最终输出：
+
+  name = "Ada"
+  count = 3
+  print(f"{name} has {count + 1} files")
+choices:
+  - label: Ada has 4 files
+    value: ada-has-4-files
+    correct: true
+    feedback: 花括号里的表达式会先计算，所以 count + 1 得到 4。
+  - label: Ada has count + 1 files
+    value: literal-expression
+    correct: false
+    feedback: f-string 不会把花括号里的表达式当普通文本。
+  - label: name has 4 files
+    value: literal-name
+    correct: false
+    feedback: name 也会被替换成变量值 Ada。
+rubric:
+  - 能识别 f-string 会替换花括号里的变量。
+  - 能判断花括号里的表达式会在输出前求值。

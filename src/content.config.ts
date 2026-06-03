@@ -20,6 +20,39 @@ const httpsUrl = z.url().refine((value) => value.startsWith("https://"), {
 });
 const todoPattern = /TODO|待补|暂无说明/;
 const requiredCodeExampleTitles = ["naive", "standard", "production"] as const;
+const conceptCategory = z.enum([
+  "language",
+  "syntax",
+  "control-flow",
+  "data-structure",
+  "function",
+  "oop",
+  "file-io",
+  "module-eng",
+  "stdlib",
+  "third-party"
+]);
+
+const activeAssessmentCategory = z.enum([
+  "language",
+  "syntax",
+  "control-flow",
+  "data-structure",
+  "function",
+  "oop",
+  "module-eng",
+  "stdlib"
+]);
+
+const assessmentKind = z.enum([
+  "recognition",
+  "debugging",
+  "completion",
+  "timed-coding",
+  "refactor"
+]);
+
+const targetTier = z.enum(["tier1", "tier2", "tier3", "tier4"]);
 
 const workLink = z.object({
   title: z.string(),
@@ -64,6 +97,20 @@ const codeExample = z.object({
   runnable: z.boolean().default(true)
 });
 
+const assessmentChoice = z.object({
+  label: z.string(),
+  value: z.string(),
+  correct: z.boolean().default(false),
+  feedback: z.string().optional()
+});
+
+const assessmentTestCase = z.object({
+  name: z.string(),
+  input: z.unknown().optional(),
+  expected: z.unknown().optional(),
+  code: z.string().optional()
+});
+
 function isUsefulString(value: string) {
   return value.trim().length > 0 && !todoPattern.test(value);
 }
@@ -88,18 +135,7 @@ const conceptSchema = z
     whyImportant: z.string().max(200),
     definition: z.string(),
     mentalModel: z.string(),
-    category: z.enum([
-      "language",
-      "syntax",
-      "control-flow",
-      "data-structure",
-      "function",
-      "oop",
-      "file-io",
-      "module-eng",
-      "stdlib",
-      "third-party"
-    ]),
+    category: conceptCategory,
     level,
     tracks: z.array(track).default([]),
     prerequisites: z.array(slugRef).default([]),
@@ -256,10 +292,86 @@ const paths = defineCollection({
   })
 });
 
+const assessmentSchema = z
+  .object({
+    title: z.string(),
+    description: z.string().optional(),
+    category: activeAssessmentCategory,
+    kind: assessmentKind,
+    targetTier,
+    concepts: z.array(slugRef).min(1),
+    prompt: z.string(),
+    timeLimit: z.number().int().positive().optional(),
+    starterCode: z.string().optional(),
+    testCases: z.array(assessmentTestCase).default([]),
+    choices: z.array(assessmentChoice).default([]),
+    referenceSolution: z.string().optional(),
+    rubric: nonEmptyStringArray
+  })
+  .superRefine((data, ctx) => {
+    if (data.kind === "recognition") {
+      if (data.choices.length < 2) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["choices"],
+          message: "recognition assessments need at least two choices"
+        });
+      }
+
+      if (data.choices.filter((choice) => choice.correct).length !== 1) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["choices"],
+          message: "recognition assessments need exactly one correct choice"
+        });
+      }
+
+      return;
+    }
+
+    if (!isUsefulString(data.starterCode ?? "")) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["starterCode"],
+        message: `${data.kind} assessments need starterCode`
+      });
+    }
+
+    if (!isUsefulString(data.referenceSolution ?? "")) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["referenceSolution"],
+        message: `${data.kind} assessments need referenceSolution`
+      });
+    }
+
+    if (data.testCases.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["testCases"],
+        message: `${data.kind} assessments need at least one test case`
+      });
+    }
+
+    if (data.kind === "timed-coding" && !data.timeLimit) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["timeLimit"],
+        message: "timed-coding assessments need timeLimit"
+      });
+    }
+  });
+
+const assessments = defineCollection({
+  loader: glob({ pattern: "**/*.{yaml,yml}", base: "./src/content/assessments" }),
+  schema: assessmentSchema
+});
+
 export const collections = {
   concepts,
   cases,
   projects,
   people,
-  paths
+  paths,
+  assessments
 };

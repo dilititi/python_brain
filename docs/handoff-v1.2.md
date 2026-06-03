@@ -30,9 +30,9 @@ v1.2 做的是“认知外脑”的掌握度地图，不是刷题平台。进度
 
 ## 开工前发现
 
-### 1. 类别矩阵口径需要裁决
+### 1. 类别矩阵口径已裁决
 
-`docs/v1.2-progress-tracking.md` 写的是 `9 类别 × 4 档`，但当前 schema 枚举是 10 类：
+v1.2 启动期采用 `8 类别 × 4 档`。当前 schema 枚举是 10 类：
 
 ```text
 language, syntax, control-flow, data-structure, function,
@@ -52,17 +52,11 @@ oop, file-io, module-eng, stdlib, third-party
 | stdlib | 4 |
 | syntax | 6 |
 
-`file-io` 和 `third-party` 仍是空 category。v1.2 第一批实现前必须决定矩阵使用哪一种口径：
-
-- 方案 A：矩阵只展示当前 8 个非空 category，空 category 不进入 v1.2。
-- 方案 B：保留 9 类，把 `file-io` 合并进 `stdlib` 或 `module-eng`，`third-party` 暂不展示。
-- 方案 C：展示 schema 的 10 类，但空 category 标为“尚未开放”。这会让 v1.2 种子题工作量增加，也会冲淡“不扩内容”的纪律。
-
-建议先采用方案 A：用当前 8 个真实 category 作为 v1.2 启动口径，等 `file-io` / `third-party` 有内容时再扩矩阵。
+`file-io` 和 `third-party` 仍是空 category。v1.2 不为了凑 9 类新增 concepts，也不展示空 category。等 `file-io` / `third-party` 有真实内容时，再扩矩阵。
 
 ### 2. assessments collection 尚未存在
 
-当前没有 `src/content/assessments/`，也没有 assessments schema。v1.2 第一个实现 PR 应先做 schema、id 规范和 5 种题型最小样本，不要先写 UI。
+`src/content/assessments/`、assessments schema 和 5 种题型最小样本已进入第一批实现。第一阶段仍不写 UI，不接 localStorage。
 
 建议题目 id 规范：
 
@@ -111,6 +105,7 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 
 - `npm run build` 能通过 Astro content schema。
 - `npm run validate:relations` 不新增 relation error。
+- `npm run audit:assessments` 返回 clean。
 - 文档更新 assessment id 规范。
 
 ### PR 2：progress calculator
@@ -155,7 +150,7 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 ### PR 5：题库扩到阶段 1 目标
 
 - 按最终 category 口径补齐种子题。
-- 原设计是 27 道题；如果采用 8 类启动口径，则阶段 1 目标调整为 24 道题（8 类 × 3 kind）。
+- 阶段 1 目标为 24 道题（8 类 × 3 kind）。
 - 5 种评估类型都必须持续存在，不能退化成只有限时编程。
 
 完成条件：
@@ -187,6 +182,7 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 ```bash
 npm run validate:relations
 npm run audit:concepts
+npm run audit:assessments
 npm run test
 npm run test:code-examples
 npm run build
@@ -206,11 +202,11 @@ v1.2 新增建议：
 - [x] 生产域名已绑定正确 repo。
 - [x] 生产抽样 URL 返回 200。
 - [x] v1.2 产品设计文档存在。
-- [ ] 裁决 category 矩阵口径：8 / 9 / 10。
-- [ ] 确认 assessment id 与目录规范。
+- [x] 裁决 category 矩阵口径：启动期使用 8 个真实 category。
+- [x] 确认 assessment id 与目录规范。
 - [ ] 确认 localStorage `schemaVersion` 和迁移策略。
 - [ ] 确认 ruff WASM spike 的成功/降级标准。
-- [ ] 确认第一批实现 PR 是否只做 schema + 样本，不碰 UI。
+- [x] 确认第一批实现 PR 是否只做 schema + 样本，不碰 UI。
 
 ## 不要提前做
 

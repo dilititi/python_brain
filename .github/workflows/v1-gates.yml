@@ -36,6 +36,9 @@ jobs:
       - name: Audit concepts
         run: npm run audit:concepts
 
+      - name: Audit assessments
+        run: npm run audit:assessments
+
       - name: Run tests
         run: npm run test
 
