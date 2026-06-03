@@ -62,6 +62,19 @@ const codeExample = z.object({
   runnable: z.boolean().default(true)
 });
 
+const mindsetShift = z.object({
+  shift: z.string().max(60),
+  why: z.string().max(200),
+  blockedBy: z.array(z.string()).default([])
+});
+
+const earlyCareer = z.object({
+  ageOrYear: z.string(),
+  whatTheyDid: z.string().max(300),
+  itLedTo: z.string().max(200),
+  source: httpsUrl
+});
+
 const concepts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/concepts" }),
   schema: z.object({
@@ -98,7 +111,8 @@ const concepts = defineCollection({
     history: z.array(historyEvent).min(1),
     tags: z.array(z.string()).default([]),
     updatedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    codeExamples: z.array(codeExample).default([])
+    codeExamples: z.array(codeExample).default([]),
+    requiresMindset: z.array(mindsetShift).default([])
   })
 });
 
@@ -156,7 +170,8 @@ const people = defineCollection({
     quote: z.string().optional(),
     concepts: z.array(slugRef).min(3),
     works: z.array(workLink).default([]),
-    sources: z.array(sourceLink).min(1)
+    sources: z.array(sourceLink).min(1),
+    earlyCareer: earlyCareer.optional()
   })
 });
 

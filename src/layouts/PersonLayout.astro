@@ -31,6 +31,15 @@ const { Content } = await render(entry);
     {entry.data.quote && (
       <blockquote class="person-quote">{entry.data.quote}</blockquote>
     )}
+    {entry.data.earlyCareer && (
+      <aside class="early-career">
+        <p class="early-career-label">早期线索</p>
+        <h2>{entry.data.earlyCareer.ageOrYear}</h2>
+        <p>{entry.data.earlyCareer.whatTheyDid}</p>
+        <p>{entry.data.earlyCareer.itLedTo}</p>
+        <a href={entry.data.earlyCareer.source}>来源</a>
+      </aside>
+    )}
     <Content />
   </section>
   <section class="section">
@@ -68,5 +77,38 @@ const { Content } = await render(entry);
     color: var(--color-ink);
     font-size: 20px;
     line-height: 1.55;
+  }
+
+  .early-career {
+    display: grid;
+    gap: 8px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    background: var(--color-soft);
+  }
+
+  .early-career-label {
+    margin: 0;
+    color: var(--color-blue);
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .early-career h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .early-career p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .early-career a {
+    width: fit-content;
+    color: var(--color-blue);
+    font-weight: 700;
   }
 </style>

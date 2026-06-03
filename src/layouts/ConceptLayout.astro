@@ -97,6 +97,26 @@ const tabs = [
                   <p>{entry.data.whyImportant}</p>
                 </aside>
               )}
+              {entry.data.requiresMindset.length > 0 && (
+                <aside class="mindset-shifts">
+                  <strong>需要切换的思维</strong>
+                  <div>
+                    {entry.data.requiresMindset.map((item) => (
+                      <section>
+                        <h3>{item.shift}</h3>
+                        <p>{item.why}</p>
+                        {item.blockedBy.length > 0 && (
+                          <ul>
+                            {item.blockedBy.map((blocker) => (
+                              <li>{blocker}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    ))}
+                  </div>
+                </aside>
+              )}
               <Content />
             </div>
           </FacetSection>
@@ -552,6 +572,48 @@ const tabs = [
 
   .why-important p {
     margin: 4px 0 0;
+    color: var(--color-muted);
+  }
+
+  .mindset-shifts {
+    display: grid;
+    gap: 12px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--color-soft);
+  }
+
+  .mindset-shifts > strong {
+    color: var(--color-ink);
+  }
+
+  .mindset-shifts > div {
+    display: grid;
+    gap: 10px;
+  }
+
+  .mindset-shifts section {
+    display: grid;
+    gap: 6px;
+  }
+
+  .mindset-shifts h3 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .mindset-shifts p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .mindset-shifts ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
     color: var(--color-muted);
   }
 

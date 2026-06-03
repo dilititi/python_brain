@@ -85,9 +85,9 @@ Week 9 收尾范围：
 
 审核结论：
 
-- `requiresMindset`：方向成立，但不进当前 v1.1 主线。可在 `decorator`、`python-language`、`function-parameters` 三页标杆先试写，v1.2 再决定是否全量 schema 化。
+- `requiresMindset`：方向成立，已作为 optional 字段在 `decorator` 做标杆试写；不在 v1.1 全量迁移，v1.2 再决定是否推广到更多概念。
 - `cases.pitfalls`：已有字段，问题是写作质量。已在 `content-guidelines.md` 补充“写代价而不是语法注意事项”的准则；18 个 cases 的 pitfalls 复核可放到 Week 9。
-- `people.earlyCareer`：适合 v1.2。先选 Guido van Rossum 和 Wes McKinney 做可验证来源的示范，不接受第三方传记式二手描述作为唯一来源。
+- `people.earlyCareer`：适合 v1.2，已作为 optional 字段在 Guido van Rossum 做标杆试写；Wes McKinney 留到 v1.2 继续验证，不接受第三方传记式二手描述作为唯一来源。
 - path `forWhom/notForWhom/opportunityCost`：产品价值高，放进 Week 9 复核范围，5 条 paths 全量补齐；仍需避免和 codeExamples strict 发布日混成不可回滚的大补丁。
 - `historicalEvents` collection：先不建 collection。更轻的试探方案是给 concept `history[]` 增加可选 `eventId`，当复用超过 10 次再考虑独立集合和页面。
 
@@ -125,7 +125,8 @@ v1.1 不做这些事：
 - [x] `docs/v1.1-batch-notes/` 已加入周批次笔记模板。
 - [x] Week 1-7 的 37 个非 `language` 概念补齐三版本。
 - [x] Week 8 的 2 个 `language` 概念完成展示性代码复核。
-- [ ] Week 9 的 13 个已有完整概念复核完成。
+- [x] Week 9 paths/cases 复核和标杆字段试写完成。
+- [x] Week 9 的 13 个已有完整概念复核完成。
 - [x] `npm run audit:concepts -- --strict-code-examples` 返回 0。
 - [ ] `src/content.config.ts` strict 化完成。
 - [ ] `scripts/validate-relations.ts` strict 化完成。

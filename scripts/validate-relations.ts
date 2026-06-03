@@ -283,6 +283,30 @@ for (const entry of concepts) {
     pushError(entry, "whyImportant", "whyImportant is missing, empty, or TODO-like", "Explain the concrete real-world value in <=200 characters; compare src/content/concepts/function-parameters.mdx.");
   }
 
+  if ("requiresMindset" in entry.data) {
+    const mindsetShifts = asRecordArray(entry.data.requiresMindset);
+
+    mindsetShifts.forEach((mindset, index) => {
+      if (!isUsefulString(mindset.shift)) {
+        pushError(entry, `requiresMindset[${index}].shift`, "mindset shift is missing or TODO-like", "Name the mental shift in one short sentence; compare src/content/concepts/decorator.mdx.");
+      }
+
+      if (!isUsefulString(mindset.why)) {
+        pushError(entry, `requiresMindset[${index}].why`, "mindset why is missing or TODO-like", "Explain why this shift unlocks the concept; compare src/content/concepts/decorator.mdx.");
+      }
+
+      if ("blockedBy" in mindset) {
+        const blockedBy = Array.isArray(mindset.blockedBy)
+          ? mindset.blockedBy
+          : [];
+
+        if (!Array.isArray(mindset.blockedBy) || blockedBy.some((item) => !isUsefulString(item))) {
+          pushError(entry, `requiresMindset[${index}].blockedBy`, "blockedBy must contain useful strings when present", "List the prior intuition that blocks this shift, or remove blockedBy.");
+        }
+      }
+    });
+  }
+
   if ("expandsTo" in entry.data) {
     pushError(entry, "expandsTo", "expandsTo is removed", "Rename the field to extends and keep concept ids unchanged.");
   }
@@ -498,6 +522,30 @@ for (const entry of people) {
       pushError(entry, `sources[${index}].url`, "source url must be an https URL", "Use an https URL from an official, PEP, repository, docs, or talk source.");
     }
   });
+
+  if ("earlyCareer" in entry.data) {
+    const earlyCareer = entry.data.earlyCareer as Record<string, unknown> | undefined;
+
+    if (!earlyCareer || typeof earlyCareer !== "object") {
+      pushError(entry, "earlyCareer", "earlyCareer must be an object when present", "Use ageOrYear, whatTheyDid, itLedTo, and source; compare src/content/people/guido-van-rossum.mdx.");
+    } else {
+      if (!isUsefulString(earlyCareer.ageOrYear)) {
+        pushError(entry, "earlyCareer.ageOrYear", "earlyCareer ageOrYear is missing or TODO-like", "Name the age or year that anchors the early-career moment.");
+      }
+
+      if (!isUsefulString(earlyCareer.whatTheyDid)) {
+        pushError(entry, "earlyCareer.whatTheyDid", "earlyCareer whatTheyDid is missing or TODO-like", "Describe the concrete early work, not the later famous achievement.");
+      }
+
+      if (!isUsefulString(earlyCareer.itLedTo)) {
+        pushError(entry, "earlyCareer.itLedTo", "earlyCareer itLedTo is missing or TODO-like", "Explain how that early work grew into a later influence.");
+      }
+
+      if (!isHttpsUrl(earlyCareer.source)) {
+        pushError(entry, "earlyCareer.source", "earlyCareer source must be an https URL", "Use a first-party interview, official page, talk, or contemporaneous source.");
+      }
+    }
+  }
 }
 
 for (const entry of paths) {

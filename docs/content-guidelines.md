@@ -7,6 +7,7 @@
 - [设计原则](#设计原则)
 - [概念节点](#概念节点)
 - [字段语义边界](#字段语义边界)
+- [标杆字段试写](#标杆字段试写)
 - [六维内容边界](#六维内容边界)
 - [代码示例](#代码示例)
 - [真实案例](#真实案例)
@@ -44,6 +45,16 @@
 
 concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜索摘要统一使用 `summary`，避免同一个概念同时维护两句相近短描述。如果 `definition` 和 `mentalModel` 难以区分，优先让 `definition` 写边界和反例，让 `mentalModel` 只保留一句可记忆的类比。
 
+## 标杆字段试写
+
+`requiresMindset?` 是 v1.2 认知字段的标杆试写，不是 v1.1 全量必填项。它用于表达“学会这个概念前需要换一种想法”，不能重复 `prerequisites` 的前置知识列表。每项必须包含：
+
+- `shift`：一句话说明要切换的思维方式。
+- `why`：解释为什么这个切换会解开当前概念。
+- `blockedBy?`：列出常见旧直觉，例如“函数只能被调用，不能像值一样传递”。
+
+`earlyCareer?` 是人物页的标杆试写，用来记录“这个人早期做过的具体事情如何长成后来的影响”。它不是普通生平简介，必须包含 `ageOrYear`、`whatTheyDid`、`itLedTo` 和 `source`；`source` 必须是 `https://`，优先使用当事人自述、官方页面、采访实录、演讲或同时代可验证来源，不接受第三方传记式描述作为唯一依据。
+
 ## 六维内容边界
 
 概念页六维固定为：
@@ -55,7 +66,7 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 5. 经典作品
 6. 历史脉络
 
-手写内容只负责前 3 维：定义、代码、历史。案例、人物、作品应优先由关系索引自动聚合。作品元数据写在 `src/content/works-registry.yaml`，概念 frontmatter 只写 `worksRef[].id` 和 `worksRef[].role`；`role` 必须说明“这个作品怎样使用或体现这个概念”，禁止只写“X 用了 Y”。
+手写内容只负责前 3 维：定义、代码、历史。`requiresMindset?` 作为定义维度里的认知提示出现，不新增第 7 维。案例、人物、作品应优先由关系索引自动聚合。作品元数据写在 `src/content/works-registry.yaml`，概念 frontmatter 只写 `worksRef[].id` 和 `worksRef[].role`；`role` 必须说明“这个作品怎样使用或体现这个概念”，禁止只写“X 用了 Y”。
 
 ## 代码示例
 
@@ -98,7 +109,7 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 
 人物不是装饰，而是记忆锚点。人物页必须满足：
 
-- 当前人物字段全集为：`name`、`role`、`field`、`description`、`quote?`、`concepts[]`、`works[]`、`sources[]`。
+- 当前人物字段全集为：`name`、`role`、`field`、`description`、`quote?`、`concepts[]`、`works[]`、`sources[]`、`earlyCareer?`。
 - `role` 说明这个人和 Python 生态的核心关系。
 - `field` 说明主要领域，避免只写头衔。
 - `quote?` 可选；若填写，必须是能帮助记住此人风格或贡献的短句，不能拿普通头衔凑数。
@@ -106,6 +117,7 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 - `sources.length >= 1`，且来源可验证。
 - 维基或个人博客不能作为唯一来源。
 - 优先使用 PEP、官方页面、仓库、文档、演讲实录或会议页面。
+- `earlyCareer?` 只写早期具体行动和后续影响链，不写“后来成为 X”这种结果总结。
 
 人物描述要说明他为什么是这个概念的锚点，而不是只列头衔。
 
