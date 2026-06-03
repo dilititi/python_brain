@@ -35,7 +35,7 @@ codeVersions:
 
       print(validate_user({"name": "Ada", "email": "ada@example.com"}))
 pitfalls:
-  - 在检查空字符串之前直接 int() 转换，会让用户输入错误变成未处理异常。
+  - 在检查空字符串之前直接 int() 转换，会把可提示的用户输入错误变成未处理异常，表单流程会中断，用户也得不到可修正的反馈。
 extensions:
   - 把校验规则抽成函数，并返回统一的错误消息或字段级错误对象。
 ---

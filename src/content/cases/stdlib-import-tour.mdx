@@ -36,7 +36,7 @@ codeVersions:
       print(sys.version_info.major)
       print(bool(re.search("py", "python")))
 pitfalls:
-  - 文件名和标准库同名会遮蔽真正的模块，例如把脚本命名为 json.py。
+  - 文件名和标准库同名会遮蔽真正的模块，例如把脚本命名为 json.py；错误会表现成标准库“莫名其妙没有某个属性”，新人容易误判为安装问题。
 extensions:
   - 做一个标准库巡检脚本，列出常用模块、用途和当前导入路径。
 ---

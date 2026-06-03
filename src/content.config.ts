@@ -167,6 +167,9 @@ const paths = defineCollection({
     description: z.string(),
     track,
     audience: z.string(),
+    forWhom: nonEmptyStringArray,
+    notForWhom: nonEmptyStringArray,
+    opportunityCost: z.string().max(300),
     estimatedNodes: z.number(),
     nodes: z.array(slugRef),
     milestones: z

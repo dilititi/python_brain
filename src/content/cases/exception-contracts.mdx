@@ -31,7 +31,7 @@ codeVersions:
 
       print(parse_positive("3"))
 pitfalls:
-  - 捕获过宽的 Exception 会把真正的程序 bug 伪装成可恢复错误。
+  - 捕获过宽的 Exception 会把真正的程序 bug 伪装成可恢复错误，监控看起来“没有失败”，但业务结果已经被错误默认值污染。
 extensions:
   - 拆分自定义异常类型，并为每种失败路径补一条单元测试。
 ---

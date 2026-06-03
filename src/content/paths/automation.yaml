@@ -2,6 +2,13 @@ title: 自动化办公方向
 description: 从循环、函数和 pathlib 进入文件处理，再接虚拟环境、JSON 和接口数据。
 track: automation
 audience: 想批量处理文件、表格或接口数据的学习者。
+forWhom:
+  - 工作里经常遇到批量改名、整理文件、清洗文本、合并数据或调用接口的人。
+  - 希望尽快做出本地可用脚本，并愿意学习 pathlib、JSON、异常处理和环境隔离的人。
+notForWhom:
+  - 主要目标是写可部署的 Web API、用户系统或服务端框架的人，Web 后端方向更聚焦。
+  - 想系统进入机器学习训练、数据建模或深度学习的人，数据或 AI 方向更合适。
+opportunityCost: 这条路会优先提升本地脚本和办公自动化效率，短期不会深入 Web 框架、数据库、可视化和模型训练；如果后续转后端或 AI，需要再补服务化和领域库。
 estimatedNodes: 31
 nodes:
   - python-language

@@ -28,7 +28,7 @@ codeVersions:
       def login():
           return "login page"
 pitfalls:
-  - 把路由函数写成大杂烩会让 URL 注册、参数校验和业务逻辑互相缠在一起。
+  - 把路由函数写成大杂烩会让 URL 注册、参数校验和业务逻辑互相缠在一起，接口一多就很难测试，改一个字段可能连带弄坏多个路由。
 extensions:
   - 加入 HTTP method、状态码和参数校验，再把业务逻辑抽成独立函数。
 ---

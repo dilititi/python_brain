@@ -501,6 +501,18 @@ for (const entry of people) {
 }
 
 for (const entry of paths) {
+  if (asStringArray(entry.data.forWhom).length === 0) {
+    pushError(entry, "forWhom", "path.forWhom must contain at least one useful audience trait", "Add concrete traits this path is designed for.");
+  }
+
+  if (asStringArray(entry.data.notForWhom).length === 0) {
+    pushError(entry, "notForWhom", "path.notForWhom must contain at least one useful exclusion trait", "Add concrete traits that should choose another path first.");
+  }
+
+  if (!isUsefulString(entry.data.opportunityCost)) {
+    pushError(entry, "opportunityCost", "path.opportunityCost is missing or TODO-like", "Explain what the learner gives up by choosing this path now.");
+  }
+
   reportMissing(entry, "nodes", entry.data.nodes, conceptIds, "concept");
   const milestones = Array.isArray(entry.data.milestones)
     ? (entry.data.milestones as Record<string, unknown>[])

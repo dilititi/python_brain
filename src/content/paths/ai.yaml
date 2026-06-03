@@ -2,6 +2,13 @@ title: AI 工程方向
 description: 先建立函数、JSON、环境管理和装饰器基础，再承接模型 API 与服务化。
 track: ai
 audience: 想调用模型 API、写推理服务或做 AI 工具的学习者。
+forWhom:
+  - 已经知道自己想把 Python 用在模型调用、提示词工具链或推理服务上的学习者。
+  - 愿意先补 JSON、异常处理、环境管理和函数封装，再进入具体 AI SDK 的学习者。
+notForWhom:
+  - 主要目标是先学机器学习数学、训练模型或数据建模的人，数据分析方向会更顺。
+  - 还没有稳定掌握函数和字典，却急着堆 API key 和框架调用的人。
+opportunityCost: 这条路会较早关注服务化、配置、错误处理和装饰器，短期会少练数据清洗、可视化和算法题；如果后来转向数据分析，部分 Web/API 细节会成为旁路经验。
 estimatedNodes: 26
 nodes:
   - python-language

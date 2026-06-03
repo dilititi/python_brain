@@ -38,7 +38,7 @@ codeVersions:
 
       print(total("100", 2.5, 3.5, currency="USD"))
 pitfalls:
-  - 可变默认参数和混用 *args/**kwargs 容易让函数调用结果看起来不稳定。
+  - 可变默认参数和混用 *args/**kwargs 会让调用结果看起来随机变化，尤其在测试共享同一个函数对象时，前一次调用留下的状态会污染下一次。
 extensions:
   - 加入类型注解、默认值示例和 pytest 参数化测试，形成函数契约练习。
 ---

@@ -37,7 +37,7 @@ codeVersions:
 
       print(sorted(cleaned, key=lambda row: row["score"], reverse=True))
 pitfalls:
-  - 默认编码、分隔符和列名都可能和真实 CSV 不一致，脚本不能假设输入总是干净的。
+  - 假设编码、分隔符和列名永远正确，会让清洗脚本悄悄丢列或错读数字；等到报表结论偏掉时，问题已经进入下游分析。
 extensions:
   - 加入列名映射、缺失值报告和 pandas 版本，对比标准库与数据分析工作流。
 ---

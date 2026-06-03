@@ -56,7 +56,7 @@ codeVersions:
           if contact.matches("python"):
               print(contact.label(), str(contact))
 pitfalls:
-  - 联系人字段散落在 dict 中时，拼写错误和缺字段通常到运行时才暴露。
+  - 联系人字段散落在 dict 中时，拼写错误和缺字段通常到运行时才暴露，导出通讯录或群发邮件时才发现数据坏掉，修复成本会落到真实用户数据上。
 extensions:
   - 用 dataclass 增加字段默认值、格式化输出和 JSON 持久化。
 ---

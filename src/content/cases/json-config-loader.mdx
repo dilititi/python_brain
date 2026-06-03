@@ -36,7 +36,7 @@ codeVersions:
 
       print(load_config("settings.json"))
 pitfalls:
-  - 假设配置文件一定存在且字段完整，会让缺文件、坏 JSON 和缺 key 混成同一种崩溃。
+  - 假设配置文件一定存在且字段完整，会让缺文件、坏 JSON 和缺 key 混成同一种崩溃；上线后只能看到启动失败，却不知道该补文件、修格式还是改字段名。
 extensions:
   - 加入默认配置、字段校验和清晰错误提示，让配置加载成为稳定入口。
 ---
