@@ -1,9 +1,11 @@
-import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { ArrowRight, Circle, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   ASSESSMENT_BANK_VERSION,
   assessmentQuestions,
-  type AssessmentOption
+  shuffleAssessmentOptions,
+  type AssessmentOption,
+  type ShuffledAssessmentQuestion
 } from "../../lib/assessment-bank";
 import {
   scoreAssessment,
@@ -47,13 +49,15 @@ function readStoredAnswers(): AssessmentAnswer[] {
 }
 
 export default function AssessmentQuiz() {
+  const [quizQuestions, setQuizQuestions] = useState<ShuffledAssessmentQuestion[]>([]);
   const [answers, setAnswers] = useState<AssessmentAnswer[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const current = questions[answers.length];
-  const done = answers.length === questions.length;
+  const current = quizQuestions[answers.length];
+  const done = loaded && quizQuestions.length > 0 && answers.length === quizQuestions.length;
   const recommendation = done ? scoreAssessment(answers) : null;
 
   useEffect(() => {
+    setQuizQuestions(shuffleAssessmentOptions(questions));
     setAnswers(readStoredAnswers());
     setLoaded(true);
   }, []);
@@ -95,19 +99,28 @@ export default function AssessmentQuiz() {
     ]);
   }
 
+  function reset() {
+    setQuizQuestions(shuffleAssessmentOptions(questions));
+    setAnswers([]);
+  }
+
   return (
     <div className="quiz-panel">
+      {!loaded && (
+        <p>测评准备中...</p>
+      )}
+
       {!done && current && (
         <>
           <div className="quiz-progress">
             <span>{answers.length + 1}</span>
-            <strong>{questions.length}</strong>
+            <strong>{quizQuestions.length}</strong>
           </div>
           <h2>{current.title}</h2>
           <div className="quiz-options">
             {current.options.map((option) => (
               <button key={option.label} type="button" onClick={() => choose(option)}>
-                <CheckCircle2 size={18} />
+                <Circle size={18} />
                 <span>{option.label}</span>
               </button>
             ))}
@@ -123,9 +136,9 @@ export default function AssessmentQuiz() {
           <div className="island-toolbar">
             <a className="button-link" href={`/path/${recommendation.track}/`}>
               <ArrowRight size={16} />
-              <span>进入路径</span>
+              <span>进入方向</span>
             </a>
-            <button type="button" onClick={() => setAnswers([])}>
+            <button type="button" onClick={reset}>
               <RotateCcw size={16} />
               <span>重来</span>
             </button>

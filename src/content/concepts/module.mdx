@@ -36,12 +36,44 @@ history:
   - year: 1991
     event: import 组织代码：模块系统让 Python 脚本可以拆分为可复用文件。
 codeExamples:
-  - title: 导入标准库
-    description: import 把另一个模块的能力带进当前文件。
+  - title: naive
+    description: 所有逻辑堆在一个脚本里时，复用只能靠复制粘贴。
     code: |
+      radius = 3
+      area = 3.14 * radius * radius
+      print(round(area, 2))
+
+      other_radius = 5
+      other_area = 3.14 * other_radius * other_radius
+      print(round(other_area, 2))
+  - title: standard
+    description: 模块把可复用函数放进独立文件，再通过 import 使用。
+    runnable: false
+    code: |
+      # geometry.py
       import math
 
-      print(math.sqrt(16))
+      def circle_area(radius):
+          return math.pi * radius * radius
+
+      # report.py
+      from geometry import circle_area
+
+      print(round(circle_area(3), 2))
+  - title: production
+    description: 工程版让模块只暴露稳定函数，并用 main 入口隔离脚本运行逻辑。
+    runnable: false
+    code: |
+      # geometry.py
+      import math
+
+      def circle_area(radius: float) -> float:
+          if radius < 0:
+              raise ValueError("radius cannot be negative")
+          return math.pi * radius * radius
+
+      if __name__ == "__main__":
+          print(round(circle_area(3), 2))
 extends:
   - package-structure
   - module-search-path

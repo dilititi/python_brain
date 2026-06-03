@@ -34,11 +34,36 @@ history:
   - year: 2008
     event: Python 3 明确文本和字节分离：Python 3 用 str 表示 Unicode 文本，用 bytes 表示二进制数据。
 codeExamples:
-  - title: 清洗文本
-    description: 常见字符串方法可以完成基础清洗。
+  - title: naive
+    description: 字符串不可变，调用方法不会原地修改原来的文本。
+    code: |
+      raw = "  Python  "
+      raw.strip().lower()
+
+      print(raw)
+  - title: standard
+    description: 每次字符串清洗都要接住返回的新字符串。
     code: |
       raw = "  Python,Data,AI  "
       parts = raw.strip().lower().split(",")
+
       print(parts)
+  - title: production
+    description: 工程版把文本清洗写成函数，并处理空输入和重复分隔符。
+    code: |
+      def parse_tags(raw: str) -> list[str]:
+          tags: list[str] = []
+
+          for part in raw.split(","):
+              tag = part.strip().lower()
+              if tag:
+                  tags.append(tag)
+
+          if not tags:
+              raise ValueError("at least one tag is required")
+
+          return tags
+
+      print(parse_tags("  Python,Data,,AI  "))
 ---
 字符串是数据清洗、日志分析、接口参数和用户输入的核心材料。它和正则、f-string、bytes 都有强连接。

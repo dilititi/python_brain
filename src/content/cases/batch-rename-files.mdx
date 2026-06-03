@@ -28,7 +28,7 @@ codeVersions:
 
       preview_renames(".")
 pitfalls:
-  - 直接改名且没有 dry-run，容易覆盖已有文件或让批量操作不可回滚。
+  - 直接改名且没有 dry-run 会把错误规则一次性应用到整批文件，轻则丢失命名线索，重则覆盖已有文件并让用户没有回滚路径。
 extensions:
   - 增加 dry-run 预览、冲突检测和改名日志，必要时支持按日志撤销。
 ---

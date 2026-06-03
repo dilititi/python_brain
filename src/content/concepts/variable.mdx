@@ -30,14 +30,39 @@ history:
   - year: 1991
     event: Python 首次发布：变量绑定对象的模型从早期版本开始就是 Python 心智模型的一部分。
 codeExamples:
-  - title: 绑定
-    description: 同一个名字可以在不同时间绑定到不同对象。
+  - title: naive
+    description: 把变量名当成独立副本时，共享可变对象会产生意外结果。
     code: |
-      score = 10
-      print(score)
+      tasks = []
+      today = tasks
 
-      score = score + 5
-      print(score)
+      tasks.append("send report")
+
+      print(today)
+  - title: standard
+    description: 需要保留当时状态时，显式创建一个新对象，而不是只换一个名字。
+    code: |
+      tasks = []
+      today = list(tasks)
+
+      tasks.append("send report")
+
+      print(today)
+      print(tasks)
+  - title: production
+    description: 工程代码会把“快照”边界写成函数，并用不可变返回值减少误改。
+    code: |
+      from typing import Iterable
+
+      def snapshot_tasks(tasks: Iterable[str]) -> tuple[str, ...]:
+          return tuple(tasks)
+
+      tasks = ["send report"]
+      today = snapshot_tasks(tasks)
+      tasks.append("archive files")
+
+      print(today)
+      print(tasks)
 extends:
   - function
 ---

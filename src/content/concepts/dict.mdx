@@ -36,14 +36,42 @@ history:
   - year: 2017
     event: 插入顺序成为语言保证：Python 3.7 开始，字典保持插入顺序成为语言规范的一部分。
 codeExamples:
-  - title: 计数
-    description: 字典最典型的入门用法是词频统计。
+  - title: naive
+    description: 用两个列表维护键和值时，查找和更新很快变得脆弱。
     code: |
-      counts = {}
-      for word in ["python", "data", "python"]:
-          counts[word] = counts.get(word, 0) + 1
+      names = ["Ada", "Guido"]
+      scores = [95, 88]
 
-      print(counts)
+      try:
+          index = names.index("Grace")
+          print(scores[index])
+      except ValueError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: dict 用键直接找到值，避免并行列表的同步问题。
+    code: |
+      scores = {"Ada": 95, "Guido": 88}
+
+      scores["Grace"] = 91
+      print(scores["Grace"])
+      print(scores.get("Linus", 0))
+  - title: production
+    description: 工程版把计数逻辑封装起来，并在写入前规范化键。
+    code: |
+      from typing import Iterable
+
+      def count_words(words: Iterable[str]) -> dict[str, int]:
+          counts: dict[str, int] = {}
+
+          for word in words:
+              key = word.strip().lower()
+              if not key:
+                  continue
+              counts[key] = counts.get(key, 0) + 1
+
+          return counts
+
+      print(count_words(["Python", "data", "python", " "]))
 extends:
   - comprehension
 ---

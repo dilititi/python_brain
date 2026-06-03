@@ -180,7 +180,6 @@ const mvpTargets = {
   projects: 5,
   people: 5
 };
-const showcaseConceptIds = new Set(["decorator", "python-language", "function-parameters"]);
 const requiredCodeExampleTitles = ["naive", "standard", "production"];
 
 if (concepts.length < mvpTargets.concepts) {
@@ -283,31 +282,83 @@ for (const entry of concepts) {
     pushError(entry, "whyImportant", "whyImportant is missing, empty, or TODO-like", "Explain the concrete real-world value in <=200 characters; compare src/content/concepts/function-parameters.mdx.");
   }
 
+  if ("requiresMindset" in entry.data) {
+    const mindsetShifts = asRecordArray(entry.data.requiresMindset);
+
+    mindsetShifts.forEach((mindset, index) => {
+      if (!isUsefulString(mindset.shift)) {
+        pushError(entry, `requiresMindset[${index}].shift`, "mindset shift is missing or TODO-like", "Name the mental shift in one short sentence; compare src/content/concepts/decorator.mdx.");
+      }
+
+      if (!isUsefulString(mindset.why)) {
+        pushError(entry, `requiresMindset[${index}].why`, "mindset why is missing or TODO-like", "Explain why this shift unlocks the concept; compare src/content/concepts/decorator.mdx.");
+      }
+
+      if ("blockedBy" in mindset) {
+        const blockedBy = Array.isArray(mindset.blockedBy)
+          ? mindset.blockedBy
+          : [];
+
+        if (!Array.isArray(mindset.blockedBy) || blockedBy.some((item) => !isUsefulString(item))) {
+          pushError(entry, `requiresMindset[${index}].blockedBy`, "blockedBy must contain useful strings when present", "List the prior intuition that blocks this shift, or remove blockedBy.");
+        }
+      }
+    });
+  }
+
   if ("expandsTo" in entry.data) {
     pushError(entry, "expandsTo", "expandsTo is removed", "Rename the field to extends and keep concept ids unchanged.");
   }
 
-  if (showcaseConceptIds.has(entry.id)) {
-    const codeExamples = asRecordArray(entry.data.codeExamples);
-    const codeExampleTitles = new Set(codeExamples.map((example) => example.title));
+  const rawCodeExamples = Array.isArray(entry.data.codeExamples)
+    ? entry.data.codeExamples
+    : [];
+  const codeExamples = rawCodeExamples.filter((example): example is Record<string, unknown> => (
+    Boolean(example) && typeof example === "object"
+  ));
+  const usefulCodeExamples = codeExamples.filter((example) => (
+    isUsefulString(example.title) &&
+    isUsefulString(example.description) &&
+    isUsefulString(example.code)
+  ));
 
+  if (!Array.isArray(entry.data.codeExamples)) {
+    pushError(entry, "codeExamples", "codeExamples must be an array", "Add concept code examples; compare src/content/concepts/decorator.mdx.");
+  }
+
+  rawCodeExamples.forEach((example, index) => {
+    if (!example || typeof example !== "object") {
+      pushError(entry, `codeExamples[${index}]`, "codeExamples item must be an object", "Use title, description, code, and optional runnable fields.");
+    }
+  });
+
+  if (entry.data.category === "language") {
+    if (usefulCodeExamples.length === 0) {
+      pushError(
+        entry,
+        "codeExamples",
+        "language concept is missing useful display code",
+        "Add at least one runnable example with visible output; compare src/content/concepts/python-language.mdx."
+      );
+    }
+  } else {
     for (const title of requiredCodeExampleTitles) {
-      const example = codeExamples.find((item) => item.title === title);
-      if (!example || !isUsefulString(example.description) || !isUsefulString(example.code)) {
+      const example = usefulCodeExamples.find((item) => item.title === title);
+      if (!example) {
         pushError(
           entry,
           `codeExamples.${title}`,
-          `showcase concept is missing a useful ${title} example`,
+          `concept is missing a useful ${title} example`,
           "Provide description and code for naive, standard, and production examples; compare src/content/concepts/decorator.mdx."
         );
       }
     }
 
-    for (const title of codeExampleTitles) {
-      if (typeof title !== "string" || !requiredCodeExampleTitles.includes(title)) {
-        pushError(entry, "codeExamples[].title", "codeExamples title must be naive, standard, or production", "Rename the example title to one of the three required labels.");
+    codeExamples.forEach((example, index) => {
+      if (typeof example.title !== "string" || !requiredCodeExampleTitles.includes(example.title)) {
+        pushError(entry, `codeExamples[${index}].title`, "codeExamples title must be naive, standard, or production", "Rename the example title to one of the three required labels.");
       }
-    }
+    });
   }
 
   const worksRef = asRecordArray(entry.data.worksRef);
@@ -498,9 +549,45 @@ for (const entry of people) {
       pushError(entry, `sources[${index}].url`, "source url must be an https URL", "Use an https URL from an official, PEP, repository, docs, or talk source.");
     }
   });
+
+  if ("earlyCareer" in entry.data) {
+    const earlyCareer = entry.data.earlyCareer as Record<string, unknown> | undefined;
+
+    if (!earlyCareer || typeof earlyCareer !== "object") {
+      pushError(entry, "earlyCareer", "earlyCareer must be an object when present", "Use ageOrYear, whatTheyDid, itLedTo, and source; compare src/content/people/guido-van-rossum.mdx.");
+    } else {
+      if (!isUsefulString(earlyCareer.ageOrYear)) {
+        pushError(entry, "earlyCareer.ageOrYear", "earlyCareer ageOrYear is missing or TODO-like", "Name the age or year that anchors the early-career moment.");
+      }
+
+      if (!isUsefulString(earlyCareer.whatTheyDid)) {
+        pushError(entry, "earlyCareer.whatTheyDid", "earlyCareer whatTheyDid is missing or TODO-like", "Describe the concrete early work, not the later famous achievement.");
+      }
+
+      if (!isUsefulString(earlyCareer.itLedTo)) {
+        pushError(entry, "earlyCareer.itLedTo", "earlyCareer itLedTo is missing or TODO-like", "Explain how that early work grew into a later influence.");
+      }
+
+      if (!isHttpsUrl(earlyCareer.source)) {
+        pushError(entry, "earlyCareer.source", "earlyCareer source must be an https URL", "Use a first-party interview, official page, talk, or contemporaneous source.");
+      }
+    }
+  }
 }
 
 for (const entry of paths) {
+  if (asStringArray(entry.data.forWhom).length === 0) {
+    pushError(entry, "forWhom", "path.forWhom must contain at least one useful audience trait", "Add concrete traits this path is designed for.");
+  }
+
+  if (asStringArray(entry.data.notForWhom).length === 0) {
+    pushError(entry, "notForWhom", "path.notForWhom must contain at least one useful exclusion trait", "Add concrete traits that should choose another path first.");
+  }
+
+  if (!isUsefulString(entry.data.opportunityCost)) {
+    pushError(entry, "opportunityCost", "path.opportunityCost is missing or TODO-like", "Explain what the learner gives up by choosing this path now.");
+  }
+
   reportMissing(entry, "nodes", entry.data.nodes, conceptIds, "concept");
   const milestones = Array.isArray(entry.data.milestones)
     ? (entry.data.milestones as Record<string, unknown>[])

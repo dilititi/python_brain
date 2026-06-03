@@ -29,12 +29,39 @@ history:
   - year: 2008
     event: Python 3 区分文本和二进制：Python 3 把 str 和 bytes 的边界变得更清楚，减少编码混乱。
 codeExamples:
-  - title: 编码
-    description: 文本可以编码成字节，字节可以解码回文本。
+  - title: naive
+    description: 把 str 当成 bytes 拼接时，文本和二进制边界会立刻暴露。
     code: |
-      text = "Python"
-      data = text.encode("utf-8")
-      print(data)
-      print(data.decode("utf-8"))
+      header = b"USER:"
+      name = "Ada"
+
+      try:
+          packet = header + name
+      except TypeError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: str 和 bytes 之间必须显式 encode / decode。
+    code: |
+      header = b"USER:"
+      name = "Ada"
+
+      packet = header + name.encode("utf-8")
+      print(packet)
+      print(packet.removeprefix(header).decode("utf-8"))
+  - title: production
+    description: 工程版检查字节头和长度，再把 bytearray 的可变处理转回不可变 bytes。
+    code: |
+      def decode_user_packet(packet: bytes) -> str:
+          prefix = b"USER:"
+          if not packet.startswith(prefix):
+              raise ValueError("packet must start with USER:")
+
+          payload = bytearray(packet.removeprefix(prefix))
+          if not payload:
+              raise ValueError("packet payload is empty")
+
+          return bytes(payload).decode("utf-8")
+
+      print(decode_user_packet(b"USER:Ada"))
 ---
 只要处理文件上传、图片、压缩包、网络响应或编码问题，bytes 就会出现。新人阶段先记住：文本和字节不是同一种东西。

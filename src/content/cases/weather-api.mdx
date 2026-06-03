@@ -31,7 +31,7 @@ codeVersions:
           print(f'{data["city"]}: {data["temp"]}C, {data["status"]}')
           attempts += 1
 pitfalls:
-  - 直接访问嵌套字段会在接口缺字段或返回错误对象时抛 KeyError。
+  - 直接访问嵌套字段会在接口缺字段或返回错误对象时抛 KeyError，定时任务会因为一次异常响应停止，后续天气通知全部丢失。
 extensions:
   - 用 dataclass 或 TypedDict 描述响应结构，并对缺失字段给默认值。
 ---

@@ -31,7 +31,7 @@ codeVersions:
       # .venv\Scripts\python -m pip freeze > requirements.txt
       print("project dependencies are isolated")
 pitfalls:
-  - 在全局环境安装依赖会污染其他项目，也让部署环境难以复现。
+  - 在全局环境安装依赖会污染其他项目，也让部署环境难以复现；几周后重装机器或交给同事时，没人知道到底依赖了哪些包和版本。
 extensions:
   - 生成 requirements 或 pyproject 依赖清单，并记录安装、升级和卸载流程。
 ---

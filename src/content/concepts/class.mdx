@@ -35,19 +35,52 @@ history:
   - year: 1991
     event: 面向对象支持：Python 从早期就支持类和对象，并把函数式、过程式和面向对象风格放在一起。
 codeExamples:
-  - title: 方法
-    description: 方法的第一个参数 self 指向当前对象。
+  - title: naive
+    description: 用字典和散落函数表达同一个实体时，字段名和规则容易漂移。
     code: |
-      class Counter:
-          def __init__(self):
-              self.value = 0
+      account = {"owner": "Ada", "balance": 100}
 
-          def add(self):
-              self.value += 1
+      def deposit(account_data, amount):
+          account_data["money"] = account_data.get("money", 0) + amount
 
-      counter = Counter()
-      counter.add()
-      print(counter.value)
+      deposit(account, 50)
+      print(account)
+  - title: standard
+    description: class 把数据和围绕这些数据的行为放进同一个对象。
+    code: |
+      class BankAccount:
+          def __init__(self, owner, balance=0):
+              self.owner = owner
+              self.balance = balance
+
+          def deposit(self, amount):
+              self.balance += amount
+
+      account = BankAccount("Ada", 100)
+      account.deposit(50)
+      print(account.owner, account.balance)
+  - title: production
+    description: 工程版把对象不变量写进方法边界，避免外部随意破坏状态。
+    code: |
+      class BankAccount:
+          def __init__(self, owner: str, balance: int = 0):
+              if balance < 0:
+                  raise ValueError("balance cannot be negative")
+              self.owner = owner
+              self._balance = balance
+
+          @property
+          def balance(self) -> int:
+              return self._balance
+
+          def deposit(self, amount: int) -> None:
+              if amount <= 0:
+                  raise ValueError("amount must be positive")
+              self._balance += amount
+
+      account = BankAccount("Ada", 100)
+      account.deposit(50)
+      print(account.balance)
 extends:
   - encapsulation
   - inheritance

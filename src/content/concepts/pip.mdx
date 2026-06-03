@@ -34,11 +34,26 @@ history:
     pep: PEP 453
     event: ensurepip 随 Python 3.4 发布：PEP 453 让 Python 自带引导 pip 的能力，降低新环境安装依赖的门槛。
 codeExamples:
-  - title: 安装依赖
-    description: 在项目虚拟环境里安装包。
+  - title: naive
+    description: 直接用 pip 安装包时，可能装进了不是当前项目正在运行的解释器。
+    runnable: false
     code: |
-      # 在终端执行：
-      # python -m pip install requests
-      print("install dependencies in your project environment")
+      pip install requests
+
+      python app.py
+  - title: standard
+    description: 用 python -m pip 绑定当前解释器，再确认包安装位置。
+    runnable: false
+    code: |
+      python -m pip install requests
+      python -m pip show requests
+      python -c "import requests; print(requests.__version__)"
+  - title: production
+    description: 工程版把依赖写进 requirements.txt，并在安装后做一致性检查。
+    runnable: false
+    code: |
+      python -m pip install -r requirements.txt
+      python -m pip check
+      python -m pip freeze > requirements.lock.txt
 ---
 学习 pip 时要同时学习 venv。包不是“装到电脑上就完事”，而是应该装进当前项目的隔离环境。

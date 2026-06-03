@@ -1,7 +1,14 @@
-title: 零基础主路径
+title: 零基础入门方向
 description: 从 Python 语言身份、基础类型、字符串、容器、判断、循环、函数、类和模块包结构开始，逐步进入小项目。
 track: beginner
 audience: 完全零基础或看过教程但没有形成稳定结构的学习者。
+forWhom:
+  - 完全零基础，或曾经跟教程写过几章但缺少整体地图的人。
+  - 还没有确定 Web、数据、自动化或 AI 方向，想先建立 Python 通用心智模型的人。
+notForWhom:
+  - 已经能独立写函数、处理文件和调试异常，只需要某个应用方向加速的人。
+  - 目标非常明确且时间很紧的人，例如只想马上写批处理脚本或一个 API demo。
+opportunityCost: 这条路最稳但最长，会覆盖语言身份、基础语法、对象和模块等通用节点；代价是前几周不够“立刻产出”，真实业务场景会比专项路径来得晚。
 estimatedNodes: 43
 nodes:
   - python-language

@@ -59,7 +59,7 @@ test("scoreAssessment keeps low-confidence learners on the beginner path", () =>
   assert.deepEqual(scoreAssessment(answers), {
     track: "beginner",
     startAfter: [],
-    reason: "测评显示基础概念还没有形成稳定连接，先走零基础主路径更稳。"
+    reason: "测评显示基础概念还没有形成稳定连接，先走零基础入门方向更稳。"
   });
 });
 
@@ -73,6 +73,6 @@ test("scoreAssessment uses the voted track after enough concept confidence", () 
   assert.deepEqual(scoreAssessment(answers), {
     track: "data",
     startAfter: ["for-loop", "range", "function", "variable"],
-    reason: "你已经能识别若干核心概念，可以从数据分析路径进入。"
+    reason: "你已经能识别若干核心概念，可以从数据分析方向进入。"
   });
 });

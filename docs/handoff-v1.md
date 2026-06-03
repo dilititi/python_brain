@@ -19,7 +19,7 @@
 
 - Vercel 生产站点已上线并验证：`https://python-brain.vercel.app/`。
 - 关键路由已验证返回 200：`/`、`/concepts/decorator/`、`/concepts/python-language/`、`/concepts/function-parameters/`、`/relations.json`。
-- 本地 static gates 已通过：`validate:relations`、`audit:concepts`、`test`、`build`、`link:check`、`link:external:inventory`。
+- 本地 static gates 已通过：`validate:relations`、`audit:concepts`、`test`、`test:code-examples`、`build`、`link:check`、`link:external:inventory`。
 - `.github/workflows/v1-gates.yml` 已配置 static gates、三页 Lighthouse beacon、手动/定时 external URL monitor。
 - GitHub Actions 判定以最新 `main` run 为准：push 事件下 `Static gates` 和 `Lighthouse beacon pages` 必须为 success；`External URL monitor` 在 push 事件中 skipped 属于预期。
 
@@ -127,6 +127,7 @@ rg -n "expandsTo|works.note|works\\[\\]|difficulty|outcome|firstAppeared|roles|l
 npm run validate:relations
 npm run audit:concepts
 npm run test
+npm run test:code-examples
 npm run build
 npm run link:check
 npm run link:external:inventory
@@ -141,7 +142,7 @@ npm run validate:relations -- --warning-exit-code=2
 当前预期：
 
 - `validate:relations` 输出 `Relations valid`
-- `audit:concepts` 输出 `Concept audit clean`
+- `audit:concepts` 输出 clean；v1.1 已将 codeExamples 缺口升级为 blocking error
 - `--warning-exit-code=2` 在没有 warning 时返回 `0`
 - content strict 项应返回 `1` 阻断，而不是 warning
 

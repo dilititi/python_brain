@@ -33,19 +33,46 @@ history:
   - year: 1991
     event: 基础控制流：if 是 Python 早期就具备的基础控制结构。
 codeExamples:
-  - title: 分支
-    description: 用 if/elif/else 把不同情况写清楚。
+  - title: naive
+    description: 多分支顺序写错时，较宽的条件会提前吃掉更精确的情况。
     code: |
-      score = 82
+      score = 92
+
+      if score >= 60:
+          level = "pass"
+      elif score >= 90:
+          level = "excellent"
+      else:
+          level = "retry"
+
+      print(level)
+  - title: standard
+    description: if/elif/else 应该先处理更具体的分支，再处理兜底分支。
+    code: |
+      score = 92
 
       if score >= 90:
-          level = "A"
+          level = "excellent"
       elif score >= 60:
           level = "pass"
       else:
           level = "retry"
 
       print(level)
+  - title: production
+    description: 工程版把分支规则封装成函数，并先校验输入范围。
+    code: |
+      def grade(score: int) -> str:
+          if score < 0 or score > 100:
+              raise ValueError("score must be between 0 and 100")
+          if score >= 90:
+              return "excellent"
+          if score >= 60:
+              return "pass"
+          return "retry"
+
+      for score in [92, 75, 40]:
+          print(score, grade(score))
 extends:
   - function
 ---

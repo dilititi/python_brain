@@ -1,7 +1,14 @@
-title: 数据分析路径
+title: 数据分析方向
 description: 围绕列表、字典、循环、推导式、数据对象和 JSON 建立数据清洗基础。
 track: data
 audience: 想做表格清洗、数据分析或 pandas 前置准备的学习者。
+forWhom:
+  - 想处理 CSV、文本、表格、统计汇总或未来进入 pandas/NumPy 的学习者。
+  - 愿意先把列表、字典、循环、推导式和数据对象练稳，再进入第三方数据生态的人。
+notForWhom:
+  - 主要想做网站后台、API 服务或框架路由的人，Web 后端方向更快到达目标。
+  - 只想自动整理本地文件、批量处理办公资料的人，自动化方向更贴近日常任务。
+opportunityCost: 这条路会把时间投向数据结构、清洗流程和可复用处理函数，短期不会深入 Web 部署、桌面自动化或模型服务；如果目标转向后端，需要补环境、路由和错误契约。
 estimatedNodes: 28
 nodes:
   - python-language

@@ -15,6 +15,30 @@ export type AssessmentQuestion = {
   options: readonly AssessmentOption[];
 };
 
+export type ShuffledAssessmentQuestion = Omit<AssessmentQuestion, "options"> & {
+  options: AssessmentOption[];
+};
+
+export function shuffleAssessmentOptions(
+  sourceQuestions: readonly AssessmentQuestion[],
+  random: () => number = Math.random
+): ShuffledAssessmentQuestion[] {
+  return sourceQuestions.map((question) => {
+    const options = [...question.options];
+
+    for (let index = options.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(random() * (index + 1));
+      [options[index], options[swapIndex]] = [options[swapIndex], options[index]];
+    }
+
+    return {
+      id: question.id,
+      title: question.title,
+      options
+    };
+  });
+}
+
 export const assessmentQuestions = [
   {
     id: "python-identity",

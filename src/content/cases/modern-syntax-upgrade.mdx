@@ -36,7 +36,7 @@ codeVersions:
 
       print(handle(("hello", "Ada")))
 pitfalls:
-  - 使用过新的语法但部署环境版本较低，会在上线时直接 SyntaxError。
+  - 使用过新的语法但部署环境版本较低，会在上线时直接 SyntaxError，服务甚至无法启动；这类错误不能靠运行时兜底，只能靠版本边界提前发现。
 extensions:
   - 结合 pyproject 的 Python 版本约束，给出 f-string、match-case、walrus 的兼容改写。
 ---

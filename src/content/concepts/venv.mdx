@@ -31,11 +31,27 @@ history:
     pep: PEP 405
     event: Python 3.3 引入 venv：PEP 405 把虚拟环境能力纳入标准库。
 codeExamples:
-  - title: 创建环境
-    description: 用标准库创建当前项目的虚拟环境。
+  - title: naive
+    description: 不创建虚拟环境就直接安装依赖，多个项目会共用同一套包。
+    runnable: false
     code: |
-      # 在终端执行：
-      # python -m venv .venv
-      print("create an isolated environment per project")
+      python -m pip install requests
+      python project_a.py
+      python project_b.py
+  - title: standard
+    description: 每个项目创建自己的 .venv，再在这个环境里安装依赖。
+    runnable: false
+    code: |
+      python -m venv .venv
+      .venv\Scripts\python -m pip install requests
+      .venv\Scripts\python app.py
+  - title: production
+    description: 工程版把环境创建、pip 升级和依赖安装固定成可重复流程。
+    runnable: false
+    code: |
+      python -m venv .venv
+      .venv\Scripts\python -m pip install --upgrade pip
+      .venv\Scripts\python -m pip install -r requirements.txt
+      .venv\Scripts\python -m pip check
 ---
 venv 解决的是“这个项目到底用哪一套依赖”。它是 Web、数据和 AI 工程里最早应该建立的工程卫生习惯。

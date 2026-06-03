@@ -32,18 +32,61 @@ history:
   - year: 2002
     event: 新式类成为现代对象模型基础：Python 2.2 引入新式类，逐步统一内置类型和用户自定义类的行为。
 codeExamples:
-  - title: 覆盖方法
-    description: 子类可以复用父类结构，并改写某个方法。
+  - title: naive
+    description: 没有共享父类时，相似对象会重复实现同一套状态和方法。
     code: |
-      class Animal:
-          def speak(self):
-              return "..."
+      class EmailNotifier:
+          def __init__(self, target):
+              self.target = target
 
-      class Robot(Animal):
-          def speak(self):
-              return "beep"
+          def send(self, message):
+              return f"email to {self.target}: {message}"
 
-      print(Robot().speak())
+      class SmsNotifier:
+          def __init__(self, target):
+              self.target = target
+
+          def send(self, message):
+              return f"sms to {self.target}: {message}"
+
+      print(EmailNotifier("ada@example.com").send("ready"))
+  - title: standard
+    description: 子类复用父类初始化逻辑，并覆盖差异化行为。
+    code: |
+      class Notifier:
+          def __init__(self, target):
+              self.target = target
+
+          def send(self, message):
+              return f"message to {self.target}: {message}"
+
+      class EmailNotifier(Notifier):
+          def send(self, message):
+              return f"email to {self.target}: {message}"
+
+      print(EmailNotifier("ada@example.com").send("ready"))
+  - title: production
+    description: 工程版用抽象基类明确子类必须实现的协议，并校验共享输入。
+    code: |
+      from abc import ABC, abstractmethod
+
+      class Notifier(ABC):
+          def __init__(self, target: str):
+              if not target:
+                  raise ValueError("target is required")
+              self.target = target
+
+          @abstractmethod
+          def send(self, message: str) -> str:
+              raise NotImplementedError
+
+      class EmailNotifier(Notifier):
+          def send(self, message: str) -> str:
+              if not message:
+                  raise ValueError("message is required")
+              return f"email to {self.target}: {message}"
+
+      print(EmailNotifier("ada@example.com").send("ready"))
 extends:
   - polymorphism
 ---

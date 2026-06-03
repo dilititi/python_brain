@@ -4,7 +4,8 @@ import { join, parse } from "node:path";
 import test from "node:test";
 import {
   ASSESSMENT_BANK_VERSION,
-  assessmentQuestions
+  assessmentQuestions,
+  shuffleAssessmentOptions
 } from "../src/lib/assessment-bank";
 
 const conceptIds = new Set(
@@ -46,4 +47,15 @@ test("assessment options only reference existing concept ids", () => {
       }
     }
   }
+});
+
+test("assessment options can be shuffled without mutating the bank", () => {
+  const firstQuestion = assessmentQuestions[0];
+  const originalLabels = firstQuestion.options.map((option) => option.label);
+  const shuffled = shuffleAssessmentOptions([firstQuestion], () => 0);
+  const shuffledLabels = shuffled[0].options.map((option) => option.label);
+
+  assert.deepEqual(firstQuestion.options.map((option) => option.label), originalLabels);
+  assert.deepEqual([...shuffledLabels].sort(), [...originalLabels].sort());
+  assert.notDeepEqual(shuffledLabels, originalLabels);
 });

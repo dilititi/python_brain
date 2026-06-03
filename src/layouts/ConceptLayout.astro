@@ -55,6 +55,24 @@ const tabs = [
     tracks={entry.data.tracks}
   />
   <MasteryToggle conceptId={entry.id} />
+  {relations.pathContexts.length > 0 && (
+    <nav
+      class="path-context-nav"
+      data-path-contexts={JSON.stringify(relations.pathContexts)}
+      hidden
+      aria-label="当前应用方向导航"
+    >
+      <div>
+        <span data-path-progress></span>
+        <strong data-path-title></strong>
+      </div>
+      <div class="path-context-actions">
+        <a data-path-back href="/path/">返回应用方向</a>
+        <a data-path-prev href="/path/" hidden>上一条</a>
+        <a data-path-next href="/path/">下一条</a>
+      </div>
+    </nav>
+  )}
 
   <div class="concept-workbench" data-empty-facets={JSON.stringify(emptyFacets)} data-concept-id={entry.id}>
     <nav class="facet-tabs" aria-label="概念六维内容" role="tablist">
@@ -77,6 +95,26 @@ const tabs = [
                 <aside class="why-important">
                   <strong>为什么重要</strong>
                   <p>{entry.data.whyImportant}</p>
+                </aside>
+              )}
+              {entry.data.requiresMindset.length > 0 && (
+                <aside class="mindset-shifts">
+                  <strong>需要切换的思维</strong>
+                  <div>
+                    {entry.data.requiresMindset.map((item) => (
+                      <section>
+                        <h3>{item.shift}</h3>
+                        <p>{item.why}</p>
+                        {item.blockedBy.length > 0 && (
+                          <ul>
+                            {item.blockedBy.map((blocker) => (
+                              <li>{blocker}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </section>
+                    ))}
+                  </div>
                 </aside>
               )}
               <Content />
@@ -271,6 +309,77 @@ const tabs = [
         console.warn(`[python-brain] concept "${conceptId}" facet "${facet}" is empty`);
       }
     }
+
+    const pathNav = document.querySelector<HTMLElement>("[data-path-contexts]");
+
+    if (pathNav) {
+      type PathNeighbor = {
+        id: string;
+        title: string;
+      };
+      type PathContext = {
+        id: string;
+        title: string;
+        currentIndex: number;
+        total: number;
+        previous?: PathNeighbor;
+        next?: PathNeighbor;
+      };
+
+      function conceptHref(id: string, pathId: string) {
+        return `/concepts/${id}/?fromPath=${encodeURIComponent(pathId)}`;
+      }
+
+      const contexts = JSON.parse(pathNav.dataset.pathContexts || "[]") as PathContext[];
+      const params = new URLSearchParams(window.location.search);
+      const requestedPath = params.get("fromPath");
+
+      if (requestedPath) {
+        window.sessionStorage.setItem("pkb:lastPath", requestedPath);
+      }
+
+      const pathId = requestedPath || window.sessionStorage.getItem("pkb:lastPath");
+      const context = contexts.find((item) => item.id === pathId);
+
+      if (context) {
+        const title = pathNav.querySelector<HTMLElement>("[data-path-title]");
+        const progress = pathNav.querySelector<HTMLElement>("[data-path-progress]");
+        const back = pathNav.querySelector<HTMLAnchorElement>("[data-path-back]");
+        const previous = pathNav.querySelector<HTMLAnchorElement>("[data-path-prev]");
+        const next = pathNav.querySelector<HTMLAnchorElement>("[data-path-next]");
+
+        if (title) {
+          title.textContent = context.title;
+        }
+
+        if (progress) {
+          progress.textContent = `第 ${context.currentIndex} / ${context.total} 个节点`;
+        }
+
+        if (back) {
+          back.href = `/path/${context.id}/`;
+          back.textContent = `返回${context.title}`;
+        }
+
+        if (previous && context.previous) {
+          previous.hidden = false;
+          previous.href = conceptHref(context.previous.id, context.id);
+          previous.textContent = `上一条：${context.previous.title}`;
+        }
+
+        if (next) {
+          if (context.next) {
+            next.href = conceptHref(context.next.id, context.id);
+            next.textContent = `下一条：${context.next.title}`;
+          } else {
+            next.href = `/path/${context.id}/`;
+            next.textContent = "完成，返回应用方向";
+          }
+        }
+
+        pathNav.hidden = false;
+      }
+    }
   </script>
 
   <noscript>
@@ -285,6 +394,61 @@ const tabs = [
 <style>
   .concept-workbench {
     margin-top: 28px;
+  }
+
+  .path-context-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 18px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    background: var(--color-panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .path-context-nav[hidden] {
+    display: none;
+  }
+
+  .path-context-nav span {
+    display: block;
+    color: var(--color-muted);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .path-context-nav strong {
+    display: block;
+    line-height: 1.3;
+  }
+
+  .path-context-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .path-context-actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    color: var(--color-ink);
+    background: var(--color-soft);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .path-context-actions a:hover {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+    background: #eff6ff;
   }
 
   .facet-tabs {
@@ -411,7 +575,58 @@ const tabs = [
     color: var(--color-muted);
   }
 
+  .mindset-shifts {
+    display: grid;
+    gap: 12px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--color-soft);
+  }
+
+  .mindset-shifts > strong {
+    color: var(--color-ink);
+  }
+
+  .mindset-shifts > div {
+    display: grid;
+    gap: 10px;
+  }
+
+  .mindset-shifts section {
+    display: grid;
+    gap: 6px;
+  }
+
+  .mindset-shifts h3 {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .mindset-shifts p {
+    margin: 0;
+    color: var(--color-muted);
+  }
+
+  .mindset-shifts ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 18px;
+    color: var(--color-muted);
+  }
+
   @media (max-width: 980px) {
+    .path-context-nav {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .path-context-actions {
+      justify-content: flex-start;
+    }
+
     .facet-tabs {
       position: static;
       grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -29,7 +29,7 @@ codeVersions:
 
       print(count_words("Python data Python"))
 pitfalls:
-  - 简单 split 会把标点、大小写和停用词混进统计结果。
+  - 简单 split 会把标点、大小写和停用词混进统计结果，最后高频词榜会被脏 token 占据，用户据此做出的内容判断会偏离真实文本。
 extensions:
   - 加入正则分词、停用词过滤和 Top N 输出，形成更接近真实分析的小工具。
 ---

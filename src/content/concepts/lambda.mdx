@@ -26,11 +26,36 @@ history:
   - year: 1994
     event: 函数式工具进入语言：lambda 和 map、filter、reduce 等函数式工具在早期 Python 中形成组合。
 codeExamples:
-  - title: 排序键
-    description: lambda 常用于按某个字段排序。
+  - title: naive
+    description: 直接排序字典列表时，Python 不知道应该按哪个字段比较。
     code: |
       rows = [{"name": "Ada", "score": 98}, {"name": "Guido", "score": 91}]
-      print(sorted(rows, key=lambda row: row["score"]))
+
+      try:
+          print(sorted(rows))
+      except TypeError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: lambda 适合把短小的排序规则传给 key。
+    code: |
+      rows = [{"name": "Ada", "score": 98}, {"name": "Guido", "score": 91}]
+
+      ranked = sorted(rows, key=lambda row: row["score"], reverse=True)
+      print(ranked)
+  - title: production
+    description: 工程版只把 lambda 用在短小 key 上，复杂校验放进具名函数。
+    code: |
+      def rank_rows(rows: list[dict[str, object]]) -> list[dict[str, object]]:
+          valid_rows: list[dict[str, object]] = []
+
+          for row in rows:
+              if "name" not in row or "score" not in row:
+                  raise ValueError("row must contain name and score")
+              valid_rows.append(row)
+
+          return sorted(valid_rows, key=lambda row: int(row["score"]), reverse=True)
+
+      print(rank_rows([{"name": "Ada", "score": 98}, {"name": "Guido", "score": 91}]))
 extends:
   - decorator
 ---

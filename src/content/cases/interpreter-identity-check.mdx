@@ -32,7 +32,7 @@ codeVersions:
       print(platform.system())
       print(sys.executable)
 pitfalls:
-  - python 和 pip 来自不同环境时，安装成功也可能在运行时 import 失败。
+  - python 和 pip 来自不同环境时，安装日志显示成功，运行时却 import 失败；团队排查会浪费在“我这里能跑”的环境差异上。
 extensions:
   - 输出 sys.executable、sys.path 和虚拟环境标记，生成环境诊断报告。
 ---

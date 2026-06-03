@@ -39,7 +39,7 @@ codeVersions:
 
       print(parse_response('{"status": "error", "message": "city missing"}'))
 pitfalls:
-  - 只判断 HTTP 200 会漏掉超时、空响应和 JSON 解析失败。
+  - 只判断 HTTP 200 会把超时、空响应和 JSON 解析失败伪装成正常数据，后续逻辑会在离故障点很远的地方崩溃，排查成本成倍增加。
 extensions:
   - 加入超时、重试、日志和结构化错误对象，让调用方能区分网络失败与业务失败。
 ---

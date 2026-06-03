@@ -1,7 +1,14 @@
-title: Web 后端路径
+title: Web 后端方向
 description: 从函数、字典和 JSON 进入工程环境，再理解装饰器路由如何组织 Web API。
 track: web
 audience: 想写接口、网站后台或自动化服务的学习者。
+forWhom:
+  - 想把 Python 用在 API、后台服务、路由、表单校验或小型 Web 工具上的学习者。
+  - 能接受先学工程环境、模块、异常和 JSON，再进入 Flask/FastAPI 这类框架的人。
+notForWhom:
+  - 主要想做表格清洗、统计分析或可视化的人，数据分析方向更直接。
+  - 只想写一次性本地脚本、不想理解服务边界和请求响应模型的人。
+opportunityCost: 这条路会把较多精力放在请求处理、依赖环境和框架路由上；如果目标其实是自动化办公或数据分析，前期的 Web 细节会推迟文件批处理、表格处理和数据清洗能力。
 estimatedNodes: 28
 nodes:
   - python-language

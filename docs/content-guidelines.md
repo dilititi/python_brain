@@ -1,12 +1,13 @@
 # 内容编辑准则
 
-本准则用于 Python 知识外脑 v1.0 内容生产。
+本准则用于 Python 知识外脑 v1.x 内容生产。
 
 ## 目录
 
 - [设计原则](#设计原则)
 - [概念节点](#概念节点)
 - [字段语义边界](#字段语义边界)
+- [标杆字段试写](#标杆字段试写)
 - [六维内容边界](#六维内容边界)
 - [代码示例](#代码示例)
 - [真实案例](#真实案例)
@@ -44,6 +45,16 @@
 
 concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜索摘要统一使用 `summary`，避免同一个概念同时维护两句相近短描述。如果 `definition` 和 `mentalModel` 难以区分，优先让 `definition` 写边界和反例，让 `mentalModel` 只保留一句可记忆的类比。
 
+## 标杆字段试写
+
+`requiresMindset?` 是 v1.2 认知字段的标杆试写，不是 v1.1 全量必填项。它用于表达“学会这个概念前需要换一种想法”，不能重复 `prerequisites` 的前置知识列表。每项必须包含：
+
+- `shift`：一句话说明要切换的思维方式。
+- `why`：解释为什么这个切换会解开当前概念。
+- `blockedBy?`：列出常见旧直觉，例如“函数只能被调用，不能像值一样传递”。
+
+`earlyCareer?` 是人物页的标杆试写，用来记录“这个人早期做过的具体事情如何长成后来的影响”。它不是普通生平简介，必须包含 `ageOrYear`、`whatTheyDid`、`itLedTo` 和 `source`；`source` 必须是 `https://`，优先使用当事人自述、官方页面、采访实录、演讲或同时代可验证来源，不接受第三方传记式描述作为唯一依据。
+
 ## 六维内容边界
 
 概念页六维固定为：
@@ -55,15 +66,29 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 5. 经典作品
 6. 历史脉络
 
-手写内容只负责前 3 维：定义、代码、历史。案例、人物、作品应优先由关系索引自动聚合。作品元数据写在 `src/content/works-registry.yaml`，概念 frontmatter 只写 `worksRef[].id` 和 `worksRef[].role`；`role` 必须说明“这个作品怎样使用或体现这个概念”，禁止只写“X 用了 Y”。
+手写内容只负责前 3 维：定义、代码、历史。`requiresMindset?` 作为定义维度里的认知提示出现，不新增第 7 维。案例、人物、作品应优先由关系索引自动聚合。作品元数据写在 `src/content/works-registry.yaml`，概念 frontmatter 只写 `worksRef[].id` 和 `worksRef[].role`；`role` 必须说明“这个作品怎样使用或体现这个概念”，禁止只写“X 用了 Y”。
 
 ## 代码示例
 
-案例代码应优先提供三种版本：
+概念页继续使用 `codeExamples` 字段。`codeVersions` 只属于 case，不要迁移到 concept。
+
+非 `language` 概念在 v1.1 目标状态下必须提供三种版本：
 
 - `naive`：新人容易写出的直接版本，用来暴露问题。
 - `standard`：推荐教学版本，必须存在。
 - `production`：更接近真实项目的版本，可以加入异常处理、类型注解、日志或边界条件。
+
+v1.1 strict 化后，`codeExamples` 已是阻塞字段：`npm run audit:concepts`、`npm run validate:relations` 和 Astro content schema 都会拦截缺失、空值、TODO-like 内容或错误标题。`--strict-code-examples` 仅保留为兼容旧发布命令的参数，不再改变默认严格语义。
+
+`language` 概念豁免三版本，不强行凑 `naive` / `standard` / `production`。它们只要求至少一段可在 Pyodide 跑通且有可观察输出的展示性代码，例如 `import this` 或 `import sys; print(sys.version_info)`；禁止只写注释或不可执行演示文本。
+
+三版本质量标准：
+
+- `naive` 必须暴露真实新人问题，不能只是把 `standard` 写差。
+- `standard` 是推荐教学版本，清楚展示当前概念。
+- `production` 必须从 `standard` 演进，并至少包含异常处理、类型注解、日志或边界条件之一。
+- 三版本必须围绕同一场景逐步演进；`production` 不能换成无关实现思路。
+- 所有 `runnable !== false` 的代码必须通过 `npm run test:code-examples`。
 
 代码应短到能在页面里读完，复杂上下文放到案例页或项目页。
 
@@ -78,11 +103,13 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 
 若引用开源项目，必须链接到 GitHub 固定 SHA 的具体行号，不能链接 `main` 分支。至少保留 1 个来自开源项目的案例作为标杆，用来校准“真实案例”的深度；当前 `validate-relations` 会阻塞 GitHub `sourceUrl` 未使用 40 位提交 SHA 或缺少行号 anchor 的情况。
 
+`pitfalls[]` 应该写“代价”，不是只写语法注意事项。优先记录实际项目里这个坑会造成什么后果，例如线上事故、性能退化、调试损耗、数据误删或维护成本上升；如果能引用真实 issue、commit 或官方文档，应把来源放到案例正文或 `sourceUrl`。
+
 ## 人物
 
 人物不是装饰，而是记忆锚点。人物页必须满足：
 
-- 当前人物字段全集为：`name`、`role`、`field`、`description`、`quote?`、`concepts[]`、`works[]`、`sources[]`。
+- 当前人物字段全集为：`name`、`role`、`field`、`description`、`quote?`、`concepts[]`、`works[]`、`sources[]`、`earlyCareer?`。
 - `role` 说明这个人和 Python 生态的核心关系。
 - `field` 说明主要领域，避免只写头衔。
 - `quote?` 可选；若填写，必须是能帮助记住此人风格或贡献的短句，不能拿普通头衔凑数。
@@ -90,6 +117,7 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 - `sources.length >= 1`，且来源可验证。
 - 维基或个人博客不能作为唯一来源。
 - 优先使用 PEP、官方页面、仓库、文档、演讲实录或会议页面。
+- `earlyCareer?` 只写早期具体行动和后续影响链，不写“后来成为 X”这种结果总结。
 
 人物描述要说明他为什么是这个概念的锚点，而不是只列头衔。
 
@@ -139,7 +167,7 @@ works registry 已落地：`src/content/works-registry.yaml` 保存作品稳定�
 标杆概念页必须满足：
 
 - 6 维 Tab 全部有实质内容，不靠“暂未整理”占位。
-- 必须包含 `naive` / `standard` / `production` 三段代码示例，且至少一段代码能在 CodeRunner 里跑通。
+- 非 `language` 标杆必须包含 `naive` / `standard` / `production` 三段代码示例；`language` 标杆至少要有一段有可观察输出的展示性代码。所有 runnable 示例必须通过 `npm run test:code-examples`。
 - 至少一个 `worksRef` 对应的 registry 链接可打开；当前 `npm run link:check` 会检查静态站内链接，`npm run link:external` 会在手动或每周 CI 监控中检查 content 外部 URL 可访问性。
 - 概念页 Lighthouse performance + accessibility 均不低于 90；三页标杆由 GitHub Actions 的 `lighthouse-beacons` job 自动检查。
 - README 保留标杆页截图，作为 v1.0 视觉契约锚点。

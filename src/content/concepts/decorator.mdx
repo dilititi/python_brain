@@ -6,6 +6,17 @@ whyImportant: >-
   这类真实框架代码。
 definition: 装饰器本质上是一个接收函数并返回函数的可调用对象。
 mentalModel: 把装饰器想成给函数套一层外壳。外壳可以在调用前后加逻辑，也可以把函数注册到框架里。
+requiresMindset:
+  - shift: 把函数当作可传递的对象
+    why: 装饰器接收函数、返回函数，并把函数名重新绑定；如果还把函数只看成可调用代码块，就会误以为 @ 是特殊魔法。
+    blockedBy:
+      - 函数只能被调用，不能像值一样传递
+      - '@ 语法会修改原函数源码'
+  - shift: 把包装逻辑看成一层可组合协议
+    why: Flask 路由、缓存、日志和测试夹具都用装饰器把横切行为挂到函数上；理解这一层协议，才能看懂框架为什么只写一行 @ 就能注册行为。
+    blockedBy:
+      - 业务逻辑必须全部写在函数体里
+      - 框架注册只能靠手动配置表
 category: function
 level: advanced
 tracks:
@@ -53,7 +64,7 @@ tags:
   - closure
   - framework
   - routing
-updatedAt: '2026-05-30'
+updatedAt: '2026-06-02'
 codeExamples:
   - title: naive
     description: 先不用 @ 语法，直接把函数传给包装函数，看到“函数名被重新绑定”的本质。
@@ -84,14 +95,18 @@ codeExamples:
 
       print(greet())
   - title: production
-    description: 真实项目里通常要支持任意参数，并用 functools.wraps 保留原函数元信息。
+    description: 真实项目里通常要支持任意参数、保留元信息，并用 logging 记录横切行为。
     code: |
+      import logging
       from functools import wraps
+
+      logging.basicConfig(level=logging.INFO, format="%(message)s")
+      logger = logging.getLogger("decorator-demo")
 
       def trace(func):
           @wraps(func)
           def wrapper(*args, **kwargs):
-              print("calling", func.__name__)
+              logger.info("calling %s", func.__name__)
               return func(*args, **kwargs)
           return wrapper
 

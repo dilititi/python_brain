@@ -36,13 +36,34 @@ history:
   - year: 1991
     event: 模块导入：import 是 Python 模块化能力的基础语法。
 codeExamples:
-  - title: 别名
-    description: as 常用于给模块或成员一个更短的名字。
+  - title: naive
+    description: 通配符导入会把太多名字放进当前文件，后续变量很容易和导入名冲突。
+    code: |
+      from datetime import *
+
+      date = "2026-06-01"
+
+      try:
+          print(date.today())
+      except AttributeError as error:
+          print(type(error).__name__)
+  - title: standard
+    description: import 模块并使用别名，可以让名字来源保持清楚。
     code: |
       import datetime as dt
 
-      today = dt.date.today()
+      today = dt.date(2026, 6, 1)
       print(today.isoformat())
+  - title: production
+    description: 工程版把导入保持在文件顶部，并把日期格式化边界写成函数。
+    code: |
+      import datetime as dt
+
+      def format_report_date(value: dt.date | None = None) -> str:
+          report_date = value or dt.date.today()
+          return report_date.isoformat()
+
+      print(format_report_date(dt.date(2026, 6, 1)))
 extends:
   - module-search-path
   - package-structure

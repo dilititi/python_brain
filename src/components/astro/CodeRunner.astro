@@ -11,7 +11,8 @@ interface Props {
 }
 
 const { examples } = Astro.props;
-const firstExample = examples[0];
+const defaultIndex = Math.max(0, examples.findIndex((example) => example.title === "standard"));
+const firstExample = examples[defaultIndex];
 ---
 
 {examples.length > 0 && (
@@ -20,9 +21,9 @@ const firstExample = examples[0];
       {examples.map((example, index) => (
         <button
           type="button"
-          class:list={[index === 0 && "active"]}
+          class:list={[index === defaultIndex && "active"]}
           data-example-index={index}
-          aria-selected={index === 0 ? "true" : "false"}
+          aria-selected={index === defaultIndex ? "true" : "false"}
           role="tab"
         >
           {example.title}
@@ -84,9 +85,9 @@ const firstExample = examples[0];
       return root.pyodide;
     }
 
-    for (const root of document.querySelectorAll("[data-code-runner]")) {
+    function bindRunner(root) {
       if (!(root instanceof HTMLElement) || root.dataset.bound === "true") {
-        continue;
+        return;
       }
 
       root.dataset.bound = "true";
@@ -100,7 +101,7 @@ const firstExample = examples[0];
       const tabs = [...root.querySelectorAll("[data-example-index]")];
 
       if (!examplesSource || !(description instanceof HTMLElement) || !(editor instanceof HTMLTextAreaElement) || !(output instanceof HTMLElement) || !(runButton instanceof HTMLButtonElement) || !(runLabel instanceof HTMLElement)) {
-        continue;
+        return;
       }
 
       let examples = [];
@@ -163,6 +164,44 @@ const firstExample = examples[0];
         }
       });
     }
+
+    const roots = [...document.querySelectorAll("[data-code-runner]")];
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            bindRunner(entry.target);
+            observer.unobserve(entry.target);
+          }
+        }
+      });
+
+      for (const root of roots) {
+        observer.observe(root);
+      }
+    } else {
+      for (const root of roots) {
+        bindRunner(root);
+      }
+    }
+
+    function bindVisibleRunners() {
+      for (const root of roots) {
+        if (root instanceof HTMLElement && root.offsetParent !== null) {
+          bindRunner(root);
+        }
+      }
+    }
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('[data-tab-target="code"]')) {
+        window.requestAnimationFrame(bindVisibleRunners);
+      }
+    });
+    window.addEventListener("hashchange", () => window.requestAnimationFrame(bindVisibleRunners));
+    window.setTimeout(bindVisibleRunners, 0);
   })();
 </script>
 
