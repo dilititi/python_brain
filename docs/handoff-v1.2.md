@@ -1,0 +1,221 @@
+# v1.2 Startup Handoff
+
+更新日期：2026-06-03
+
+## 当前基线
+
+- v1.1 已发布：`main` 位于 `617e938`，tag 为 `v1.1.0`。
+- 当前正确仓库：`https://github.com/dilititi/python_brain.git`。
+- 旧的相似仓库 `python-brain` 已归档，Vercel 新 project 已绑定到 `python_brain`。
+- 生产域名：`https://python-brain.vercel.app/`。
+- 抽样验证已通过：`/concepts/decorator/`、`/path/automation/`、`/relations.json` 返回 200。
+- 本文件只用于 v1.2 启动前审查和拆任务；不在这里提前实现 progress tracking。
+
+## v1.2 定位
+
+v1.2 做的是“认知外脑”的掌握度地图，不是刷题平台。进度系统必须展示学习者在知识图谱中的形状、证据和下一步空缺，而不是只显示百分比、连击或排行榜。
+
+详细产品设计见 `docs/v1.2-progress-tracking.md`。本 handoff 负责记录开工前必须确认的工程口径、风险和第一批 PR 切法。
+
+## 已定边界
+
+- 不新增 concept，不把内容规模推到 80+。
+- 不引入后端、用户系统、跨设备同步。
+- 不接入需要 API key 的外部服务。
+- 题库纯静态进入 `src/content/assessments/`。
+- 用户进度只落在 localStorage。
+- 编辑器使用 CodeMirror 6，不使用 Monaco。
+- Pyodide 只在用户点击“开始评估”后加载。
+- ruff WASM 只作为阶段 A 可行性验证；验证失败则降级为建议层，不阻断主流程。
+
+## 开工前发现
+
+### 1. 类别矩阵口径需要裁决
+
+`docs/v1.2-progress-tracking.md` 写的是 `9 类别 × 4 档`，但当前 schema 枚举是 10 类：
+
+```text
+language, syntax, control-flow, data-structure, function,
+oop, file-io, module-eng, stdlib, third-party
+```
+
+当前 52 个概念实际只覆盖 8 类：
+
+| category | concepts |
+|---|---:|
+| control-flow | 8 |
+| data-structure | 8 |
+| function | 7 |
+| language | 7 |
+| module-eng | 6 |
+| oop | 6 |
+| stdlib | 4 |
+| syntax | 6 |
+
+`file-io` 和 `third-party` 仍是空 category。v1.2 第一批实现前必须决定矩阵使用哪一种口径：
+
+- 方案 A：矩阵只展示当前 8 个非空 category，空 category 不进入 v1.2。
+- 方案 B：保留 9 类，把 `file-io` 合并进 `stdlib` 或 `module-eng`，`third-party` 暂不展示。
+- 方案 C：展示 schema 的 10 类，但空 category 标为“尚未开放”。这会让 v1.2 种子题工作量增加，也会冲淡“不扩内容”的纪律。
+
+建议先采用方案 A：用当前 8 个真实 category 作为 v1.2 启动口径，等 `file-io` / `third-party` 有内容时再扩矩阵。
+
+### 2. assessments collection 尚未存在
+
+当前没有 `src/content/assessments/`，也没有 assessments schema。v1.2 第一个实现 PR 应先做 schema、id 规范和 5 种题型最小样本，不要先写 UI。
+
+建议题目 id 规范：
+
+```text
+{category}-{kind}-{tier}-{short-slug}
+```
+
+示例：
+
+```text
+syntax-recognition-tier1-f-string-output
+control-flow-debugging-tier2-loop-break
+function-refactor-tier3-parameter-contract
+```
+
+### 3. localStorage 需要版本化
+
+`pkb:progress`、`pkb:attempts`、`pkb:timetrack` 都必须带 `schemaVersion`。原因是 v1.2 期间会频繁调整证据结构，没有版本号会让旧浏览器数据把 UI 算坏。
+
+建议从 `schemaVersion: 1` 开始。读取失败或版本不匹配时，只清理 v1.2 progress keys，不影响 v1.0 已有的概念点亮数据。
+
+### 4. progress calculator 必须先于页面
+
+`src/lib/progress-calculator.ts` 必须是无 DOM、无 localStorage、无 Pyodide 的纯函数。先写 calculator 和单测，再接 `/progress` 页面。这样矩阵规则不会散落到 React island 或页面脚本里。
+
+### 5. ruff WASM 不能提前成为 gate
+
+PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体积、加载方式、API 稳定性都还没验证。阶段 A 只做 spike：
+
+- 能否在浏览器端加载。
+- 首次加载是否破坏 Lighthouse。
+- 是否能返回可解释的 lint 结果。
+- 失败时是否能降级为“建议层”而不是阻断评估。
+
+## 第一批任务拆分
+
+### PR 1：数据模型和种子样本
+
+- 新增 `assessments` collection schema。
+- 新建 `src/content/assessments/`。
+- 每种 kind 至少 1 道样本：`recognition`、`debugging`、`completion`、`timed-coding`、`refactor`。
+- 写 schema 校验，确保 `concepts[]` 引用现有 concept。
+- 不做页面，不接 localStorage。
+
+完成条件：
+
+- `npm run build` 能通过 Astro content schema。
+- `npm run validate:relations` 不新增 relation error。
+- 文档更新 assessment id 规范。
+
+### PR 2：progress calculator
+
+- 新增 `src/lib/progress-calculator.ts`。
+- 定义 attempts/progress 的 TypeScript 类型和 `schemaVersion`。
+- 实现 attempts -> matrix/cell/evidence/frontier 的纯函数。
+- 新增单测，覆盖率目标不低于 80%。
+
+完成条件：
+
+- `npm run test` 通过。
+- calculator 不读取 DOM、localStorage、Pyodide。
+
+### PR 3：只读矩阵页
+
+- 新增 `/progress` 页面。
+- 先读取本地 mock/localStorage fixture 渲染矩阵。
+- 空状态要能清楚告诉用户“还没有评估证据”。
+- 不接 Pyodide，不接 CodeMirror。
+
+完成条件：
+
+- `/progress` 可访问。
+- Lighthouse 不低于现有门槛。
+- localStorage 解析失败时页面不崩。
+
+### PR 4：评估页最小闭环
+
+- 新增 `/assessments/[id]`。
+- 接入 CodeMirror 6。
+- Pyodide 点击“开始评估”后加载。
+- 支持至少一种 runnable 题型跑测试并写入 `pkb:attempts`。
+- 提交后通过 calculator 更新 `pkb:progress`。
+
+完成条件：
+
+- 至少 1 道 timed-coding 可跑通测试用例。
+- 失败输出可读，不吞错误。
+- 首屏不加载 Pyodide。
+
+### PR 5：题库扩到阶段 1 目标
+
+- 按最终 category 口径补齐种子题。
+- 原设计是 27 道题；如果采用 8 类启动口径，则阶段 1 目标调整为 24 道题（8 类 × 3 kind）。
+- 5 种评估类型都必须持续存在，不能退化成只有限时编程。
+
+完成条件：
+
+- assessment inventory 文档列出 category/kind/tier 分布。
+- 每个非空 category 至少 3 道题。
+
+## 后续阶段
+
+### 阶段 2：UI 与运行
+
+- `/progress` 矩阵页进入真实 localStorage。
+- `/assessments/[id]` 支持 5 种题型。
+- 三层反馈接通：键盘层、运行层、进度层。
+- 周摘要页显示证据、卡壳模式、活跃前沿。
+
+### 阶段 3：反向触发与发布
+
+- 停留触发识别题。
+- 沉默提醒。
+- e2e 覆盖关键路径。
+- 写 release handoff。
+- 全量 gates 通过后打 annotated tag `v1.2.0`。
+
+## v1.2 Gates
+
+沿用 v1.1 gates：
+
+```bash
+npm run validate:relations
+npm run audit:concepts
+npm run test
+npm run test:code-examples
+npm run build
+npm run link:check
+npm run link:external:inventory
+```
+
+v1.2 新增建议：
+
+- calculator 单测进入 `npm run test`。
+- 若新增 assessment 专用校验脚本，命名为 `npm run audit:assessments`，并在发布前进入 deployment 文档。
+- runnable assessment 测试脚本不要复用 `test:code-examples`，另起 `npm run test:assessments`，避免概念示例和评估题混在一起。
+
+## 启动前 Checklist
+
+- [x] v1.1.0 已发布。
+- [x] 生产域名已绑定正确 repo。
+- [x] 生产抽样 URL 返回 200。
+- [x] v1.2 产品设计文档存在。
+- [ ] 裁决 category 矩阵口径：8 / 9 / 10。
+- [ ] 确认 assessment id 与目录规范。
+- [ ] 确认 localStorage `schemaVersion` 和迁移策略。
+- [ ] 确认 ruff WASM spike 的成功/降级标准。
+- [ ] 确认第一批实现 PR 是否只做 schema + 样本，不碰 UI。
+
+## 不要提前做
+
+- 不要在 PR 1 里引入 CodeMirror 或 Pyodide。
+- 不要为了凑 9 类矩阵新增 concepts。
+- 不要把 ruff WASM 直接写进发布 gate。
+- 不要把 progress 证据写进远端或第三方服务。
+- 不要把积分、徽章、排行榜作为“激励”塞进 v1.2。
