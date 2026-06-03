@@ -217,6 +217,21 @@ test("failed attempts do not count as evidence but feed recent pattern summaries
   assert.equal(snapshot.recentPatterns[0].lastSeenAt, "2026-06-04T11:00:00.000Z");
 });
 
+test("unknown categories from localStorage-shaped data are ignored", () => {
+  const snapshot = calculateProgress([
+    {
+      id: "stale-category",
+      category: "third-party",
+      occurredAt: "2026-06-04T13:00:00.000Z",
+      kind: "concept-read",
+      conceptId: "requests"
+    } as unknown as ProgressAttempt
+  ]);
+
+  assert.deepEqual(snapshot.tiersByCategory.syntax, "none");
+  assert.equal(snapshot.activeFrontier.length, PROGRESS_CATEGORIES.length);
+});
+
 test("active frontier prefers earliest incomplete tier, then strongest progress", () => {
   const snapshot = calculateProgress([
     attempt("syntax-read-1", "syntax", {

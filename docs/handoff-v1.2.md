@@ -142,8 +142,8 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 
 ### PR 3：只读矩阵页
 
-- 新增 `/progress` 页面。
-- 先读取本地 mock/localStorage fixture 渲染矩阵。
+- 新增 `/progress` 页面。已落地为只读矩阵页。
+- 先读取本地 mock/localStorage fixture 渲染矩阵。当前只接受 `pkb:attempts` 中 `schemaVersion = 1` 且包含 `attempts[]` 的数据，否则回落 mock。
 - 空状态要能清楚告诉用户“还没有评估证据”。
 - 不接 Pyodide，不接 CodeMirror。
 
@@ -152,6 +152,7 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 - `/progress` 可访问。
 - Lighthouse 不低于现有门槛。
 - localStorage 解析失败时页面不崩。
+- 页面不写入 localStorage，不加载 Pyodide / CodeMirror。
 
 ### PR 4：评估页最小闭环
 

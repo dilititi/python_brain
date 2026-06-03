@@ -222,7 +222,11 @@ function collectEvidence(attempts: readonly ProgressAttempt[]) {
   const evidence = makeEvidenceByCategory();
 
   for (const attempt of attempts) {
-    const categoryEvidence = evidence[attempt.category];
+    const categoryEvidence = (evidence as Partial<Record<string, CategoryEvidence>>)[attempt.category];
+    if (!categoryEvidence) {
+      continue;
+    }
+
     categoryEvidence.evidenceIds.add(attempt.id);
 
     if (!passed(attempt)) {
