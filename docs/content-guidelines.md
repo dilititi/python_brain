@@ -78,7 +78,7 @@ concept frontmatter 不再包含 `description`。列表卡片、SEO 描述和搜
 - `standard`：推荐教学版本，必须存在。
 - `production`：更接近真实项目的版本，可以加入异常处理、类型注解、日志或边界条件。
 
-当前处于 v1.1 warning 阶段：`npm run audit:concepts` 会列出 `codeExamples` 缺口，但默认不阻断；`npm run audit:concepts -- --strict-code-examples` 用于发布前模拟 strict gate。等 52 个概念补齐后，再把 codeExamples 升级为阻塞校验。
+v1.1 strict 化后，`codeExamples` 已是阻塞字段：`npm run audit:concepts`、`npm run validate:relations` 和 Astro content schema 都会拦截缺失、空值、TODO-like 内容或错误标题。`--strict-code-examples` 仅保留为兼容旧发布命令的参数，不再改变默认严格语义。
 
 `language` 概念豁免三版本，不强行凑 `naive` / `standard` / `production`。它们只要求至少一段可在 Pyodide 跑通且有可观察输出的展示性代码，例如 `import this` 或 `import sys; print(sys.version_info)`；禁止只写注释或不可执行演示文本。
 

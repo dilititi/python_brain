@@ -142,7 +142,7 @@ npm run validate:relations -- --warning-exit-code=2
 当前预期：
 
 - `validate:relations` 输出 `Relations valid`
-- `audit:concepts` 输出 blocking checks clean；v1.1 codeExamples warning 阶段会列出待补清单但不阻断
+- `audit:concepts` 输出 clean；v1.1 已将 codeExamples 缺口升级为 blocking error
 - `--warning-exit-code=2` 在没有 warning 时返回 `0`
 - content strict 项应返回 `1` 阻断，而不是 warning
 

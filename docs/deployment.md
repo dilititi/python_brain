@@ -33,7 +33,7 @@ npm run link:external:inventory
 | 命令 | 通过条件 | 阻断行为 |
 |---|---|---|
 | `npm run validate:relations` | 无 blocking error | error 时返回 `1` 并阻断；默认 warning-only 返回 `0` |
-| `npm run audit:concepts` | 无 concept blocking error；v1.1 codeExamples warning 可存在 | blocking error 返回 `1`；当前 codeExamples warning 默认返回 `0` |
+| `npm run audit:concepts` | 无 concept blocking error；codeExamples 缺口也必须为 0 | blocking error 返回 `1`；codeExamples 已是严格阻断项 |
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run test:code-examples` | 所有 `runnable !== false` 的 concept codeExamples 可在 Pyodide 跑通 | 语法错误或运行错误返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
@@ -42,11 +42,11 @@ npm run link:external:inventory
 
 `npm run build` 会先运行 `build:relations` 生成 `src/generated/relations.json`，让概念页、路径页和图谱页在 Astro 静态构建期间消费同一份关系索引；静态构建结束后会再次运行 `build:relations`，把同一索引写入 `dist/relations.json` 作为部署产物。
 
-当前 `summary` / `whyImportant`、concept `worksRef` 引用与 `role`、case `standard` code version / `pitfalls` / `extensions`、project v1 字段（`type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]`）与 `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值、TODO-like 内容或 registry 引用缺失会阻断审计、关系校验或 Astro content schema。
+当前 `summary` / `whyImportant`、concept `worksRef` 引用与 `role`、concept `codeExamples`、case `standard` code version / `pitfalls` / `extensions`、project v1 字段（`type`、`stage`、`finalOutput`、`structure`、`youWillLearn[]`、`coreFlow[]`、`upgradePath[]`）与 `concepts >= 3`、person `sources` / `role` / `field`、path milestone `cases` / `projects` 已升级为严格字段；缺失、空值、TODO-like 内容或 registry 引用缺失会阻断审计、关系校验或 Astro content schema。
 
 严格字段状态以源码和命令输出共同裁决：`src/content.config.ts` 必须声明 schema，`scripts/validate-relations.ts` 必须把缺失或无效内容作为 error，相关审计脚本必须返回非 0。当前 `summary` / `whyImportant` 不保留 warning-only 过渡状态；如果再次出现这两个字段的 warning 清单，应视为代码和文档脱节的回归，而不是可部署状态。
 
-concept `codeExamples` 处于 v1.1 warning 阶段：`npm run audit:concepts` 默认列出缺口但不阻断，`npm run audit:concepts -- --strict-code-examples` 用于发布前模拟 strict gate。等 52 个概念全部补齐后，才把 codeExamples 缺失从 warning 升级为 blocking error，并把 strict 结果写回 schema、`validate-relations` 和本文件。
+concept `codeExamples` 已完成 v1.1 strict 化：非 `language` 概念必须有 `naive` / `standard` / `production` 三段 useful 示例；`language` 概念至少要有一段可观察输出的展示性代码。`npm run audit:concepts -- --strict-code-examples` 仍可运行，但只是兼容旧发布 checklist，默认 `npm run audit:concepts` 已经严格。
 
 后续 GitHub Actions 进入 production monitoring gate 时，可额外使用：
 
@@ -59,7 +59,7 @@ npm run validate:relations -- --warning-exit-code=2
 - 默认模式：不带 `--warning-exit-code` 时，warning 不影响退出码；无 error 返回 `0`，有 error 返回 `1`。本地开发和 watch 场景默认使用这一模式，避免 warning 打断编辑。
 - CI 监控模式：带 `--warning-exit-code=2` 时，无 error 但存在 warning 返回 `2`；有 error 仍返回 `1`。GitHub Actions 可用 `continue-on-error` 或单独步骤把 `2` 标记为通知或黄灯，但不阻断 merge。
 
-`--warning-exit-code=2` 只用于 `validate:relations` 的非阻塞 warning（例如孤立节点通知）。当前 content strict 项应直接返回 `1` 并阻断。concept `codeExamples` 的 warning/strict 切换由 `audit:concepts -- --strict-code-examples` 单独控制，不使用 `--warning-exit-code=2`。
+`--warning-exit-code=2` 只用于 `validate:relations` 的非阻塞 warning（例如孤立节点通知）。当前 content strict 项应直接返回 `1` 并阻断。concept `codeExamples` 已是 strict 项，不使用 `--warning-exit-code=2`。
 
 Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命令；Vercel 只适合作为硬阻断部署 gate，继续使用 `npm run build`，并在合并前由本地或 GitHub Actions 跑完整前置检查。
 
@@ -99,6 +99,6 @@ npx vercel --prod --token <VERCEL_TOKEN>
 - `npm.cmd run link:external:inventory`
 - `npx.cmd --yes vercel --version`
 
-其中 `validate:relations` 输出 `Relations valid`；`audit:concepts` 当前应输出 blocking checks clean，并列出 v1.1 codeExamples warning 库存；`test:code-examples` 当前应输出 Pyodide runnable 示例全部通过。当前不存在 `summary` / `whyImportant` warning 库存。
+其中 `validate:relations` 输出 `Relations valid`；`audit:concepts` 当前应输出 clean，不应再列出 codeExamples warning 库存；`test:code-examples` 当前应输出 Pyodide runnable 示例全部通过。当前不存在 `summary` / `whyImportant` 或 `codeExamples` warning 库存。
 
 Vercel production 已由用户完成部署，生产域名为 `https://python-brain.vercel.app/`。后续仍以 GitHub Actions 绿灯和生产站点关键路由可访问共同判定发布健康。

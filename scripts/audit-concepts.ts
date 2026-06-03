@@ -28,18 +28,14 @@ function isUsefulString(value: unknown) {
   return typeof value === "string" && value.trim().length > 0 && !todoPattern.test(value);
 }
 
-function codeSeverity(options: AuditOptions): AuditSeverity {
-  return options.strictCodeExamples ? "error" : "warning";
-}
-
 function issue(severity: AuditSeverity, message: string): AuditIssue {
   return { severity, message };
 }
 
-function auditCodeExamples(record: ConceptRecord, options: AuditOptions): AuditIssue[] {
+function auditCodeExamples(record: ConceptRecord, _options: AuditOptions): AuditIssue[] {
   const issues: AuditIssue[] = [];
   const codeExamples = Array.isArray(record.data.codeExamples) ? record.data.codeExamples : [];
-  const severity = codeSeverity(options);
+  const severity: AuditSeverity = "error";
   const category = record.data.category;
 
   const usefulExamples = codeExamples.filter((example): example is Record<string, unknown> => (
@@ -183,7 +179,7 @@ async function main() {
   const result = auditConceptRecords(records, { strictCodeExamples });
 
   printIssues("Concept audit errors", result.errors);
-  printIssues("Concept audit codeExamples warnings", result.warnings);
+  printIssues("Concept audit warnings", result.warnings);
 
   if (result.errors.length > 0) {
     process.exitCode = 1;
@@ -191,12 +187,8 @@ async function main() {
   }
 
   if (result.warnings.length > 0) {
-    console.log(
-      strictCodeExamples
-        ? "Concept audit failed: codeExamples warnings are strict in this mode."
-        : "Concept audit blocking checks clean; codeExamples warnings are non-blocking until v1.1 strict mode."
-    );
-    process.exitCode = strictCodeExamples ? 1 : 0;
+    console.log("Concept audit warnings are informational only; current strict content gates use errors.");
+    process.exitCode = 0;
     return;
   }
 

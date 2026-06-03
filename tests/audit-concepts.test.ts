@@ -14,7 +14,7 @@ const baseConcept = {
   ]
 };
 
-test("concept codeExamples warnings are non-blocking by default", () => {
+test("concept codeExamples errors are blocking by default", () => {
   const issues = auditConceptRecord({
     label: "src/content/concepts/example.mdx",
     data: {
@@ -23,11 +23,11 @@ test("concept codeExamples warnings are non-blocking by default", () => {
     }
   });
 
-  assert.equal(issues.filter((item) => item.severity === "error").length, 0);
-  assert.equal(issues.filter((item) => item.severity === "warning").length, 3);
+  assert.equal(issues.filter((item) => item.severity === "error").length, 3);
+  assert.equal(issues.filter((item) => item.severity === "warning").length, 0);
 });
 
-test("strict codeExamples mode upgrades missing versions to errors", () => {
+test("strict codeExamples flag remains compatible with default blocking errors", () => {
   const issues = auditConceptRecord({
     label: "src/content/concepts/example.mdx",
     data: {
@@ -59,7 +59,7 @@ test("language concepts require useful display code but not three versions", () 
         }
       ]
     }
-  }, { strictCodeExamples: true });
+  });
 
   assert.deepEqual(issues, []);
 });
@@ -79,5 +79,6 @@ test("TODO-like code is not useful", () => {
     }
   });
 
-  assert.equal(issues.filter((item) => item.severity === "warning").length, 3);
+  assert.equal(issues.filter((item) => item.severity === "error").length, 3);
+  assert.equal(issues.filter((item) => item.severity === "warning").length, 0);
 });

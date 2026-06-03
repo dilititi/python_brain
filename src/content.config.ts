@@ -18,6 +18,8 @@ const url = z.url();
 const httpsUrl = z.url().refine((value) => value.startsWith("https://"), {
   message: "source must be an https URL"
 });
+const todoPattern = /TODO|待补|暂无说明/;
+const requiredCodeExampleTitles = ["naive", "standard", "production"] as const;
 
 const workLink = z.object({
   title: z.string(),
@@ -62,6 +64,10 @@ const codeExample = z.object({
   runnable: z.boolean().default(true)
 });
 
+function isUsefulString(value: string) {
+  return value.trim().length > 0 && !todoPattern.test(value);
+}
+
 const mindsetShift = z.object({
   shift: z.string().max(60),
   why: z.string().max(200),
@@ -75,9 +81,8 @@ const earlyCareer = z.object({
   source: httpsUrl
 });
 
-const concepts = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/concepts" }),
-  schema: z.object({
+const conceptSchema = z
+  .object({
     title: z.string(),
     summary: z.string().max(80),
     whyImportant: z.string().max(200),
@@ -114,6 +119,51 @@ const concepts = defineCollection({
     codeExamples: z.array(codeExample).default([]),
     requiresMindset: z.array(mindsetShift).default([])
   })
+  .superRefine((data, ctx) => {
+    const usefulExamples = data.codeExamples.filter((example) => (
+      isUsefulString(example.title) &&
+      isUsefulString(example.description) &&
+      isUsefulString(example.code)
+    ));
+
+    if (data.category === "language") {
+      if (usefulExamples.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["codeExamples"],
+          message: "language concepts need at least one useful display code example"
+        });
+      }
+
+      return;
+    }
+
+    for (const title of requiredCodeExampleTitles) {
+      const example = usefulExamples.find((item) => item.title === title);
+
+      if (!example) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["codeExamples", title],
+          message: `non-language concepts need a useful ${title} code example`
+        });
+      }
+    }
+
+    data.codeExamples.forEach((example, index) => {
+      if (!requiredCodeExampleTitles.includes(example.title as (typeof requiredCodeExampleTitles)[number])) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["codeExamples", index, "title"],
+          message: "codeExamples title must be naive, standard, or production"
+        });
+      }
+    });
+  });
+
+const concepts = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/concepts" }),
+  schema: conceptSchema
 });
 
 const cases = defineCollection({

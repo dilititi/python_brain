@@ -180,7 +180,6 @@ const mvpTargets = {
   projects: 5,
   people: 5
 };
-const showcaseConceptIds = new Set(["decorator", "python-language", "function-parameters"]);
 const requiredCodeExampleTitles = ["naive", "standard", "production"];
 
 if (concepts.length < mvpTargets.concepts) {
@@ -311,27 +310,55 @@ for (const entry of concepts) {
     pushError(entry, "expandsTo", "expandsTo is removed", "Rename the field to extends and keep concept ids unchanged.");
   }
 
-  if (showcaseConceptIds.has(entry.id)) {
-    const codeExamples = asRecordArray(entry.data.codeExamples);
-    const codeExampleTitles = new Set(codeExamples.map((example) => example.title));
+  const rawCodeExamples = Array.isArray(entry.data.codeExamples)
+    ? entry.data.codeExamples
+    : [];
+  const codeExamples = rawCodeExamples.filter((example): example is Record<string, unknown> => (
+    Boolean(example) && typeof example === "object"
+  ));
+  const usefulCodeExamples = codeExamples.filter((example) => (
+    isUsefulString(example.title) &&
+    isUsefulString(example.description) &&
+    isUsefulString(example.code)
+  ));
 
+  if (!Array.isArray(entry.data.codeExamples)) {
+    pushError(entry, "codeExamples", "codeExamples must be an array", "Add concept code examples; compare src/content/concepts/decorator.mdx.");
+  }
+
+  rawCodeExamples.forEach((example, index) => {
+    if (!example || typeof example !== "object") {
+      pushError(entry, `codeExamples[${index}]`, "codeExamples item must be an object", "Use title, description, code, and optional runnable fields.");
+    }
+  });
+
+  if (entry.data.category === "language") {
+    if (usefulCodeExamples.length === 0) {
+      pushError(
+        entry,
+        "codeExamples",
+        "language concept is missing useful display code",
+        "Add at least one runnable example with visible output; compare src/content/concepts/python-language.mdx."
+      );
+    }
+  } else {
     for (const title of requiredCodeExampleTitles) {
-      const example = codeExamples.find((item) => item.title === title);
-      if (!example || !isUsefulString(example.description) || !isUsefulString(example.code)) {
+      const example = usefulCodeExamples.find((item) => item.title === title);
+      if (!example) {
         pushError(
           entry,
           `codeExamples.${title}`,
-          `showcase concept is missing a useful ${title} example`,
+          `concept is missing a useful ${title} example`,
           "Provide description and code for naive, standard, and production examples; compare src/content/concepts/decorator.mdx."
         );
       }
     }
 
-    for (const title of codeExampleTitles) {
-      if (typeof title !== "string" || !requiredCodeExampleTitles.includes(title)) {
-        pushError(entry, "codeExamples[].title", "codeExamples title must be naive, standard, or production", "Rename the example title to one of the three required labels.");
+    codeExamples.forEach((example, index) => {
+      if (typeof example.title !== "string" || !requiredCodeExampleTitles.includes(example.title)) {
+        pushError(entry, `codeExamples[${index}].title`, "codeExamples title must be naive, standard, or production", "Rename the example title to one of the three required labels.");
       }
-    }
+    });
   }
 
   const worksRef = asRecordArray(entry.data.worksRef);
