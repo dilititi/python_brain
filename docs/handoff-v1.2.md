@@ -82,6 +82,25 @@ function-refactor-tier3-parameter-contract
 
 `src/lib/progress-calculator.ts` 必须是无 DOM、无 localStorage、无 Pyodide 的纯函数。先写 calculator 和单测，再接 `/progress` 页面。这样矩阵规则不会散落到 React island 或页面脚本里。
 
+PR 2 已落地 calculator 规则：
+
+- `PROGRESS_SCHEMA_VERSION = 1`。
+- 启动期 category 为 8 类：`language`、`syntax`、`control-flow`、`data-structure`、`function`、`oop`、`module-eng`、`stdlib`。
+- 档位采用累计完成：Tier 2 必须在 Tier 1 完成后才算完成，Tier 3/4 同理。
+- 单个 cell 有 `empty` / `in_progress` / `blocked` / `complete` 四种状态。当前置档未完成时，即使本档证据已满足，也只显示 `blocked`。
+- 证据按稳定 id 去重：概念、assessment、project 或 code example 的重复提交不重复计数。
+- 失败 attempt 不计入档位证据，但会进入 `recentPatterns`，用于后续周摘要或卡壳模式提示。
+- `activeFrontier` 优先返回最早未完成档；同档同进度时，有证据活动的 category 优先。
+
+Tier 规则：
+
+| Tier | 规则 |
+|---|---|
+| Tier 1 | 读过 15 个概念 + 通过 10 道识别题 + 跑通 8 段 `standard` 代码 |
+| Tier 2 | 5 道限时题通过测试 + 3 道 PEP 8 检查通过 |
+| Tier 3 | 完成 1 个 `entry` 项目 + 跑通 1 段 `production` 代码 |
+| Tier 4 | 完成 1 个 `mid` / `capstone` 项目 + 2 次反向识别 + 1 道跨概念题 |
+
 ### 5. ruff WASM 不能提前成为 gate
 
 PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体积、加载方式、API 稳定性都还没验证。阶段 A 只做 spike：
@@ -119,6 +138,7 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 
 - `npm run test` 通过。
 - calculator 不读取 DOM、localStorage、Pyodide。
+- `npm run build` 通过 Astro strict check。
 
 ### PR 3：只读矩阵页
 
