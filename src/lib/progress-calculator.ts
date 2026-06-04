@@ -74,7 +74,7 @@ export type RequirementStatus = {
   complete: boolean;
 };
 
-export type CellStatus = "empty" | "in_progress" | "blocked" | "complete";
+export type CellStatus = "empty" | "in_progress" | "blocked" | "complete" | "n/a";
 
 export type MatrixCell = {
   category: ProgressCategory;
@@ -180,6 +180,15 @@ export const TIER_REQUIREMENTS: readonly TierDefinition[] = [
     ]
   }
 ] as const;
+
+// v1.2 PR4 does not yet ship browser ruff, reverse triggers, or cross-concept
+// assessment flows. Keep these dimensions visible in the type model, but make
+// their targets explicitly unavailable until the corresponding feature lands.
+const DISABLED_REQUIREMENTS = new Set<RequirementKey>([
+  "pep8Passed",
+  "reverseRecognitionPassed",
+  "crossConceptPassed"
+]);
 
 const tierRank: Record<ProgressTier, number> = {
   tier1: 1,
@@ -383,6 +392,10 @@ function requirementTarget(
   config: ProgressCategoryConfigItem,
   definition: RequirementDefinition
 ) {
+  if (DISABLED_REQUIREMENTS.has(definition.key)) {
+    return 0;
+  }
+
   switch (definition.key) {
     case "conceptsRead":
       return config.conceptCount;
@@ -435,7 +448,9 @@ export function calculateProgress(
       const progress = cellProgress(requirements);
       let status: CellStatus = "empty";
 
-      if (complete) {
+      if (!hasMeasurableRequirements) {
+        status = "n/a";
+      } else if (complete) {
         status = "complete";
         highestTier = tierDefinition.tier;
       } else if (!previousComplete) {
@@ -456,12 +471,17 @@ export function calculateProgress(
 
       matrix[category][tierDefinition.tier] = cell;
       evidenceByCell[cellKey(category, tierDefinition.tier)] = requirements;
-      previousComplete = complete;
+      if (hasMeasurableRequirements) {
+        previousComplete = complete;
+      }
     }
 
     tiersByCategory[category] = highestTier;
 
-    const nextTier = PROGRESS_TIERS.find((tier) => matrix[category][tier].status !== "complete");
+    const nextTier = PROGRESS_TIERS.find((tier) => {
+      const status = matrix[category][tier].status;
+      return status !== "complete" && status !== "n/a";
+    });
     if (nextTier) {
       const cell = matrix[category][nextTier];
       activeFrontier.push({

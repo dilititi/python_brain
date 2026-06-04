@@ -105,10 +105,10 @@ test("calculateProgress returns an 8 category matrix with schema version", () =>
 
   for (const category of PROGRESS_CATEGORIES) {
     assert.equal(snapshot.tiersByCategory[category], "none");
-    assert.equal(snapshot.matrix[category].tier1.status, "empty");
-    assert.equal(snapshot.matrix[category].tier2.status, "blocked");
-    assert.equal(snapshot.matrix[category].tier3.status, "blocked");
-    assert.equal(snapshot.matrix[category].tier4.status, "blocked");
+    assert.equal(snapshot.matrix[category].tier1.status, "n/a");
+    assert.equal(snapshot.matrix[category].tier2.status, "n/a");
+    assert.equal(snapshot.matrix[category].tier3.status, "n/a");
+    assert.equal(snapshot.matrix[category].tier4.status, "n/a");
   }
 });
 
@@ -150,6 +150,10 @@ test("tier 2 becomes complete when tier 1 is complete first", () => {
   assert.equal(snapshot.matrix.syntax.tier2.status, "complete");
   assert.equal(snapshot.tiersByCategory.syntax, "tier2");
   assert.equal(snapshot.matrix.syntax.tier3.status, "empty");
+  assert.deepEqual(
+    snapshot.matrix.syntax.tier2.requirements.map((requirement) => requirement.target),
+    [1, 0]
+  );
 });
 
 test("tier 3 and tier 4 use project and advanced evidence", () => {
@@ -188,6 +192,82 @@ test("tier 3 and tier 4 use project and advanced evidence", () => {
   assert.equal(snapshot.matrix.syntax.tier3.status, "complete");
   assert.equal(snapshot.matrix.syntax.tier4.status, "complete");
   assert.equal(snapshot.tiersByCategory.syntax, "tier4");
+  assert.deepEqual(
+    snapshot.matrix.syntax.tier4.requirements.map((requirement) => requirement.target),
+    [1, 0, 0]
+  );
+});
+
+test("n/a tiers are transparent when later tier evidence is complete", () => {
+  const config = categoryConfig({
+    stdlib: {
+      conceptCount: 4,
+      standardCodeCount: 4,
+      productionCodeCount: 1,
+      entryProjectCount: 1
+    }
+  });
+  const attempts = [
+    ...Array.from({ length: 4 }, (_, index) =>
+      attempt(`stdlib-read-${index}`, "stdlib", {
+        kind: "concept-read",
+        conceptId: `stdlib-concept-${index}`
+      })
+    ),
+    ...Array.from({ length: 4 }, (_, index) =>
+      attempt(`stdlib-standard-${index}`, "stdlib", {
+        kind: "code-run",
+        codeExampleTitle: "standard",
+        conceptId: `stdlib-standard-${index}`
+      })
+    ),
+    attempt("stdlib-entry-project", "stdlib", {
+      kind: "project-complete",
+      projectId: "python-basics-lab",
+      projectStage: "entry"
+    }),
+    attempt("stdlib-production", "stdlib", {
+      kind: "code-run",
+      codeExampleTitle: "production",
+      conceptId: "json"
+    })
+  ];
+  const snapshot = calculateProgress(attempts, config);
+
+  assert.equal(snapshot.matrix.stdlib.tier1.status, "complete");
+  assert.equal(snapshot.matrix.stdlib.tier2.status, "n/a");
+  assert.equal(snapshot.matrix.stdlib.tier3.rawComplete, true);
+  assert.equal(snapshot.matrix.stdlib.tier3.status, "complete");
+  assert.equal(snapshot.tiersByCategory.stdlib, "tier3");
+});
+
+test("n/a tiers do not unlock later tiers when previous measurable tier is incomplete", () => {
+  const config = categoryConfig({
+    stdlib: {
+      conceptCount: 4,
+      standardCodeCount: 4,
+      productionCodeCount: 1,
+      entryProjectCount: 1
+    }
+  });
+  const snapshot = calculateProgress([
+    attempt("stdlib-entry-project", "stdlib", {
+      kind: "project-complete",
+      projectId: "python-basics-lab",
+      projectStage: "entry"
+    }),
+    attempt("stdlib-production", "stdlib", {
+      kind: "code-run",
+      codeExampleTitle: "production",
+      conceptId: "json"
+    })
+  ], config);
+
+  assert.equal(snapshot.matrix.stdlib.tier1.status, "empty");
+  assert.equal(snapshot.matrix.stdlib.tier2.status, "n/a");
+  assert.equal(snapshot.matrix.stdlib.tier3.rawComplete, true);
+  assert.equal(snapshot.matrix.stdlib.tier3.status, "blocked");
+  assert.equal(snapshot.tiersByCategory.stdlib, "none");
 });
 
 test("duplicate evidence is counted once by stable concept or assessment id", () => {
@@ -274,10 +354,16 @@ test("unknown categories from localStorage-shaped data are ignored", () => {
       kind: "concept-read",
       conceptId: "requests"
     } as unknown as ProgressAttempt
-  ], emptyProgressCategoryConfig());
+  ], categoryConfig({
+    syntax: {
+      conceptCount: 1,
+      standardCodeCount: 1
+    }
+  }));
 
   assert.deepEqual(snapshot.tiersByCategory.syntax, "none");
-  assert.equal(snapshot.activeFrontier.length, PROGRESS_CATEGORIES.length);
+  assert.equal(snapshot.activeFrontier[0].category, "syntax");
+  assert.equal(snapshot.activeFrontier[0].tier, "tier1");
 });
 
 test("active frontier prefers earliest incomplete tier, then strongest progress", () => {

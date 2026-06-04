@@ -5,6 +5,7 @@ import {
   calculateProgress,
   PROGRESS_CATEGORIES,
   PROGRESS_TIERS,
+  type CellStatus,
   type ProgressCategory,
   type ProgressTier,
   type ProgressSnapshot
@@ -35,6 +36,10 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
   }
 
   return `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
+}
+
+function cellStatusClass(status: CellStatus) {
+  return status === "n/a" ? "na" : status;
 }
 ---
 
@@ -87,7 +92,7 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
             const cell = initialSnapshot.matrix[category][tier];
             return (
               <div
-                class={`matrix-cell ${cell.status}`}
+                class={`matrix-cell ${cellStatusClass(cell.status)}`}
                 role="cell"
                 data-cell={`${category}:${tier}`}
                 aria-label={`${progressCategoryLabels[category]} ${progressTierLabels[tier]} ${cell.status}`}
@@ -149,6 +154,7 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
 <script>
   import {
     calculateProgress,
+    type CellStatus,
     type ProgressCategoryConfig,
     type ProgressCategory,
     type ProgressTier,
@@ -210,6 +216,10 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
     return `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
   }
 
+  function cellStatusClass(status: CellStatus) {
+    return status === "n/a" ? "na" : status;
+  }
+
   function renderSnapshot(snapshot: ProgressSnapshot, source: string) {
     setText('[data-summary="schema"]', String(snapshot.schemaVersion));
     setText('[data-summary="completed"]', String(completedCategories(snapshot)));
@@ -229,7 +239,7 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
           continue;
         }
 
-        element.className = `matrix-cell ${cell.status}`;
+        element.className = `matrix-cell ${cellStatusClass(cell.status)}`;
         element.setAttribute("aria-label", `${progressCategoryLabels[category]} ${progressTierLabels[tier]} ${cell.status}`);
         const status = element.querySelector("[data-status]");
         const progress = element.querySelector("[data-progress]");
@@ -426,6 +436,15 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
   .matrix-cell.blocked .cell-status,
   .matrix-cell.blocked strong {
     color: var(--color-amber);
+  }
+
+  .matrix-cell.na {
+    background: #f8fafc;
+  }
+
+  .matrix-cell.na .cell-status,
+  .matrix-cell.na strong {
+    color: var(--color-muted);
   }
 
   .progress-details {

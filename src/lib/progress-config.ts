@@ -77,6 +77,8 @@ export function emptyProgressCategoryConfig(): ProgressCategoryConfig {
         assessmentCounts: {},
         standardCodeCount: 0,
         productionCodeCount: 0,
+        // Reserved for later v1.2 phases. These remain 0 until browser ruff,
+        // reverse triggers, and cross-concept assessments are implemented.
         pep8Count: 0,
         entryProjectCount: 0,
         midOrCapstoneProjectCount: 0,
