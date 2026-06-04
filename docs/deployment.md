@@ -24,6 +24,7 @@ npm run audit:concepts
 npm run audit:assessments
 npm run test
 npm run test:code-examples
+npm run test:assessments
 npm run build
 npm run link:check
 npm run link:external:inventory
@@ -38,6 +39,7 @@ npm run link:external:inventory
 | `npm run audit:assessments` | v1.2 assessment 文件名、kind 覆盖、concept 引用和题型结构均有效 | blocking error 返回 `1` 并阻断 |
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run test:code-examples` | 所有 `runnable !== false` 的 concept codeExamples 可在 Pyodide 跑通 | 语法错误或运行错误返回 `1` 并阻断 |
+| `npm run test:assessments` | 所有非 recognition assessment 的 `referenceSolution` 可通过 `testCases` | 语法错误、运行错误或断言失败返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
 | `npm run link:check` | `dist` 内部链接和 anchor 全部可解析 | 缺失页面、资源或 anchor 时返回 `1` 并阻断 |
 | `npm run link:external:inventory` | content 外链均为 `https://`，并输出去重清单规模 | 非 https 外链返回 `1`；不访问网络 |
@@ -69,7 +71,7 @@ Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命�
 
 GitHub Actions 工作流 `.github/workflows/v1-gates.yml` 会在 PR 和 `main` push 时运行：
 
-- static gates：`validate:relations`、`audit:concepts`、`audit:assessments`、`test`、`test:code-examples`、`build`、`link:check`
+- static gates：`validate:relations`、`audit:concepts`、`audit:assessments`、`test`、`test:code-examples`、`test:assessments`、`build`、`link:check`
 - Lighthouse beacon pages：构建静态站、启动 Astro preview、跑三页标杆 Lighthouse
 - external URL monitor：手动或每周定时运行 `npm run link:external`
 
@@ -97,6 +99,7 @@ npx vercel --prod --token <VERCEL_TOKEN>
 - `npm.cmd run audit:assessments`
 - `npm.cmd run test`
 - `npm.cmd run test:code-examples`
+- `npm.cmd run test:assessments`
 - `npm.cmd run build`
 - `npm.cmd run link:check`
 - `npm.cmd run link:external:inventory`
