@@ -1,0 +1,51 @@
+title: 给账户余额加校验
+description: 把裸属性重构为带校验的 @property。
+category: oop
+kind: refactor
+targetTier: tier3
+concepts:
+  - encapsulation
+  - class
+prompt: |
+  Account 直接暴露 balance，可被设成负数。重构为用 @property，
+  使 balance 在被设为负数时抛 ValueError，其余读写行为不变。
+starterCode: |
+  class Account:
+      def __init__(self, balance):
+          self.balance = balance
+testCases:
+  - name: 正常读写不受影响
+    code: |
+      a = Account(100)
+      a.balance = 50
+      assert a.balance == 50
+  - name: 初始化的合法值可读
+    code: |
+      assert Account(100).balance == 100
+  - name: 设为负数被拒绝
+    code: |
+      a = Account(100)
+      try:
+          a.balance = -10
+          raised = False
+      except ValueError:
+          raised = True
+      assert raised
+referenceSolution: |
+  class Account:
+      def __init__(self, balance):
+          self.balance = balance
+
+      @property
+      def balance(self):
+          return self._balance
+
+      @balance.setter
+      def balance(self, value):
+          if value < 0:
+              raise ValueError("balance cannot be negative")
+          self._balance = value
+rubric:
+  - 能把裸属性改成 @property + setter 并在 setter 校验。
+  - 保留调用方原有写法（仍写 a.balance），不破坏既有接口。
+  - 理解 __init__ 中的赋值也会经过 setter。

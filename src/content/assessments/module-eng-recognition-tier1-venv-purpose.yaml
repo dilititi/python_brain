@@ -1,0 +1,25 @@
+title: 虚拟环境解决什么问题
+description: 判断 venv 的核心作用。
+category: module-eng
+kind: recognition
+targetTier: tier1
+concepts:
+  - venv
+  - pip
+prompt: |
+  使用虚拟环境（venv）最主要的目的是什么？
+choices:
+  - label: 让每个项目有独立的依赖，避免全局包互相冲突
+    value: isolate-deps
+    correct: true
+    feedback: venv 的核心价值是依赖隔离，不同项目的包版本互不干扰。
+  - label: 让 Python 代码运行得更快
+    value: faster-runtime
+    correct: false
+    feedback: venv 不改变运行速度，只隔离依赖。
+  - label: 自动修复代码里的语法错误
+    value: fix-syntax
+    correct: false
+    feedback: venv 与语法检查无关。
+rubric:
+  - 理解 venv 的核心价值是依赖隔离，让不同项目的包版本互不干扰。

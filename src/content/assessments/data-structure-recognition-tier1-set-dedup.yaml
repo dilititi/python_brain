@@ -1,0 +1,25 @@
+title: set 如何处理重复元素
+description: 判断从列表构造 set 的结果。
+category: data-structure
+kind: recognition
+targetTier: tier1
+concepts:
+  - set
+  - list
+prompt: |
+  len(set([1, 2, 2, 3, 3, 3])) 的值是多少？
+choices:
+  - label: "3"
+    value: three
+    correct: true
+    feedback: set 去重后只剩 1、2、3 三个不同元素。
+  - label: "6"
+    value: six
+    correct: false
+    feedback: set 会去重，不保留重复计数。
+  - label: "1"
+    value: one
+    correct: false
+    feedback: set 保留所有不同元素，不是只留一个。
+rubric:
+  - 理解 set 自动去重，长度等于不同元素的个数。

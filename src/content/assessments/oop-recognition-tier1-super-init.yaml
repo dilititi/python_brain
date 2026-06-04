@@ -1,0 +1,25 @@
+title: 子类如何复用父类初始化
+description: 判断 super().__init__ 的作用。
+category: oop
+kind: recognition
+targetTier: tier1
+concepts:
+  - inheritance
+  - class
+prompt: |
+  在子类的 __init__ 中调用 super().__init__(name) 的作用是什么？
+choices:
+  - label: 执行父类的初始化逻辑，复用其字段设置
+    value: reuse-parent-init
+    correct: true
+    feedback: super() 让子类复用父类已有的初始化，不必重写一遍。
+  - label: 创建一个父类的独立实例
+    value: new-parent-instance
+    correct: false
+    feedback: super().__init__ 是在当前实例上调用父类初始化，不新建对象。
+  - label: 删除子类自己的属性
+    value: clear-child-attrs
+    correct: false
+    feedback: 它不会清除任何属性，只是运行父类初始化。
+rubric:
+  - 理解 super().__init__ 调用父类初始化以复用其状态设置，而不是新建父类实例。

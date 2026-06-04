@@ -1,0 +1,25 @@
+title: json.loads 的转换方向
+description: 判断 json.loads 的作用方向。
+category: stdlib
+kind: recognition
+targetTier: tier1
+concepts:
+  - json
+  - common-stdlib-modules
+prompt: |
+  json.loads 的作用是什么？
+choices:
+  - label: 把 JSON 字符串解析成 Python 对象
+    value: parse-string
+    correct: true
+    feedback: loads 是 "load string"，把 JSON 文本解析成 dict/list 等对象。
+  - label: 把 Python 对象序列化成 JSON 字符串
+    value: serialize
+    correct: false
+    feedback: 那是 json.dumps 的方向。
+  - label: 从磁盘读取一个 JSON 文件
+    value: read-file
+    correct: false
+    feedback: 从文件读取是 json.load（无 s），loads 处理字符串。
+rubric:
+  - 理解 loads 是“load string”（解析），与 dumps（序列化）方向相反。

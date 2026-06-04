@@ -1,0 +1,39 @@
+title: 限时建模矩形类
+description: 在限定时间内定义一个带行为方法的类。
+category: oop
+kind: timed-coding
+targetTier: tier2
+concepts:
+  - class
+  - encapsulation
+timeLimit: 480
+prompt: |
+  定义 Rectangle 类：构造接收 width 和 height；area() 返回面积；is_square() 返回宽高是否相等（布尔值）。
+starterCode: |
+  class Rectangle:
+      pass
+testCases:
+  - name: area 返回宽乘高
+    code: |
+      assert Rectangle(3, 4).area() == 12
+  - name: 宽高相等时 is_square 为真
+    code: |
+      assert Rectangle(5, 5).is_square() is True
+  - name: 宽高不等时 is_square 为假
+    code: |
+      assert Rectangle(3, 4).is_square() is False
+referenceSolution: |
+  class Rectangle:
+      def __init__(self, width, height):
+          self.width = width
+          self.height = height
+
+      def area(self):
+          return self.width * self.height
+
+      def is_square(self):
+          return self.width == self.height
+rubric:
+  - 能在 __init__ 中保存实例状态。
+  - 能定义返回计算结果的方法。
+  - 通过给定测试用例。
