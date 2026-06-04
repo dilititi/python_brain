@@ -35,24 +35,27 @@
 
 | kind | 数量 | 进 test:assessments | 驱动 tier |
 |---|---:|---|---|
-| recognition | 8 | 否（无 testCase） | Tier 1 recognitionPassed |
-| timed-coding | 8 | 是 | Tier 2 timedCodingPassed |
-| completion | 3 | 是 | Tier 1 completionPassed |
-| refactor | 3 | 是 | Tier 3 refactorPassed |
-| debugging | 2 | 是 | Tier 2 debuggingPassed |
+| recognition | 8 | 否 | Tier1 recognitionPassed |
+| timed-coding | 8 | 是 | Tier2 timedCodingPassed |
+| completion | 3 | 是 | Tier1 completionPassed |
+| refactor | 3 | 是 | Tier3 refactorPassed |
+| debugging | 2 | 是 | Tier2 debuggingPassed |
 
-## 每类 kind 覆盖
+## 每类 Tier2 可达成性
 
-| category | 3 道 kind | Tier 2 可达成？ |
+| category | 3 道 kind | Tier2 |
 |---|---|---|
-| language | completion、recognition、timed-coding | 是 |
-| syntax | completion、recognition、timed-coding | 是 |
-| control-flow | debugging、recognition、timed-coding | 是 |
-| data-structure | completion、recognition、timed-coding | 是 |
-| function | recognition、refactor、timed-coding | 是 |
-| oop | recognition、refactor、timed-coding | 是 |
-| module-eng | recognition、refactor、timed-coding | 是 |
-| stdlib | debugging、recognition、timed-coding | 是 |
+| language | completion、recognition、timed-coding | ✓ 有 timed-coding |
+| syntax | completion、recognition、timed-coding | ✓ 有 timed-coding |
+| control-flow | debugging、recognition、timed-coding | ✓ 有 timed-coding |
+| data-structure | completion、recognition、timed-coding | ✓ 有 timed-coding |
+| function | recognition、refactor、timed-coding | ✓ 有 timed-coding |
+| oop | recognition、refactor、timed-coding | ✓ 有 timed-coding |
+| module-eng | recognition、refactor、timed-coding | ✓ 有 timed-coding |
+| stdlib | debugging、recognition、timed-coding | ✓ 有 timed-coding |
+
+> 注：module-eng 当前保留 timed-coding（import-report），Tier2 正常可达成。
+> import-path（completion）留作 module-eng 未来第 4 道扩展题，不属于当前 24 道。
 
 ## 当前计分口径
 
