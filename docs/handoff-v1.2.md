@@ -156,17 +156,19 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 
 ### PR 4：评估页最小闭环
 
-- 新增 `/assessments/[id]`。
-- 接入 CodeMirror 6。
-- Pyodide 点击“开始评估”后加载。
-- 支持至少一种 runnable 题型跑测试并写入 `pkb:attempts`。
-- 提交后通过 calculator 更新 `pkb:progress`。
+- 新增 `/assessments/` 列表页和 `/assessments/[id]` 静态详情页。
+- 接入 CodeMirror 6 的最小编辑器配置，避免引入 Monaco 或完整编辑器套件。
+- Pyodide 仍只在用户点击“开始评估”后通过 CDN 脚本加载，不进入首屏 HTML。
+- runnable 题型会运行 `testCases` 并写入 `pkb:attempts`。
+- recognition 题型可提交选择题结果，不触发 Pyodide。
+- 提交后通过 calculator 更新 `pkb:progress`，并广播 `pkb:progress-updated`。
 
 完成条件：
 
 - 至少 1 道 timed-coding 可跑通测试用例。
-- 失败输出可读，不吞错误。
+- 失败输出包含测试名和 traceback，不吞错误。
 - 首屏不加载 Pyodide。
+- 当前仍不包含 ruff / PEP 8 浏览器检查、e2e 浏览器自动化、完整五题型专用 UI；这些进入后续 PR。
 
 ### PR 5：题库扩到阶段 1 目标
 
@@ -225,7 +227,7 @@ v1.2 新增建议：
 - [x] v1.2 产品设计文档存在。
 - [x] 裁决 category 矩阵口径：启动期使用 8 个真实 category。
 - [x] 确认 assessment id 与目录规范。
-- [ ] 确认 localStorage `schemaVersion` 和迁移策略。
+- [x] 确认 localStorage `schemaVersion` 和迁移策略。
 - [ ] 确认 ruff WASM spike 的成功/降级标准。
 - [x] 确认第一批实现 PR 是否只做 schema + 样本，不碰 UI。
 

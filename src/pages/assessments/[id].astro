@@ -1,0 +1,79 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import AssessmentRunner, { type AssessmentPayload } from "../../components/react/AssessmentRunner";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const assessments = await getCollection("assessments");
+
+  return assessments.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry }
+  }));
+}
+
+type Props = {
+  entry: CollectionEntry<"assessments">;
+};
+
+const { entry } = Astro.props;
+const assessment: AssessmentPayload = {
+  id: entry.id,
+  title: entry.data.title,
+  description: entry.data.description,
+  category: entry.data.category,
+  kind: entry.data.kind,
+  targetTier: entry.data.targetTier,
+  concepts: entry.data.concepts,
+  prompt: entry.data.prompt,
+  timeLimit: entry.data.timeLimit,
+  starterCode: entry.data.starterCode,
+  testCases: entry.data.testCases,
+  choices: entry.data.choices,
+  referenceSolution: entry.data.referenceSolution,
+  rubric: entry.data.rubric
+};
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description ?? entry.data.prompt}>
+  <header class="assessment-header">
+    <div>
+      <p class="eyebrow">Assessment</p>
+      <h1>{entry.data.title}</h1>
+      {entry.data.description && <p class="lead">{entry.data.description}</p>}
+    </div>
+    <a class="back-link" href="/assessments/">全部评估题</a>
+  </header>
+
+  <AssessmentRunner assessment={assessment} client:load />
+</BaseLayout>
+
+<style>
+  .assessment-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+
+  .back-link {
+    flex: 0 0 auto;
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 860px) {
+    .assessment-header {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+</style>
