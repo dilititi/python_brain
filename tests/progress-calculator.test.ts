@@ -4,9 +4,11 @@ import {
   calculateProgress,
   PROGRESS_CATEGORIES,
   PROGRESS_SCHEMA_VERSION,
+  type ProgressCategoryConfigItem,
   type ProgressAttempt,
   type ProgressCategory
 } from "../src/lib/progress-calculator";
+import { emptyProgressCategoryConfig } from "../src/lib/progress-config";
 
 function attempt(
   id: string,
@@ -24,20 +26,20 @@ function attempt(
 
 function tier1SyntaxEvidence(): ProgressAttempt[] {
   return [
-    ...Array.from({ length: 15 }, (_, index) =>
+    ...Array.from({ length: 6 }, (_, index) =>
       attempt(`read-${index}`, "syntax", {
         kind: "concept-read",
         conceptId: `syntax-concept-${index}`
       })
     ),
-    ...Array.from({ length: 10 }, (_, index) =>
+    ...Array.from({ length: 1 }, (_, index) =>
       attempt(`recognition-${index}`, "syntax", {
         kind: "assessment",
         assessmentKind: "recognition",
         assessmentId: `syntax-recognition-${index}`
       })
     ),
-    ...Array.from({ length: 8 }, (_, index) =>
+    ...Array.from({ length: 6 }, (_, index) =>
       attempt(`standard-${index}`, "syntax", {
         kind: "code-run",
         codeExampleTitle: "standard",
@@ -49,24 +51,54 @@ function tier1SyntaxEvidence(): ProgressAttempt[] {
 
 function tier2SyntaxEvidence(): ProgressAttempt[] {
   return [
-    ...Array.from({ length: 5 }, (_, index) =>
+    ...Array.from({ length: 1 }, (_, index) =>
       attempt(`timed-${index}`, "syntax", {
         kind: "assessment",
         assessmentKind: "timed-coding",
         assessmentId: `syntax-timed-${index}`
       })
-    ),
-    ...Array.from({ length: 3 }, (_, index) =>
-      attempt(`pep8-${index}`, "syntax", {
-        kind: "pep8",
-        assessmentId: `syntax-pep8-${index}`
-      })
     )
   ];
 }
 
+function categoryConfig(
+  overrides: Partial<Record<ProgressCategory, Partial<ProgressCategoryConfigItem>>> = {}
+) {
+  const config = emptyProgressCategoryConfig();
+
+  for (const [category, override] of Object.entries(overrides) as Array<[
+    ProgressCategory,
+    Partial<ProgressCategoryConfigItem>
+  ]>) {
+    config[category] = {
+      ...config[category],
+      ...override,
+      assessmentCounts: {
+        ...config[category].assessmentCounts,
+        ...override.assessmentCounts
+      }
+    };
+  }
+
+  return config;
+}
+
+const syntaxConfig = categoryConfig({
+  syntax: {
+    conceptCount: 6,
+    assessmentCounts: {
+      recognition: 1,
+      "timed-coding": 1
+    },
+    standardCodeCount: 6,
+    productionCodeCount: 1,
+    entryProjectCount: 1,
+    midOrCapstoneProjectCount: 1
+  }
+});
+
 test("calculateProgress returns an 8 category matrix with schema version", () => {
-  const snapshot = calculateProgress([]);
+  const snapshot = calculateProgress([], emptyProgressCategoryConfig());
 
   assert.equal(snapshot.schemaVersion, PROGRESS_SCHEMA_VERSION);
   assert.deepEqual(Object.keys(snapshot.matrix), [...PROGRESS_CATEGORIES]);
@@ -81,7 +113,7 @@ test("calculateProgress returns an 8 category matrix with schema version", () =>
 });
 
 test("tier 1 requires concepts read, recognition passes, and standard code runs", () => {
-  const snapshot = calculateProgress(tier1SyntaxEvidence());
+  const snapshot = calculateProgress(tier1SyntaxEvidence(), syntaxConfig);
   const tier1 = snapshot.matrix.syntax.tier1;
 
   assert.equal(tier1.status, "complete");
@@ -90,12 +122,16 @@ test("tier 1 requires concepts read, recognition passes, and standard code runs"
   assert.equal(snapshot.matrix.syntax.tier2.status, "empty");
   assert.deepEqual(
     snapshot.evidenceByCell["syntax:tier1"].map((requirement) => requirement.current),
-    [15, 10, 8]
+    [6, 1, 6]
+  );
+  assert.deepEqual(
+    snapshot.evidenceByCell["syntax:tier1"].map((requirement) => requirement.target),
+    [6, 1, 6]
   );
 });
 
 test("higher tiers are blocked until previous tiers are complete", () => {
-  const snapshot = calculateProgress(tier2SyntaxEvidence());
+  const snapshot = calculateProgress(tier2SyntaxEvidence(), syntaxConfig);
 
   assert.equal(snapshot.matrix.syntax.tier2.rawComplete, true);
   assert.equal(snapshot.matrix.syntax.tier2.status, "blocked");
@@ -108,7 +144,7 @@ test("tier 2 becomes complete when tier 1 is complete first", () => {
   const snapshot = calculateProgress([
     ...tier1SyntaxEvidence(),
     ...tier2SyntaxEvidence()
-  ]);
+  ], syntaxConfig);
 
   assert.equal(snapshot.matrix.syntax.tier1.status, "complete");
   assert.equal(snapshot.matrix.syntax.tier2.status, "complete");
@@ -147,7 +183,7 @@ test("tier 3 and tier 4 use project and advanced evidence", () => {
       kind: "cross-concept",
       assessmentId: "syntax-cross-1"
     })
-  ]);
+  ], syntaxConfig);
 
   assert.equal(snapshot.matrix.syntax.tier3.status, "complete");
   assert.equal(snapshot.matrix.syntax.tier4.status, "complete");
@@ -174,7 +210,13 @@ test("duplicate evidence is counted once by stable concept or assessment id", ()
       assessmentKind: "recognition",
       assessmentId: "function-model"
     })
-  ]);
+  ], categoryConfig({
+    function: {
+      conceptCount: 2,
+      assessmentCounts: { recognition: 1 },
+      standardCodeCount: 1
+    }
+  }));
 
   const tier1 = snapshot.matrix.function.tier1;
   assert.equal(tier1.requirements.find((item) => item.key === "conceptsRead")?.current, 1);
@@ -207,7 +249,13 @@ test("failed attempts do not count as evidence but feed recent pattern summaries
       pattern: "confuses return and print",
       occurredAt: "2026-06-04T12:00:00.000Z"
     })
-  ]);
+  ], categoryConfig({
+    function: {
+      conceptCount: 1,
+      assessmentCounts: { "timed-coding": 1 },
+      standardCodeCount: 1
+    }
+  }));
 
   assert.equal(snapshot.matrix.function.tier2.requirements[0].current, 0);
   assert.deepEqual(snapshot.recentPatterns.map((item) => [item.pattern, item.count]), [
@@ -226,7 +274,7 @@ test("unknown categories from localStorage-shaped data are ignored", () => {
       kind: "concept-read",
       conceptId: "requests"
     } as unknown as ProgressAttempt
-  ]);
+  ], emptyProgressCategoryConfig());
 
   assert.deepEqual(snapshot.tiersByCategory.syntax, "none");
   assert.equal(snapshot.activeFrontier.length, PROGRESS_CATEGORIES.length);
@@ -246,7 +294,16 @@ test("active frontier prefers earliest incomplete tier, then strongest progress"
       kind: "concept-read",
       conceptId: "function-parameters"
     })
-  ]);
+  ], categoryConfig({
+    syntax: {
+      conceptCount: 2,
+      standardCodeCount: 2
+    },
+    function: {
+      conceptCount: 3,
+      standardCodeCount: 3
+    }
+  }));
 
   assert.equal(snapshot.activeFrontier[0].category, "function");
   assert.equal(snapshot.activeFrontier[0].tier, "tier1");

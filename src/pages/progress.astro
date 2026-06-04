@@ -1,21 +1,40 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import {
   calculateProgress,
   PROGRESS_CATEGORIES,
   PROGRESS_TIERS,
+  type ProgressCategory,
+  type ProgressTier,
   type ProgressSnapshot
 } from "../lib/progress-calculator";
+import { buildProgressCategoryConfig } from "../lib/progress-config";
 import {
   mockProgressAttempts,
   progressCategoryLabels,
   progressTierLabels
 } from "../lib/progress-fixtures";
 
-const initialSnapshot = calculateProgress(mockProgressAttempts);
+const [concepts, assessments, projects] = await Promise.all([
+  getCollection("concepts"),
+  getCollection("assessments"),
+  getCollection("projects")
+]);
+const progressCategoryConfig = buildProgressCategoryConfig({ concepts, assessments, projects });
+const progressCategoryConfigJson = JSON.stringify(progressCategoryConfig);
+const initialSnapshot = calculateProgress(mockProgressAttempts, progressCategoryConfig);
 
 function completedCategories(snapshot: ProgressSnapshot) {
   return PROGRESS_CATEGORIES.filter((category) => snapshot.tiersByCategory[category] !== "none").length;
+}
+
+function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][ProgressTier]) {
+  if (cell.requirements.every((item) => item.target === 0)) {
+    return "暂无可衡量项";
+  }
+
+  return `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
 }
 ---
 
@@ -75,7 +94,7 @@ function completedCategories(snapshot: ProgressSnapshot) {
               >
                 <span class="cell-status" data-status>{cell.status}</span>
                 <strong data-progress>{Math.round(cell.progress * 100)}%</strong>
-                <span data-missing>{cell.requirements.filter((item) => !item.complete).length} 项待补</span>
+                <span data-missing>{cellMissingLabel(cell)}</span>
               </div>
             );
           })}
@@ -125,9 +144,14 @@ function completedCategories(snapshot: ProgressSnapshot) {
   </section>
 </BaseLayout>
 
+<script id="progress-category-config" type="application/json" set:html={progressCategoryConfigJson} is:inline></script>
+
 <script>
   import {
     calculateProgress,
+    type ProgressCategoryConfig,
+    type ProgressCategory,
+    type ProgressTier,
     PROGRESS_CATEGORIES,
     PROGRESS_SCHEMA_VERSION,
     PROGRESS_TIERS,
@@ -158,6 +182,15 @@ function completedCategories(snapshot: ProgressSnapshot) {
     }
   }
 
+  function readCategoryConfig(): ProgressCategoryConfig {
+    const element = document.getElementById("progress-category-config");
+    if (!element?.textContent) {
+      throw new Error("Progress category config is missing");
+    }
+
+    return JSON.parse(element.textContent) as ProgressCategoryConfig;
+  }
+
   function setText(selector: string, value: string) {
     const element = document.querySelector(selector);
     if (element) {
@@ -167,6 +200,14 @@ function completedCategories(snapshot: ProgressSnapshot) {
 
   function completedCategories(snapshot: ProgressSnapshot) {
     return PROGRESS_CATEGORIES.filter((category) => snapshot.tiersByCategory[category] !== "none").length;
+  }
+
+  function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][ProgressTier]) {
+    if (cell.requirements.every((item) => item.target === 0)) {
+      return "暂无可衡量项";
+    }
+
+    return `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
   }
 
   function renderSnapshot(snapshot: ProgressSnapshot, source: string) {
@@ -195,7 +236,7 @@ function completedCategories(snapshot: ProgressSnapshot) {
         const missing = element.querySelector("[data-missing]");
         if (status) status.textContent = cell.status;
         if (progress) progress.textContent = `${Math.round(cell.progress * 100)}%`;
-        if (missing) missing.textContent = `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
+        if (missing) missing.textContent = cellMissingLabel(cell);
       }
     }
 
@@ -239,7 +280,8 @@ function completedCategories(snapshot: ProgressSnapshot) {
   }
 
   const { attempts, source } = readAttempts();
-  renderSnapshot(calculateProgress(attempts), source);
+  const categoryConfig = readCategoryConfig();
+  renderSnapshot(calculateProgress(attempts, categoryConfig), source);
 </script>
 
 <style>

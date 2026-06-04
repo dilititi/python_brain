@@ -109,6 +109,20 @@ export type ProgressSnapshot = {
   recentPatterns: RecentPattern[];
 };
 
+export type ProgressCategoryConfigItem = {
+  conceptCount: number;
+  assessmentCounts: Partial<Record<AssessmentKind, number>>;
+  standardCodeCount: number;
+  productionCodeCount: number;
+  pep8Count: number;
+  entryProjectCount: number;
+  midOrCapstoneProjectCount: number;
+  reverseRecognitionCount: number;
+  crossConceptCount: number;
+};
+
+export type ProgressCategoryConfig = Record<ProgressCategory, ProgressCategoryConfigItem>;
+
 type RequirementDefinition = {
   key: RequirementKey;
   label: string;
@@ -294,7 +308,8 @@ function collectEvidence(attempts: readonly ProgressAttempt[]) {
 
 function requirementStatus(
   evidence: CategoryEvidence,
-  definition: RequirementDefinition
+  definition: RequirementDefinition,
+  target: number
 ): RequirementStatus {
   const current = evidence[definition.key].size;
 
@@ -302,21 +317,23 @@ function requirementStatus(
     key: definition.key,
     label: definition.label,
     current,
-    target: definition.target,
-    complete: current >= definition.target
+    target,
+    complete: target === 0 || current >= target
   };
 }
 
 function cellProgress(requirements: readonly RequirementStatus[]) {
-  if (requirements.length === 0) {
+  const measurable = requirements.filter((requirement) => requirement.target > 0);
+
+  if (measurable.length === 0) {
     return 0;
   }
 
-  const total = requirements.reduce((sum, requirement) => {
+  const total = measurable.reduce((sum, requirement) => {
     return sum + Math.min(requirement.current / requirement.target, 1);
   }, 0);
 
-  return Number((total / requirements.length).toFixed(4));
+  return Number((total / measurable.length).toFixed(4));
 }
 
 function cellKey(category: ProgressCategory, tier: ProgressTier) {
@@ -362,8 +379,37 @@ function buildRecentPatterns(attempts: readonly ProgressAttempt[], limit: number
   });
 }
 
+function requirementTarget(
+  config: ProgressCategoryConfigItem,
+  definition: RequirementDefinition
+) {
+  switch (definition.key) {
+    case "conceptsRead":
+      return config.conceptCount;
+    case "recognitionPassed":
+      return config.assessmentCounts.recognition ?? 0;
+    case "standardCodeRun":
+      return config.standardCodeCount;
+    case "timedCodingPassed":
+      return config.assessmentCounts["timed-coding"] ?? 0;
+    case "pep8Passed":
+      return config.pep8Count;
+    case "entryProjectComplete":
+      return Math.min(config.entryProjectCount, definition.target);
+    case "productionCodeRun":
+      return Math.min(config.productionCodeCount, definition.target);
+    case "midOrCapstoneProjectComplete":
+      return Math.min(config.midOrCapstoneProjectCount, definition.target);
+    case "reverseRecognitionPassed":
+      return Math.min(config.reverseRecognitionCount, definition.target);
+    case "crossConceptPassed":
+      return Math.min(config.crossConceptCount, definition.target);
+  }
+}
+
 export function calculateProgress(
   attempts: readonly ProgressAttempt[],
+  categoryConfig: ProgressCategoryConfig,
   options: { recentPatternLimit?: number } = {}
 ): ProgressSnapshot {
   const evidence = collectEvidence(attempts);
@@ -374,15 +420,17 @@ export function calculateProgress(
 
   for (const category of PROGRESS_CATEGORIES) {
     const categoryEvidence = evidence[category];
+    const config = categoryConfig[category];
     matrix[category] = {} as Record<ProgressTier, MatrixCell>;
     let previousComplete = true;
     let highestTier: ProgressTier | "none" = "none";
 
     for (const tierDefinition of TIER_REQUIREMENTS) {
       const requirements = tierDefinition.requirements.map((requirement) =>
-        requirementStatus(categoryEvidence, requirement)
+        requirementStatus(categoryEvidence, requirement, requirementTarget(config, requirement))
       );
-      const rawComplete = requirements.every((requirement) => requirement.complete);
+      const hasMeasurableRequirements = requirements.some((requirement) => requirement.target > 0);
+      const rawComplete = hasMeasurableRequirements && requirements.every((requirement) => requirement.complete);
       const complete: boolean = previousComplete && rawComplete;
       const progress = cellProgress(requirements);
       let status: CellStatus = "empty";

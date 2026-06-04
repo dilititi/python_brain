@@ -5,6 +5,7 @@ import {
   calculateProgress,
   PROGRESS_SCHEMA_VERSION,
   type AssessmentKind,
+  type ProgressCategoryConfig,
   type ProgressAttempt,
   type ProgressCategory,
   type ProgressTier
@@ -38,6 +39,7 @@ export type AssessmentPayload = {
   choices: AssessmentChoice[];
   referenceSolution?: string;
   rubric: string[];
+  categoryConfig: ProgressCategoryConfig;
 };
 
 type TestResult = {
@@ -134,10 +136,10 @@ function readStoredAttempts(): ProgressAttempt[] {
   }
 }
 
-function writeAttempt(attempt: ProgressAttempt) {
+function writeAttempt(attempt: ProgressAttempt, categoryConfig: ProgressCategoryConfig) {
   const attempts = [...readStoredAttempts(), attempt].slice(-300);
   const updatedAt = new Date().toISOString();
-  const progress = calculateProgress(attempts);
+  const progress = calculateProgress(attempts, categoryConfig);
 
   window.localStorage.setItem(
     attemptsStorageKey,
@@ -309,7 +311,7 @@ export default function AssessmentRunner({ assessment }: { assessment: Assessmen
     const passed = Boolean(choice?.correct);
     const pattern = passed ? undefined : "识别题答案判断错误";
 
-    writeAttempt(makeAttempt(passed, pattern));
+    writeAttempt(makeAttempt(passed, pattern), assessment.categoryConfig);
     setLastPassed(passed);
     setStatus("submitted");
     setMessage(choice?.feedback ?? (passed ? "回答正确。" : `正确答案是：${correctChoice?.label ?? "未配置"}`));
@@ -354,7 +356,7 @@ export default function AssessmentRunner({ assessment }: { assessment: Assessmen
       }
 
       const passed = nextResults.every((result) => result.passed);
-      writeAttempt(makeAttempt(passed, summarizeFailure(nextResults)));
+      writeAttempt(makeAttempt(passed, summarizeFailure(nextResults)), assessment.categoryConfig);
       setResults(nextResults);
       setLastPassed(passed);
       setStatus("submitted");
@@ -367,7 +369,7 @@ export default function AssessmentRunner({ assessment }: { assessment: Assessmen
         output: "",
         error: errorMessage
       };
-      writeAttempt(makeAttempt(false, "Pyodide 或运行时错误"));
+      writeAttempt(makeAttempt(false, "Pyodide 或运行时错误"), assessment.categoryConfig);
       setResults([failedResult]);
       setLastPassed(false);
       setStatus("submitted");

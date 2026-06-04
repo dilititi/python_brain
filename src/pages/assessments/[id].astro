@@ -2,6 +2,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import AssessmentRunner, { type AssessmentPayload } from "../../components/react/AssessmentRunner";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { buildProgressCategoryConfig } from "../../lib/progress-config";
 
 export async function getStaticPaths() {
   const assessments = await getCollection("assessments");
@@ -17,6 +18,12 @@ type Props = {
 };
 
 const { entry } = Astro.props;
+const [concepts, assessments, projects] = await Promise.all([
+  getCollection("concepts"),
+  getCollection("assessments"),
+  getCollection("projects")
+]);
+const categoryConfig = buildProgressCategoryConfig({ concepts, assessments, projects });
 const assessment: AssessmentPayload = {
   id: entry.id,
   title: entry.data.title,
@@ -31,7 +38,8 @@ const assessment: AssessmentPayload = {
   testCases: entry.data.testCases,
   choices: entry.data.choices,
   referenceSolution: entry.data.referenceSolution,
-  rubric: entry.data.rubric
+  rubric: entry.data.rubric,
+  categoryConfig
 };
 ---
 

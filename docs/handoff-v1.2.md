@@ -72,6 +72,8 @@ control-flow-debugging-tier2-loop-break
 function-refactor-tier3-parameter-contract
 ```
 
+当前种子题保留 `tier` 进 id。这个选择的代价是：未来若调整题目 tier，直接改 id 会让既有 `pkb:attempts` 引用失效。因此 v1.2 内如果要改题目 tier，优先保持旧 id 不变，并在题目数据或迁移脚本里处理展示 tier / 证据 tier 的变化；不要无迁移地重命名 assessment id。
+
 ### 3. localStorage 需要版本化
 
 `pkb:progress`、`pkb:attempts`、`pkb:timetrack` 都必须带 `schemaVersion`。原因是 v1.2 期间会频繁调整证据结构，没有版本号会让旧浏览器数据把 UI 算坏。
@@ -86,6 +88,9 @@ PR 2 已落地 calculator 规则：
 
 - `PROGRESS_SCHEMA_VERSION = 1`。
 - 启动期 category 为 8 类：`language`、`syntax`、`control-flow`、`data-structure`、`function`、`oop`、`module-eng`、`stdlib`。
+- calculator 第二参数必须传入 `categoryConfig`，由当前 concepts / assessments / projects 构建得到；不要把全局 Tier 目标逐 category 硬套。
+- Tier 目标按每类实际可用证据池缩放：概念阅读目标取该类概念数，识别题 / 限时题目标取该类对应题数，standard / production 代码目标取该类可运行示例数。
+- 某个要求没有可用证据池时不计入完成度；但一个档位如果没有任何可衡量要求，不会自动完成。
 - 档位采用累计完成：Tier 2 必须在 Tier 1 完成后才算完成，Tier 3/4 同理。
 - 单个 cell 有 `empty` / `in_progress` / `blocked` / `complete` 四种状态。当前置档未完成时，即使本档证据已满足，也只显示 `blocked`。
 - 证据按稳定 id 去重：概念、assessment、project 或 code example 的重复提交不重复计数。
