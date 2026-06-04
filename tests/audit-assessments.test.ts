@@ -99,3 +99,26 @@ test("timed-coding assessments require timeLimit and tests", () => {
   assert.ok(issues.some((item) => item.message.includes("time limit")));
   assert.ok(issues.some((item) => item.message.includes("at least one test case")));
 });
+
+test("assessment audit enforces kind to tier mapping", () => {
+  const issues = auditAssessmentRecord({
+    id: "function-refactor-tier1-wrong-tier",
+    label: "src/content/assessments/function-refactor-tier1-wrong-tier.yaml",
+    data: {
+      title: "Wrong tier",
+      category: "function",
+      kind: "refactor",
+      targetTier: "tier1",
+      concepts: ["function"],
+      prompt: "Refactor the function.",
+      starterCode: "def run():\n    return None",
+      referenceSolution: "def run():\n    return None",
+      testCases: [
+        { name: "returns None", code: "assert run() is None" }
+      ],
+      rubric: ["Keep behavior stable."]
+    }
+  }, conceptIds);
+
+  assert.ok(issues.some((item) => item.message.includes("refactor assessments currently map to tier3")));
+});

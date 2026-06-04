@@ -90,6 +90,7 @@ PR 2 已落地 calculator 规则：
 - 启动期 category 为 8 类：`language`、`syntax`、`control-flow`、`data-structure`、`function`、`oop`、`module-eng`、`stdlib`。
 - calculator 第二参数必须传入 `categoryConfig`，由当前 concepts / assessments / projects 构建得到；不要把全局 Tier 目标逐 category 硬套。
 - Tier 目标按每类实际可用证据池缩放：概念阅读目标取该类概念数，识别题 / 限时题目标取该类对应题数，standard / production 代码目标取该类可运行示例数。
+- 5 种 assessment kind 必须都进入矩阵证据：`recognition` + `completion` 计入 Tier 1，`debugging` + `timed-coding` 计入 Tier 2，`refactor` 计入 Tier 3。不要让某种题型只留下 `evidenceIds` 却不驱动任何 requirement。
 - 某个要求没有可用证据池时不计入完成度；一个档位如果没有任何可衡量要求，显示为 `n/a`，不自动完成，也不阻断后续档位。
 - v1.2 PR4 阶段暂不计入 `pep8Passed`、`reverseRecognitionPassed`、`crossConceptPassed`：ruff WASM、反向触发、跨概念评估落地前，这三项 target 显式为 0。
 - 未来启用 `pep8Passed`、`reverseRecognitionPassed` 或 `crossConceptPassed` 时，必须在同一 PR 同步改两处：从 `progress-calculator.ts` 的 `DISABLED_REQUIREMENTS` 移除对应项，并在 `buildProgressCategoryConfig` 里补上对应 count 的真实数据来源和单测。只改 disabled 列表会让该维度名义启用、实际 target 仍为 0，重新制造隐藏的矩阵空洞。
@@ -103,9 +104,9 @@ Tier 规则：
 
 | Tier | 规则 |
 |---|---|
-| Tier 1 | 读过 15 个概念 + 通过 10 道识别题 + 跑通 8 段 `standard` 代码 |
-| Tier 2 | 5 道限时题通过测试 + 3 道 PEP 8 检查通过 |
-| Tier 3 | 完成 1 个 `entry` 项目 + 跑通 1 段 `production` 代码 |
+| Tier 1 | 读过 15 个概念 + 通过识别题 / 补全题 + 跑通 8 段 `standard` 代码 |
+| Tier 2 | 改错题 / 限时题通过测试 + 3 道 PEP 8 检查通过 |
+| Tier 3 | 完成 1 个 `entry` 项目 + 跑通 1 段 `production` 代码 + 通过重构题 |
 | Tier 4 | 完成 1 个 `mid` / `capstone` 项目 + 2 次反向识别 + 1 道跨概念题 |
 
 ### 5. ruff WASM 不能提前成为 gate
@@ -182,7 +183,8 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 - 按最终 category 口径补齐种子题。
 - 阶段 1 目标为 24 道题（8 类 × 3 kind）。
 - 5 种评估类型都必须持续存在，不能退化成只有限时编程。
-- 每个 category 必须至少有 1 道 `timed-coding` 题。当前 Tier 2 的可计入维度只有限时题；如果某类没有 timed-coding，该类 Tier 2 会显示 `n/a`，虽不会死锁 Tier 3，但“会功能”档永远无法点亮。除非产品显式决定某类没有功能档考核，并在 inventory 里写明原因，否则 PR 5 不允许合并。
+- 每个 category 必须至少有 1 道 `timed-coding` 题。当前 Tier 2 由 `debugging` + `timed-coding` 驱动；debugging 能补充“会功能”证据，但不能替代可运行的限时编码证据。除非产品显式决定某类没有功能档考核，并在 inventory 里写明原因，否则 PR 5 不允许合并。
+- `npm run audit:assessments` 会强制 kind -> tier 映射：recognition/completion -> tier1，debugging/timed-coding -> tier2，refactor -> tier3。若要改变映射，必须同步修改 calculator、audit 和文档。
 - PR 5 不为 `pep8Passed`、`reverseRecognitionPassed`、`crossConceptPassed` 凑题量；这三维当前不计入矩阵。等 ruff spike、反向触发和跨概念题流真正落地后，再按上方 calculator 规则同步启用。
 
 完成条件：
@@ -190,7 +192,7 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 - assessment inventory 文档列出 category/kind/tier 分布。
 - 每个非空 category 至少 3 道题。
 - 每个 category 至少 1 道 `timed-coding`。
-- inventory 明确标注：当前 Tier 2 = `timed-coding` 单维，Tier 4 = `mid/capstone project` 单维；`pep8` / `reverseRecognition` / `crossConcept` 暂不计入。
+- inventory 明确标注：当前 Tier 1 = `recognition` + `completion`，Tier 2 = `debugging` + `timed-coding`，Tier 3 = `refactor` + 工程证据，Tier 4 = `mid/capstone project` 单维；`pep8` / `reverseRecognition` / `crossConcept` 暂不计入。
 
 ## 后续阶段
 

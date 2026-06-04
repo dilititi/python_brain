@@ -33,6 +33,14 @@ type AssessmentKind = (typeof assessmentKinds)[number];
 type TargetTier = (typeof targetTiers)[number];
 type ActiveAssessmentCategory = (typeof activeAssessmentCategories)[number];
 
+const expectedTierByKind: Record<AssessmentKind, TargetTier> = {
+  recognition: "tier1",
+  completion: "tier1",
+  debugging: "tier2",
+  "timed-coding": "tier2",
+  refactor: "tier3"
+};
+
 export type AssessmentRecord = {
   id: string;
   label: string;
@@ -144,6 +152,18 @@ export function auditAssessmentRecord(
 
   if (!isTargetTier(data.targetTier)) {
     issues.push(issue(record, "targetTier", "targetTier must be tier1-tier4", "Use tier1, tier2, tier3, or tier4."));
+  }
+
+  if (isAssessmentKind(data.kind) && isTargetTier(data.targetTier)) {
+    const expectedTier = expectedTierByKind[data.kind];
+    if (data.targetTier !== expectedTier) {
+      issues.push(issue(
+        record,
+        "targetTier",
+        `${data.kind} assessments currently map to ${expectedTier}, not ${data.targetTier}`,
+        `Set targetTier: ${expectedTier}, or change progress-calculator.ts and this audit rule in the same PR.`
+      ));
+    }
   }
 
   if (!isUsefulString(data.prompt)) {

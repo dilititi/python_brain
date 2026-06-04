@@ -57,11 +57,14 @@ export type ProgressAttempt = {
 export type RequirementKey =
   | "conceptsRead"
   | "recognitionPassed"
+  | "completionPassed"
   | "standardCodeRun"
+  | "debuggingPassed"
   | "timedCodingPassed"
   | "pep8Passed"
   | "entryProjectComplete"
   | "productionCodeRun"
+  | "refactorPassed"
   | "midOrCapstoneProjectComplete"
   | "reverseRecognitionPassed"
   | "crossConceptPassed";
@@ -138,11 +141,14 @@ type CategoryEvidence = {
   evidenceIds: Set<string>;
   conceptsRead: Set<string>;
   recognitionPassed: Set<string>;
+  completionPassed: Set<string>;
   standardCodeRun: Set<string>;
+  debuggingPassed: Set<string>;
   timedCodingPassed: Set<string>;
   pep8Passed: Set<string>;
   entryProjectComplete: Set<string>;
   productionCodeRun: Set<string>;
+  refactorPassed: Set<string>;
   midOrCapstoneProjectComplete: Set<string>;
   reverseRecognitionPassed: Set<string>;
   crossConceptPassed: Set<string>;
@@ -154,12 +160,14 @@ export const TIER_REQUIREMENTS: readonly TierDefinition[] = [
     requirements: [
       { key: "conceptsRead", label: "读过概念", target: 15 },
       { key: "recognitionPassed", label: "通过识别题", target: 10 },
+      { key: "completionPassed", label: "通过补全题", target: 5 },
       { key: "standardCodeRun", label: "跑通 standard 代码", target: 8 }
     ]
   },
   {
     tier: "tier2",
     requirements: [
+      { key: "debuggingPassed", label: "通过改错题", target: 5 },
       { key: "timedCodingPassed", label: "限时题通过测试", target: 5 },
       { key: "pep8Passed", label: "通过 PEP 8 检查", target: 3 }
     ]
@@ -168,7 +176,8 @@ export const TIER_REQUIREMENTS: readonly TierDefinition[] = [
     tier: "tier3",
     requirements: [
       { key: "entryProjectComplete", label: "完成 entry 项目", target: 1 },
-      { key: "productionCodeRun", label: "跑通 production 代码", target: 1 }
+      { key: "productionCodeRun", label: "跑通 production 代码", target: 1 },
+      { key: "refactorPassed", label: "通过重构题", target: 3 }
     ]
   },
   {
@@ -202,11 +211,14 @@ function emptyCategoryEvidence(): CategoryEvidence {
     evidenceIds: new Set(),
     conceptsRead: new Set(),
     recognitionPassed: new Set(),
+    completionPassed: new Set(),
     standardCodeRun: new Set(),
+    debuggingPassed: new Set(),
     timedCodingPassed: new Set(),
     pep8Passed: new Set(),
     entryProjectComplete: new Set(),
     productionCodeRun: new Set(),
+    refactorPassed: new Set(),
     midOrCapstoneProjectComplete: new Set(),
     reverseRecognitionPassed: new Set(),
     crossConceptPassed: new Set()
@@ -278,8 +290,20 @@ function collectEvidence(attempts: readonly ProgressAttempt[]) {
         categoryEvidence.recognitionPassed.add(evidenceKey(attempt, "recognition"));
       }
 
+      if (attempt.assessmentKind === "completion") {
+        categoryEvidence.completionPassed.add(evidenceKey(attempt, "completion"));
+      }
+
+      if (attempt.assessmentKind === "debugging") {
+        categoryEvidence.debuggingPassed.add(evidenceKey(attempt, "debugging"));
+      }
+
       if (attempt.assessmentKind === "timed-coding") {
         categoryEvidence.timedCodingPassed.add(evidenceKey(attempt, "timed-coding"));
+      }
+
+      if (attempt.assessmentKind === "refactor") {
+        categoryEvidence.refactorPassed.add(evidenceKey(attempt, "refactor"));
       }
 
       if (attempt.pep8Passed) {
@@ -401,8 +425,12 @@ function requirementTarget(
       return config.conceptCount;
     case "recognitionPassed":
       return config.assessmentCounts.recognition ?? 0;
+    case "completionPassed":
+      return config.assessmentCounts.completion ?? 0;
     case "standardCodeRun":
       return config.standardCodeCount;
+    case "debuggingPassed":
+      return config.assessmentCounts.debugging ?? 0;
     case "timedCodingPassed":
       return config.assessmentCounts["timed-coding"] ?? 0;
     case "pep8Passed":
@@ -411,6 +439,8 @@ function requirementTarget(
       return Math.min(config.entryProjectCount, definition.target);
     case "productionCodeRun":
       return Math.min(config.productionCodeCount, definition.target);
+    case "refactorPassed":
+      return Math.min(config.assessmentCounts.refactor ?? 0, definition.target);
     case "midOrCapstoneProjectComplete":
       return Math.min(config.midOrCapstoneProjectCount, definition.target);
     case "reverseRecognitionPassed":

@@ -112,7 +112,7 @@ test("calculateProgress returns an 8 category matrix with schema version", () =>
   }
 });
 
-test("tier 1 requires concepts read, recognition passes, and standard code runs", () => {
+test("tier 1 uses concepts, recognition, completion, and standard code evidence", () => {
   const snapshot = calculateProgress(tier1SyntaxEvidence(), syntaxConfig);
   const tier1 = snapshot.matrix.syntax.tier1;
 
@@ -122,11 +122,11 @@ test("tier 1 requires concepts read, recognition passes, and standard code runs"
   assert.equal(snapshot.matrix.syntax.tier2.status, "empty");
   assert.deepEqual(
     snapshot.evidenceByCell["syntax:tier1"].map((requirement) => requirement.current),
-    [6, 1, 6]
+    [6, 1, 0, 6]
   );
   assert.deepEqual(
     snapshot.evidenceByCell["syntax:tier1"].map((requirement) => requirement.target),
-    [6, 1, 6]
+    [6, 1, 0, 6]
   );
 });
 
@@ -152,7 +152,59 @@ test("tier 2 becomes complete when tier 1 is complete first", () => {
   assert.equal(snapshot.matrix.syntax.tier3.status, "empty");
   assert.deepEqual(
     snapshot.matrix.syntax.tier2.requirements.map((requirement) => requirement.target),
-    [1, 0]
+    [0, 1, 0]
+  );
+});
+
+test("debugging completion and refactor assessments contribute to the matrix", () => {
+  const attempts = [
+    ...Array.from({ length: 5 }, (_, index) =>
+      attempt(`completion-${index}`, "syntax", {
+        kind: "assessment",
+        assessmentKind: "completion",
+        assessmentId: `syntax-completion-${index}`
+      })
+    ),
+    ...Array.from({ length: 5 }, (_, index) =>
+      attempt(`debugging-${index}`, "syntax", {
+        kind: "assessment",
+        assessmentKind: "debugging",
+        assessmentId: `syntax-debugging-${index}`
+      })
+    ),
+    ...Array.from({ length: 5 }, (_, index) =>
+      attempt(`refactor-${index}`, "syntax", {
+        kind: "assessment",
+        assessmentKind: "refactor",
+        assessmentId: `syntax-refactor-${index}`
+      })
+    )
+  ];
+  const snapshot = calculateProgress(attempts, categoryConfig({
+    syntax: {
+      assessmentCounts: {
+        completion: 5,
+        debugging: 5,
+        refactor: 5
+      }
+    }
+  }));
+
+  assert.equal(snapshot.matrix.syntax.tier1.status, "complete");
+  assert.equal(snapshot.matrix.syntax.tier2.status, "complete");
+  assert.equal(snapshot.matrix.syntax.tier3.status, "complete");
+  assert.equal(snapshot.tiersByCategory.syntax, "tier3");
+  assert.deepEqual(
+    snapshot.matrix.syntax.tier1.requirements.map((requirement) => requirement.current),
+    [0, 0, 5, 0]
+  );
+  assert.deepEqual(
+    snapshot.matrix.syntax.tier2.requirements.map((requirement) => requirement.current),
+    [5, 0, 0]
+  );
+  assert.deepEqual(
+    snapshot.matrix.syntax.tier3.requirements.map((requirement) => requirement.current),
+    [0, 0, 5]
   );
 });
 
