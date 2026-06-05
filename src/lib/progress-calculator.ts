@@ -112,6 +112,27 @@ export type ProgressSnapshot = {
   recentPatterns: RecentPattern[];
 };
 
+export type WeeklyEvidenceItem = {
+  id: string;
+  category: ProgressCategory;
+  kind: ProgressEvidenceKind;
+  occurredAt: string;
+  assessmentKind?: AssessmentKind;
+  assessmentId?: string;
+  conceptId?: string;
+  codeExampleTitle?: CodeExampleTitle;
+  projectId?: string;
+};
+
+export type WeeklySummary = {
+  weekStart: string;
+  weekEnd: string;
+  total: number;
+  byCategory: Partial<Record<ProgressCategory, number>>;
+  byKind: Partial<Record<ProgressEvidenceKind, number>>;
+  items: WeeklyEvidenceItem[];
+};
+
 export type ProgressCategoryConfigItem = {
   conceptCount: number;
   assessmentCounts: Partial<Record<AssessmentKind, number>>;
@@ -547,5 +568,74 @@ export function calculateProgress(
     evidenceByCell,
     activeFrontier,
     recentPatterns: buildRecentPatterns(attempts, options.recentPatternLimit ?? 20)
+  };
+}
+
+function emptyWeeklySummary(): WeeklySummary {
+  return {
+    weekStart: "",
+    weekEnd: "",
+    total: 0,
+    byCategory: {},
+    byKind: {},
+    items: []
+  };
+}
+
+export function weeklySummary(
+  attempts: readonly ProgressAttempt[],
+  weekStart: string
+): WeeklySummary {
+  const start = Date.parse(weekStart);
+  if (!Number.isFinite(start)) {
+    return emptyWeeklySummary();
+  }
+
+  const end = start + 7 * 24 * 60 * 60 * 1000;
+  const categorySet = new Set<string>(PROGRESS_CATEGORIES);
+  const items: WeeklyEvidenceItem[] = [];
+  const byCategory: Partial<Record<ProgressCategory, number>> = {};
+  const byKind: Partial<Record<ProgressEvidenceKind, number>> = {};
+
+  for (const attempt of attempts) {
+    const occurredAt = Date.parse(attempt.occurredAt);
+    if (
+      attempt.passed === false ||
+      !Number.isFinite(occurredAt) ||
+      occurredAt < start ||
+      occurredAt >= end ||
+      !categorySet.has(attempt.category)
+    ) {
+      continue;
+    }
+
+    const category = attempt.category as ProgressCategory;
+    byCategory[category] = (byCategory[category] ?? 0) + 1;
+    byKind[attempt.kind] = (byKind[attempt.kind] ?? 0) + 1;
+    items.push({
+      id: attempt.id,
+      category,
+      kind: attempt.kind,
+      occurredAt: new Date(occurredAt).toISOString(),
+      assessmentKind: attempt.assessmentKind,
+      assessmentId: attempt.assessmentId,
+      conceptId: attempt.conceptId,
+      codeExampleTitle: attempt.codeExampleTitle,
+      projectId: attempt.projectId
+    });
+  }
+
+  items.sort((a, b) => {
+    const timeDifference = Date.parse(b.occurredAt) - Date.parse(a.occurredAt);
+    return timeDifference !== 0 ? timeDifference : a.id.localeCompare(b.id);
+  });
+
+  return {
+    weekStart: new Date(start).toISOString(),
+    weekEnd: new Date(end).toISOString(),
+    total: items.length,
+    byCategory,
+    byKind,
+    items
   };
 }

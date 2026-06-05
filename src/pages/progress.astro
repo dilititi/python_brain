@@ -5,10 +5,13 @@ import {
   calculateProgress,
   PROGRESS_CATEGORIES,
   PROGRESS_TIERS,
+  weeklySummary,
   type CellStatus,
   type ProgressCategory,
+  type ProgressEvidenceKind,
   type ProgressTier,
-  type ProgressSnapshot
+  type ProgressSnapshot,
+  type WeeklyEvidenceItem
 } from "../lib/progress-calculator";
 import { buildProgressCategoryConfig } from "../lib/progress-config";
 import {
@@ -25,6 +28,28 @@ const [concepts, assessments, projects] = await Promise.all([
 const progressCategoryConfig = buildProgressCategoryConfig({ concepts, assessments, projects });
 const progressCategoryConfigJson = JSON.stringify(progressCategoryConfig);
 const initialSnapshot = calculateProgress(mockProgressAttempts, progressCategoryConfig);
+const rollingWindowMs = 7 * 24 * 60 * 60 * 1000;
+const initialWeek = weeklySummary(
+  mockProgressAttempts,
+  new Date(Date.now() - rollingWindowMs).toISOString()
+);
+const evidenceKindLabels: Record<ProgressEvidenceKind, string> = {
+  "concept-read": "阅读概念",
+  "code-run": "运行代码",
+  assessment: "完成评估",
+  pep8: "PEP 8 检查",
+  "project-complete": "完成项目",
+  "reverse-recognition": "反向识别",
+  "cross-concept": "跨概念题"
+};
+const weekTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
+  timeZone: "Asia/Shanghai",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false
+});
 
 function completedCategories(snapshot: ProgressSnapshot) {
   return PROGRESS_CATEGORIES.filter((category) => snapshot.tiersByCategory[category] !== "none").length;
@@ -40,6 +65,18 @@ function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][Pro
 
 function cellStatusClass(status: CellStatus) {
   return status === "n/a" ? "na" : status;
+}
+
+function evidenceDetail(item: WeeklyEvidenceItem) {
+  return item.assessmentId
+    ?? item.projectId
+    ?? item.conceptId
+    ?? item.codeExampleTitle
+    ?? item.id;
+}
+
+function formatWeekTime(value: string) {
+  return weekTimeFormatter.format(new Date(value));
 }
 ---
 
@@ -108,6 +145,55 @@ function cellStatusClass(status: CellStatus) {
     </div>
   </section>
 
+  <section class="section weekly-review" aria-labelledby="weekly-heading">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Weekly Review</p>
+        <h2 id="weekly-heading">最近 7 天证据</h2>
+      </div>
+      <p class="muted" data-week-window>
+        {initialWeek.weekStart
+          ? `${formatWeekTime(initialWeek.weekStart)} 至 ${formatWeekTime(initialWeek.weekEnd)}`
+          : "等待有效时间窗口"}
+      </p>
+    </div>
+
+    <div class="weekly-summary-grid">
+      <div class="weekly-total">
+        <span>通过证据</span>
+        <strong data-week-total>{initialWeek.total}</strong>
+        <small>失败记录不计入，但仍用于卡壳模式。</small>
+      </div>
+
+      <div class="weekly-breakdown">
+        <span class="weekly-label">涉及类别</span>
+        <div class="weekly-category-list" data-week-categories>
+          {Object.entries(initialWeek.byCategory).length > 0 ? (
+            Object.entries(initialWeek.byCategory).map(([category, count]) => (
+              <span>{progressCategoryLabels[category as ProgressCategory]} {count}</span>
+            ))
+          ) : (
+            <span class="weekly-empty">最近 7 天暂无通过证据。</span>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <ol class="weekly-items" data-week-items>
+      {initialWeek.items.length > 0 ? (
+        initialWeek.items.slice(0, 8).map((item) => (
+          <li>
+            <time datetime={item.occurredAt}>{formatWeekTime(item.occurredAt)}</time>
+            <strong>{evidenceKindLabels[item.kind]}</strong>
+            <span>{progressCategoryLabels[item.category]} · {evidenceDetail(item)}</span>
+          </li>
+        ))
+      ) : (
+        <li class="weekly-empty">完成概念、代码或评估后，证据会在这里出现。</li>
+      )}
+    </ol>
+  </section>
+
   <section class="section progress-details">
     <article class="card">
       <div class="section-header compact">
@@ -154,21 +240,44 @@ function cellStatusClass(status: CellStatus) {
 <script>
   import {
     calculateProgress,
+    weeklySummary,
     type CellStatus,
     type ProgressCategoryConfig,
     type ProgressCategory,
+    type ProgressEvidenceKind,
     type ProgressTier,
     PROGRESS_CATEGORIES,
     PROGRESS_SCHEMA_VERSION,
     PROGRESS_TIERS,
     type ProgressAttempt,
     type ProgressSnapshot,
+    type WeeklyEvidenceItem,
+    type WeeklySummary,
   } from "../lib/progress-calculator";
   import {
     mockProgressAttempts,
     progressCategoryLabels,
     progressTierLabels
   } from "../lib/progress-fixtures";
+
+  const rollingWindowMs = 7 * 24 * 60 * 60 * 1000;
+  const evidenceKindLabels: Record<ProgressEvidenceKind, string> = {
+    "concept-read": "阅读概念",
+    "code-run": "运行代码",
+    assessment: "完成评估",
+    pep8: "PEP 8 检查",
+    "project-complete": "完成项目",
+    "reverse-recognition": "反向识别",
+    "cross-concept": "跨概念题"
+  };
+  const weekTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
 
   function readAttempts() {
     try {
@@ -218,6 +327,70 @@ function cellStatusClass(status: CellStatus) {
 
   function cellStatusClass(status: CellStatus) {
     return status === "n/a" ? "na" : status;
+  }
+
+  function evidenceDetail(item: WeeklyEvidenceItem) {
+    return item.assessmentId
+      ?? item.projectId
+      ?? item.conceptId
+      ?? item.codeExampleTitle
+      ?? item.id;
+  }
+
+  function formatWeekTime(value: string) {
+    return weekTimeFormatter.format(new Date(value));
+  }
+
+  function renderWeeklySummary(summary: WeeklySummary) {
+    setText("[data-week-total]", String(summary.total));
+    setText(
+      "[data-week-window]",
+      summary.weekStart
+        ? `${formatWeekTime(summary.weekStart)} 至 ${formatWeekTime(summary.weekEnd)}`
+        : "等待有效时间窗口"
+    );
+
+    const categories = document.querySelector("[data-week-categories]");
+    if (categories) {
+      const entries = Object.entries(summary.byCategory) as [ProgressCategory, number][];
+      if (entries.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "weekly-empty";
+        empty.textContent = "最近 7 天暂无通过证据。";
+        categories.replaceChildren(empty);
+      } else {
+        const items = entries.map(([category, count]) => {
+          const item = document.createElement("span");
+          item.textContent = `${progressCategoryLabels[category]} ${count}`;
+          return item;
+        });
+        categories.replaceChildren(...items);
+      }
+    }
+
+    const list = document.querySelector("[data-week-items]");
+    if (list) {
+      if (summary.items.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "weekly-empty";
+        empty.textContent = "完成概念、代码或评估后，证据会在这里出现。";
+        list.replaceChildren(empty);
+      } else {
+        const items = summary.items.slice(0, 8).map((item) => {
+          const li = document.createElement("li");
+          const time = document.createElement("time");
+          const kind = document.createElement("strong");
+          const detail = document.createElement("span");
+          time.dateTime = item.occurredAt;
+          time.textContent = formatWeekTime(item.occurredAt);
+          kind.textContent = evidenceKindLabels[item.kind];
+          detail.textContent = `${progressCategoryLabels[item.category]} · ${evidenceDetail(item)}`;
+          li.append(time, kind, detail);
+          return li;
+        });
+        list.replaceChildren(...items);
+      }
+    }
   }
 
   function renderSnapshot(snapshot: ProgressSnapshot, source: string) {
@@ -289,9 +462,23 @@ function cellStatusClass(status: CellStatus) {
     }
   }
 
-  const { attempts, source } = readAttempts();
   const categoryConfig = readCategoryConfig();
-  renderSnapshot(calculateProgress(attempts, categoryConfig), source);
+
+  function refreshProgress() {
+    const { attempts, source } = readAttempts();
+    renderSnapshot(calculateProgress(attempts, categoryConfig), source);
+    renderWeeklySummary(
+      weeklySummary(attempts, new Date(Date.now() - rollingWindowMs).toISOString())
+    );
+  }
+
+  refreshProgress();
+  window.addEventListener("pkb:progress-updated", refreshProgress);
+  window.addEventListener("storage", (event) => {
+    if (event.key === "pkb:attempts") {
+      refreshProgress();
+    }
+  });
 </script>
 
 <style>
@@ -447,6 +634,83 @@ function cellStatusClass(status: CellStatus) {
     color: var(--color-muted);
   }
 
+  .weekly-review {
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .weekly-summary-grid {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.35fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+
+  .weekly-total span,
+  .weekly-total strong,
+  .weekly-total small,
+  .weekly-label {
+    display: block;
+  }
+
+  .weekly-total span,
+  .weekly-label {
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .weekly-total strong {
+    margin: 4px 0;
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .weekly-total small {
+    color: var(--color-muted);
+    font-size: 12px;
+  }
+
+  .weekly-category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .weekly-category-list > span:not(.weekly-empty) {
+    padding: 5px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: var(--color-soft);
+    font-size: 13px;
+  }
+
+  .weekly-items {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .weekly-items li {
+    display: grid;
+    grid-template-columns: 120px minmax(100px, 0.35fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .weekly-items time,
+  .weekly-items span,
+  .weekly-empty {
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
   .progress-details {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
@@ -496,6 +760,16 @@ function cellStatusClass(status: CellStatus) {
 
     .progress-summary {
       grid-template-columns: 1fr;
+    }
+
+    .weekly-summary-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .weekly-items li {
+      grid-template-columns: 1fr;
+      gap: 2px;
     }
   }
 </style>

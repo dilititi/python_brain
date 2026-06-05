@@ -4,6 +4,7 @@ import {
   calculateProgress,
   PROGRESS_CATEGORIES,
   PROGRESS_SCHEMA_VERSION,
+  weeklySummary,
   type ProgressCategoryConfigItem,
   type ProgressAttempt,
   type ProgressCategory
@@ -446,4 +447,97 @@ test("active frontier prefers earliest incomplete tier, then strongest progress"
   assert.equal(snapshot.activeFrontier[0].category, "function");
   assert.equal(snapshot.activeFrontier[0].tier, "tier1");
   assert.equal(snapshot.activeFrontier[1].category, "syntax");
+});
+
+test("weeklySummary slices a pure seven-day evidence window", () => {
+  const weekStart = "2026-06-01T00:00:00.000Z";
+  const attempts: ProgressAttempt[] = [
+    attempt("at-start", "syntax", {
+      kind: "concept-read",
+      conceptId: "variable",
+      occurredAt: weekStart
+    }),
+    attempt("assessment", "function", {
+      kind: "assessment",
+      assessmentKind: "timed-coding",
+      assessmentId: "function-timed",
+      occurredAt: "2026-06-04T12:00:00.000Z"
+    }),
+    attempt("code-run", "syntax", {
+      kind: "code-run",
+      codeExampleTitle: "standard",
+      conceptId: "f-string",
+      occurredAt: "2026-06-07T23:59:59.999Z"
+    }),
+    attempt("failed", "syntax", {
+      kind: "assessment",
+      assessmentKind: "debugging",
+      assessmentId: "syntax-debug",
+      passed: false,
+      occurredAt: "2026-06-05T00:00:00.000Z"
+    }),
+    attempt("previous-window", "syntax", {
+      kind: "concept-read",
+      conceptId: "operators",
+      occurredAt: "2026-05-31T23:59:59.999Z"
+    }),
+    attempt("next-window", "syntax", {
+      kind: "concept-read",
+      conceptId: "type-casting",
+      occurredAt: "2026-06-08T00:00:00.000Z"
+    }),
+    attempt("invalid-time", "syntax", {
+      kind: "concept-read",
+      conceptId: "variable",
+      occurredAt: "not-a-date"
+    }),
+    {
+      ...attempt("invalid-category", "syntax", {
+        kind: "concept-read",
+        conceptId: "requests",
+        occurredAt: "2026-06-03T00:00:00.000Z"
+      }),
+      category: "third-party"
+    } as unknown as ProgressAttempt
+  ];
+
+  const summary = weeklySummary(attempts, weekStart);
+
+  assert.equal(summary.weekStart, weekStart);
+  assert.equal(summary.weekEnd, "2026-06-08T00:00:00.000Z");
+  assert.equal(summary.total, 3);
+  assert.deepEqual(summary.byCategory, { syntax: 2, function: 1 });
+  assert.deepEqual(summary.byKind, {
+    "concept-read": 1,
+    assessment: 1,
+    "code-run": 1
+  });
+  assert.deepEqual(summary.items.map((item) => item.id), [
+    "code-run",
+    "assessment",
+    "at-start"
+  ]);
+});
+
+test("weeklySummary returns deterministic empty windows for empty or invalid input", () => {
+  assert.deepEqual(weeklySummary([], "2026-06-01T00:00:00.000Z"), {
+    weekStart: "2026-06-01T00:00:00.000Z",
+    weekEnd: "2026-06-08T00:00:00.000Z",
+    total: 0,
+    byCategory: {},
+    byKind: {},
+    items: []
+  });
+
+  const first = weeklySummary([], "invalid");
+  const second = weeklySummary([], "invalid");
+  assert.deepEqual(first, {
+    weekStart: "",
+    weekEnd: "",
+    total: 0,
+    byCategory: {},
+    byKind: {},
+    items: []
+  });
+  assert.deepEqual(second, first);
 });
