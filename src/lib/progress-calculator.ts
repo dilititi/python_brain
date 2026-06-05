@@ -461,7 +461,7 @@ function requirementTarget(
     case "productionCodeRun":
       return Math.min(config.productionCodeCount, definition.target);
     case "refactorPassed":
-      return Math.min(config.assessmentCounts.refactor ?? 0, definition.target);
+      return config.assessmentCounts.refactor ?? 0;
     case "midOrCapstoneProjectComplete":
       return Math.min(config.midOrCapstoneProjectCount, definition.target);
     case "reverseRecognitionPassed":

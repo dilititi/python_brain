@@ -207,6 +207,10 @@ test("debugging completion and refactor assessments contribute to the matrix", (
     snapshot.matrix.syntax.tier3.requirements.map((requirement) => requirement.current),
     [0, 0, 5]
   );
+  assert.deepEqual(
+    snapshot.matrix.syntax.tier3.requirements.map((requirement) => requirement.target),
+    [0, 0, 5]
+  );
 });
 
 test("tier 3 and tier 4 use project and advanced evidence", () => {
