@@ -4,6 +4,7 @@ import {
   calculateProgress,
   PROGRESS_CATEGORIES,
   PROGRESS_SCHEMA_VERSION,
+  stalledCategories,
   weeklySummary,
   type ProgressCategoryConfigItem,
   type ProgressAttempt,
@@ -544,4 +545,73 @@ test("weeklySummary returns deterministic empty windows for empty or invalid inp
     items: []
   });
   assert.deepEqual(second, first);
+});
+
+test("stalledCategories returns touched low-tier categories beyond the threshold", () => {
+  const asOf = "2026-06-05T00:00:00.000Z";
+  const tiers = Object.fromEntries(
+    PROGRESS_CATEGORIES.map((category) => [category, "none"])
+  ) as Record<ProgressCategory, "none" | "tier1" | "tier2" | "tier3" | "tier4">;
+  tiers.function = "tier1";
+  tiers.syntax = "tier2";
+
+  const result = stalledCategories([
+    attempt("oop-old", "oop", { occurredAt: "2026-05-06T00:00:00.000Z" }),
+    attempt("language-old", "language", { occurredAt: "2026-05-16T00:00:00.000Z" }),
+    attempt("function-old", "function", { occurredAt: "2026-05-16T00:00:00.000Z" }),
+    attempt("syntax-old", "syntax", { occurredAt: "2026-05-01T00:00:00.000Z" }),
+    attempt("control-active", "control-flow", { occurredAt: "2026-05-31T00:00:00.000Z" }),
+    attempt("oop-newer-failed", "oop", {
+      occurredAt: "2026-05-10T00:00:00.000Z",
+      passed: false
+    }),
+    attempt("future", "stdlib", { occurredAt: "2026-06-06T00:00:00.000Z" }),
+    attempt("invalid-time", "module-eng", { occurredAt: "not-a-date" }),
+    {
+      ...attempt("invalid-category", "syntax", { occurredAt: "2026-05-01T00:00:00.000Z" }),
+      category: "third-party"
+    } as unknown as ProgressAttempt
+  ], tiers, asOf);
+
+  assert.deepEqual(result, [
+    {
+      category: "oop",
+      currentTier: "none",
+      lastEvidenceAt: "2026-05-10T00:00:00.000Z",
+      daysSinceLastEvidence: 26
+    },
+    {
+      category: "language",
+      currentTier: "none",
+      lastEvidenceAt: "2026-05-16T00:00:00.000Z",
+      daysSinceLastEvidence: 20
+    },
+    {
+      category: "function",
+      currentTier: "tier1",
+      lastEvidenceAt: "2026-05-16T00:00:00.000Z",
+      daysSinceLastEvidence: 20
+    }
+  ]);
+});
+
+test("stalledCategories includes the exact threshold and stays deterministic", () => {
+  const tiers = Object.fromEntries(
+    PROGRESS_CATEGORIES.map((category) => [category, "none"])
+  ) as Record<ProgressCategory, "none" | "tier1" | "tier2" | "tier3" | "tier4">;
+  const attempts = [
+    attempt("threshold", "stdlib", { occurredAt: "2026-05-22T00:00:00.000Z" })
+  ];
+
+  assert.deepEqual(
+    stalledCategories(attempts, tiers, "2026-06-05T00:00:00.000Z"),
+    [{
+      category: "stdlib",
+      currentTier: "none",
+      lastEvidenceAt: "2026-05-22T00:00:00.000Z",
+      daysSinceLastEvidence: 14
+    }]
+  );
+  assert.deepEqual(stalledCategories(attempts, tiers, "invalid"), []);
+  assert.deepEqual(stalledCategories(attempts, tiers, "invalid"), []);
 });

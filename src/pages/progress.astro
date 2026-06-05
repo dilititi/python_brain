@@ -27,6 +27,15 @@ const [concepts, assessments, projects] = await Promise.all([
 ]);
 const progressCategoryConfig = buildProgressCategoryConfig({ concepts, assessments, projects });
 const progressCategoryConfigJson = JSON.stringify(progressCategoryConfig);
+const recognitionAssessments = assessments
+  .filter((entry) => entry.data.kind === "recognition")
+  .map((entry) => ({
+    id: entry.id,
+    title: entry.data.title,
+    category: entry.data.category
+  }))
+  .sort((left, right) => left.category.localeCompare(right.category) || left.id.localeCompare(right.id));
+const recognitionAssessmentsJson = JSON.stringify(recognitionAssessments);
 const initialSnapshot = calculateProgress(mockProgressAttempts, progressCategoryConfig);
 const rollingWindowMs = 7 * 24 * 60 * 60 * 1000;
 const initialWeek = weeklySummary(
@@ -192,6 +201,19 @@ function formatWeekTime(value: string) {
         <li class="weekly-empty">完成概念、代码或评估后，证据会在这里出现。</li>
       )}
     </ol>
+
+    <p class="return-guidance" data-return-guidance hidden></p>
+  </section>
+
+  <section class="section stalled-review" data-stalled-section aria-labelledby="stalled-heading" hidden>
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Re-entry</p>
+        <h2 id="stalled-heading">想从一个小问题重新进入吗？</h2>
+      </div>
+      <p class="muted">这些入口只来自你碰过但暂时停下的类别。</p>
+    </div>
+    <ul class="stalled-list" data-stalled-list></ul>
   </section>
 
   <section class="section progress-details">
@@ -236,10 +258,12 @@ function formatWeekTime(value: string) {
 </BaseLayout>
 
 <script id="progress-category-config" type="application/json" set:html={progressCategoryConfigJson} is:inline></script>
+<script id="recognition-assessments" type="application/json" set:html={recognitionAssessmentsJson} is:inline></script>
 
 <script>
   import {
     calculateProgress,
+    stalledCategories,
     weeklySummary,
     type CellStatus,
     type ProgressCategoryConfig,
@@ -251,6 +275,7 @@ function formatWeekTime(value: string) {
     PROGRESS_TIERS,
     type ProgressAttempt,
     type ProgressSnapshot,
+    type StalledCategory,
     type WeeklyEvidenceItem,
     type WeeklySummary,
   } from "../lib/progress-calculator";
@@ -278,6 +303,12 @@ function formatWeekTime(value: string) {
     minute: "2-digit",
     hour12: false
   });
+  type ProgressSource = "Local" | "Mock";
+  type RecognitionAssessmentLink = {
+    id: string;
+    title: string;
+    category: ProgressCategory;
+  };
 
   function readAttempts() {
     try {
@@ -288,12 +319,12 @@ function formatWeekTime(value: string) {
         : [];
 
       if (attempts.length === 0) {
-        return { attempts: mockProgressAttempts, source: "Mock" };
+        return { attempts: mockProgressAttempts, source: "Mock" as const };
       }
 
-      return { attempts: attempts as ProgressAttempt[], source: "Local" };
+      return { attempts: attempts as ProgressAttempt[], source: "Local" as const };
     } catch {
-      return { attempts: mockProgressAttempts, source: "Mock" };
+      return { attempts: mockProgressAttempts, source: "Mock" as const };
     }
   }
 
@@ -304,6 +335,15 @@ function formatWeekTime(value: string) {
     }
 
     return JSON.parse(element.textContent) as ProgressCategoryConfig;
+  }
+
+  function readRecognitionAssessments(): RecognitionAssessmentLink[] {
+    const element = document.getElementById("recognition-assessments");
+    if (!element?.textContent) {
+      return [];
+    }
+
+    return JSON.parse(element.textContent) as RecognitionAssessmentLink[];
   }
 
   function setText(selector: string, value: string) {
@@ -393,7 +433,89 @@ function formatWeekTime(value: string) {
     }
   }
 
-  function renderSnapshot(snapshot: ProgressSnapshot, source: string) {
+  function renderReturnGuidance(
+    snapshot: ProgressSnapshot,
+    summary: WeeklySummary,
+    source: ProgressSource
+  ) {
+    const guidance = document.querySelector<HTMLElement>("[data-return-guidance]");
+    const frontier = snapshot.activeFrontier[0];
+    if (!guidance) {
+      return;
+    }
+
+    if (source !== "Local" || summary.total > 0 || !frontier) {
+      guidance.hidden = true;
+      guidance.textContent = "";
+      return;
+    }
+
+    guidance.textContent = `欢迎回来。你上次的前沿在「${progressCategoryLabels[frontier.category]}」的「${progressTierLabels[frontier.tier]}」，可以从这里继续。`;
+    guidance.hidden = false;
+  }
+
+  function recognitionCandidate(
+    stalled: StalledCategory,
+    attempts: readonly ProgressAttempt[],
+    assessments: readonly RecognitionAssessmentLink[]
+  ) {
+    const attemptedIds = new Set(
+      attempts
+        .filter((attempt) => attempt.kind === "assessment" && attempt.assessmentId)
+        .map((attempt) => attempt.assessmentId as string)
+    );
+
+    return assessments.find((assessment) => (
+      assessment.category === stalled.category && !attemptedIds.has(assessment.id)
+    ));
+  }
+
+  function renderStalledCategories(
+    stalled: readonly StalledCategory[],
+    attempts: readonly ProgressAttempt[],
+    assessments: readonly RecognitionAssessmentLink[],
+    source: ProgressSource
+  ) {
+    const section = document.querySelector<HTMLElement>("[data-stalled-section]");
+    const list = document.querySelector<HTMLUListElement>("[data-stalled-list]");
+    if (!section || !list) {
+      return;
+    }
+
+    const suggestions = source === "Local"
+      ? stalled.flatMap((item) => {
+          const assessment = recognitionCandidate(item, attempts, assessments);
+          return assessment ? [{ item, assessment }] : [];
+        })
+      : [];
+
+    if (suggestions.length === 0) {
+      section.hidden = true;
+      list.replaceChildren();
+      return;
+    }
+
+    const rows = suggestions.map(({ item, assessment }) => {
+      const li = document.createElement("li");
+      const context = document.createElement("div");
+      const category = document.createElement("strong");
+      const detail = document.createElement("span");
+      const link = document.createElement("a");
+      category.textContent = `${progressCategoryLabels[item.category]} · ${progressTierLabels[item.currentTier === "none" ? "tier1" : item.currentTier]}`;
+      detail.textContent = "这里暂时停了一阵。用一道识别题找回上下文。";
+      link.href = `/assessments/${assessment.id}/`;
+      link.textContent = assessment.title;
+      link.setAttribute("data-stalled-assessment", assessment.id);
+      context.append(category, detail);
+      li.append(context, link);
+      return li;
+    });
+
+    list.replaceChildren(...rows);
+    section.hidden = false;
+  }
+
+  function renderSnapshot(snapshot: ProgressSnapshot, source: ProgressSource) {
     setText('[data-summary="schema"]', String(snapshot.schemaVersion));
     setText('[data-summary="completed"]', String(completedCategories(snapshot)));
     setText('[data-summary="source"]', source);
@@ -463,12 +585,24 @@ function formatWeekTime(value: string) {
   }
 
   const categoryConfig = readCategoryConfig();
+  const recognitionAssessmentLinks = readRecognitionAssessments();
 
   function refreshProgress() {
     const { attempts, source } = readAttempts();
-    renderSnapshot(calculateProgress(attempts, categoryConfig), source);
-    renderWeeklySummary(
-      weeklySummary(attempts, new Date(Date.now() - rollingWindowMs).toISOString())
+    const asOf = new Date().toISOString();
+    const snapshot = calculateProgress(attempts, categoryConfig);
+    const week = weeklySummary(
+      attempts,
+      new Date(Date.parse(asOf) - rollingWindowMs).toISOString()
+    );
+    renderSnapshot(snapshot, source);
+    renderWeeklySummary(week);
+    renderReturnGuidance(snapshot, week, source);
+    renderStalledCategories(
+      stalledCategories(attempts, snapshot.tiersByCategory, asOf),
+      attempts,
+      recognitionAssessmentLinks,
+      source
     );
   }
 
@@ -711,6 +845,53 @@ function formatWeekTime(value: string) {
     font-size: 13px;
   }
 
+  .return-guidance {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-blue);
+    font-weight: 700;
+  }
+
+  .stalled-review {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .stalled-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .stalled-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.35fr);
+    gap: 18px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .stalled-list strong,
+  .stalled-list span {
+    display: block;
+  }
+
+  .stalled-list span {
+    margin-top: 3px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .stalled-list a {
+    justify-self: end;
+    color: var(--color-blue);
+    font-weight: 700;
+  }
+
   .progress-details {
     display: grid;
     grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
@@ -770,6 +951,15 @@ function formatWeekTime(value: string) {
     .weekly-items li {
       grid-template-columns: 1fr;
       gap: 2px;
+    }
+
+    .stalled-list li {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .stalled-list a {
+      justify-self: start;
     }
   }
 </style>

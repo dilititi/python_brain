@@ -133,6 +133,13 @@ export type WeeklySummary = {
   items: WeeklyEvidenceItem[];
 };
 
+export type StalledCategory = {
+  category: ProgressCategory;
+  currentTier: ProgressTier | "none";
+  lastEvidenceAt: string;
+  daysSinceLastEvidence: number;
+};
+
 export type ProgressCategoryConfigItem = {
   conceptCount: number;
   assessmentCounts: Partial<Record<AssessmentKind, number>>;
@@ -638,4 +645,61 @@ export function weeklySummary(
     byKind,
     items
   };
+}
+
+export function stalledCategories(
+  attempts: readonly ProgressAttempt[],
+  tiersByCategory: Readonly<Record<ProgressCategory, ProgressTier | "none">>,
+  asOf: string,
+  options: { stallThresholdDays?: number } = {}
+): StalledCategory[] {
+  const asOfTime = Date.parse(asOf);
+  if (!Number.isFinite(asOfTime)) {
+    return [];
+  }
+
+  const dayMs = 24 * 60 * 60 * 1000;
+  const thresholdDays = Math.max(0, options.stallThresholdDays ?? 14);
+  const thresholdMs = thresholdDays * dayMs;
+  const categorySet = new Set<string>(PROGRESS_CATEGORIES);
+  const lastEvidenceByCategory = new Map<ProgressCategory, number>();
+
+  for (const attempt of attempts) {
+    const occurredAt = Date.parse(attempt.occurredAt);
+    if (
+      !Number.isFinite(occurredAt) ||
+      occurredAt > asOfTime ||
+      !categorySet.has(attempt.category)
+    ) {
+      continue;
+    }
+
+    const category = attempt.category as ProgressCategory;
+    const previous = lastEvidenceByCategory.get(category);
+    if (previous === undefined || occurredAt > previous) {
+      lastEvidenceByCategory.set(category, occurredAt);
+    }
+  }
+
+  return PROGRESS_CATEGORIES.flatMap((category) => {
+    const lastEvidenceAt = lastEvidenceByCategory.get(category);
+    const currentTier = tiersByCategory[category];
+    if (
+      lastEvidenceAt === undefined ||
+      (currentTier !== "none" && currentTier !== "tier1") ||
+      asOfTime - lastEvidenceAt < thresholdMs
+    ) {
+      return [];
+    }
+
+    return [{
+      category,
+      currentTier,
+      lastEvidenceAt: new Date(lastEvidenceAt).toISOString(),
+      daysSinceLastEvidence: Math.floor((asOfTime - lastEvidenceAt) / dayMs)
+    }];
+  }).sort((left, right) => (
+    right.daysSinceLastEvidence - left.daysSinceLastEvidence
+      || PROGRESS_CATEGORIES.indexOf(left.category) - PROGRESS_CATEGORIES.indexOf(right.category)
+  ));
 }
