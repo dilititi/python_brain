@@ -75,6 +75,16 @@ GitHub Actions 工作流 `.github/workflows/v1-gates.yml` 会在 PR 和 `main` p
 - Lighthouse beacon pages：构建静态站、启动 Astro preview、跑三页标杆 Lighthouse
 - external URL monitor：手动或每周定时运行 `npm run link:external`
 
+### v1.2 发布前浏览器闭环
+
+v1.2 release candidate 在合并和打 tag 前额外运行：
+
+```bash
+npm run test:e2e
+```
+
+该命令使用 Playwright 覆盖 recognition 题提交写入 `pkb:attempts`、attempt 驱动 `/progress` matrix 与最近 7 天证据，以及回归定位只对真实本地历史出现的边界。它需要安装 Chromium（首次执行运行 `npx playwright install chromium`），属于发布前 gate，不加入每次 PR 的常规 `v1-gates`，避免浏览器下载和启动拖慢普通内容改动。
+
 ## CLI 部署
 
 本地如果已经登录 Vercel，可运行：

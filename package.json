@@ -12,6 +12,7 @@
     "link:external:inventory": "tsx scripts/external-link-check.ts",
     "preview": "astro preview",
     "test": "tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
     "test:code-examples": "tsx scripts/test-code-examples.ts",
     "test:assessments": "tsx scripts/test-assessments.ts",
     "validate:relations": "tsx scripts/validate-relations.ts",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@playwright/test": "^1.60.0",
     "@types/node": "^25.9.1",
     "gray-matter": "^4.0.3",
     "pyodide": "^0.29.4",

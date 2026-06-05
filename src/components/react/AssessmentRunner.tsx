@@ -211,11 +211,16 @@ export default function AssessmentRunner({ assessment }: { assessment: Assessmen
   const [results, setResults] = useState<TestResult[]>([]);
   const [message, setMessage] = useState("");
   const [lastPassed, setLastPassed] = useState<boolean | null>(null);
+  const [hydrated, setHydrated] = useState(false);
   const coding = isCodingAssessment(assessment.kind);
   const correctChoice = useMemo(
     () => assessment.choices.find((choice) => choice.correct),
     [assessment.choices]
   );
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (!coding || !editorHost.current || editorView.current) {
@@ -397,7 +402,7 @@ export default function AssessmentRunner({ assessment }: { assessment: Assessmen
   }
 
   return (
-    <div className="assessment-runner">
+    <div className="assessment-runner" data-assessment-ready={hydrated ? "true" : "false"}>
       <section className="assessment-task" aria-labelledby="assessment-task-heading">
         <div>
           <p className="eyebrow">Task</p>

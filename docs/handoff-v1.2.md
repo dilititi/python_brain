@@ -1,6 +1,6 @@
-# v1.2 Startup Handoff
+# v1.2 Handoff
 
-更新日期：2026-06-03
+更新日期：2026-06-05
 
 ## 当前基线
 
@@ -9,7 +9,7 @@
 - 旧的相似仓库 `python-brain` 已归档，Vercel 新 project 已绑定到 `python_brain`。
 - 生产域名：`https://python-brain.vercel.app/`。
 - 抽样验证已通过：`/concepts/decorator/`、`/path/automation/`、`/relations.json` 返回 200。
-- 本文件只用于 v1.2 启动前审查和拆任务；不在这里提前实现 progress tracking。
+- 本文件记录 v1.2 从启动审查到发布前验收的工程契约与真实状态。
 
 ## v1.2 定位
 
@@ -206,11 +206,16 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 
 ### 阶段 3：反向触发与发布
 
-- 停留触发识别题。
-- 沉默提醒。
-- e2e 覆盖关键路径。
+- [x] `stalledCategories` 以纯函数判定“碰过、低档、14 天无新记录”的类别；不读当前时间，未来记录和非法时间不参与。
+- [x] `/progress` 对回归用户显示温和的活跃前沿定位，不做推送、弹窗、streak 或负罪感文案。
+- [x] `/progress` 为停留类别选择一道尚未做过的 recognition 题；Mock、新用户和 `tier2+` 类别不显示。
+- [x] Playwright 覆盖 recognition 提交写入 attempt、attempt 驱动 matrix / weekly，以及新用户不提示的边界。
+- [x] `test:e2e` 保持发布前 gate，不进入每次 PR 的常规 `v1-gates`。
+- [ ] GitHub Actions 绿灯并完成 Vercel production 抽样。
 - 写 release handoff。
 - 全量 gates 通过后打 annotated tag `v1.2.0`。
+
+阶段三的“停留触发”不是反向识别题，不产生 `reverseRecognitionPassed` 或 `crossConceptPassed`。不要因此解除 `DISABLED_REQUIREMENTS`；只有对应题型和 category config 数据来源同时落地时，才能在同一 PR 启用这些维度。
 
 ## v1.2 Gates
 
@@ -221,6 +226,7 @@ npm run validate:relations
 npm run audit:concepts
 npm run audit:assessments
 npm run test
+npm run test:e2e
 npm run test:code-examples
 npm run build
 npm run link:check
@@ -232,6 +238,7 @@ v1.2 新增建议：
 - calculator 单测进入 `npm run test`。
 - 若新增 assessment 专用校验脚本，命名为 `npm run audit:assessments`，并在发布前进入 deployment 文档。
 - runnable assessment 测试脚本不要复用 `test:code-examples`，另起 `npm run test:assessments`，避免概念示例和评估题混在一起。
+- `npm run test:e2e` 使用 Playwright 真浏览器覆盖 localStorage 到 DOM 的闭环，只作为 release candidate / 发布前 gate；常规 PR 仍由快速静态 gates 负责。
 
 ## 启动前 Checklist
 
