@@ -1,0 +1,33 @@
+title: 重构重复问候逻辑
+description: 把重复字符串拼接提取成函数。
+category: function
+kind: refactor
+targetTier: tier3
+concepts:
+  - function
+  - function-parameters
+prompt: |
+  将重复的问候语拼接重构成 greet(name) 函数，并保留 build_messages(names) 的行为。
+starterCode: |
+  def build_messages(names):
+      messages = []
+      for name in names:
+          messages.append("Hello, " + name + "!")
+      return messages
+testCases:
+  - name: greets one name
+    code: |
+      assert greet("Ada") == "Hello, Ada!"
+  - name: build_messages reuses greeting behavior
+    code: |
+      assert build_messages(["Ada", "Guido"]) == ["Hello, Ada!", "Hello, Guido!"]
+referenceSolution: |
+  def greet(name):
+      return "Hello, " + name + "!"
+
+  def build_messages(names):
+      return [greet(name) for name in names]
+rubric:
+  - 能提取有名字的函数承载重复逻辑。
+  - 能让原函数复用新函数。
+  - 保持原有输出不变。

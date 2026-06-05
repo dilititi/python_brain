@@ -1,0 +1,34 @@
+title: 修复缺字段时的 JSON 读取
+description: 直接索引缺失字段会抛 KeyError，改为带默认值的安全读取。
+category: stdlib
+kind: debugging
+targetTier: tier2
+concepts:
+  - json
+  - common-stdlib-modules
+prompt: |
+  get_theme 在配置缺少 theme 字段时会抛 KeyError。
+  修复它，使缺字段时返回默认值 "light"。
+starterCode: |
+  import json
+
+  def get_theme(raw):
+      data = json.loads(raw)
+      return data["theme"]
+testCases:
+  - name: 有字段时返回该值
+    code: |
+      assert get_theme('{"theme": "dark"}') == "dark"
+  - name: 缺字段时回退默认值
+    code: |
+      assert get_theme("{}") == "light"
+referenceSolution: |
+  import json
+
+  def get_theme(raw):
+      data = json.loads(raw)
+      return data.get("theme", "light")
+rubric:
+  - 能定位直接索引 data["theme"] 在缺字段时抛 KeyError。
+  - 改用 dict.get 提供默认值，而不是用 try/except 吞掉所有错误。
+  - 通过给定测试用例。

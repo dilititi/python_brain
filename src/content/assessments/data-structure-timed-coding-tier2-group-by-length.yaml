@@ -1,0 +1,31 @@
+title: 限时按长度分组
+description: 在限定时间内用 dict 把字符串按长度分组。
+category: data-structure
+kind: timed-coding
+targetTier: tier2
+concepts:
+  - dict
+  - list
+timeLimit: 480
+prompt: |
+  实现 group_by_length(words)，返回一个 dict：key 是单词长度，value 是该长度的单词列表（保持原顺序）。空输入返回空 dict。
+starterCode: |
+  def group_by_length(words):
+      pass
+testCases:
+  - name: 按长度分组并保序
+    code: |
+      assert group_by_length(["a", "bb", "cc", "ddd"]) == {1: ["a"], 2: ["bb", "cc"], 3: ["ddd"]}
+  - name: 空输入返回空 dict
+    code: |
+      assert group_by_length([]) == {}
+referenceSolution: |
+  def group_by_length(words):
+      groups = {}
+      for word in words:
+          groups.setdefault(len(word), []).append(word)
+      return groups
+rubric:
+  - 能用 dict 累积分组而不是反复扫描。
+  - 能用 setdefault 或等价手段处理首次出现的 key。
+  - 通过给定测试用例。

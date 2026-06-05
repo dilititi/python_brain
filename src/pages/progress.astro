@@ -1,0 +1,965 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  calculateProgress,
+  PROGRESS_CATEGORIES,
+  PROGRESS_TIERS,
+  weeklySummary,
+  type CellStatus,
+  type ProgressCategory,
+  type ProgressEvidenceKind,
+  type ProgressTier,
+  type ProgressSnapshot,
+  type WeeklyEvidenceItem
+} from "../lib/progress-calculator";
+import { buildProgressCategoryConfig } from "../lib/progress-config";
+import {
+  mockProgressAttempts,
+  progressCategoryLabels,
+  progressTierLabels
+} from "../lib/progress-fixtures";
+
+const [concepts, assessments, projects] = await Promise.all([
+  getCollection("concepts"),
+  getCollection("assessments"),
+  getCollection("projects")
+]);
+const progressCategoryConfig = buildProgressCategoryConfig({ concepts, assessments, projects });
+const progressCategoryConfigJson = JSON.stringify(progressCategoryConfig);
+const recognitionAssessments = assessments
+  .filter((entry) => entry.data.kind === "recognition")
+  .map((entry) => ({
+    id: entry.id,
+    title: entry.data.title,
+    category: entry.data.category
+  }))
+  .sort((left, right) => left.category.localeCompare(right.category) || left.id.localeCompare(right.id));
+const recognitionAssessmentsJson = JSON.stringify(recognitionAssessments);
+const initialSnapshot = calculateProgress(mockProgressAttempts, progressCategoryConfig);
+const rollingWindowMs = 7 * 24 * 60 * 60 * 1000;
+const initialWeek = weeklySummary(
+  mockProgressAttempts,
+  new Date(Date.now() - rollingWindowMs).toISOString()
+);
+const evidenceKindLabels: Record<ProgressEvidenceKind, string> = {
+  "concept-read": "阅读概念",
+  "code-run": "运行代码",
+  assessment: "完成评估",
+  pep8: "PEP 8 检查",
+  "project-complete": "完成项目",
+  "reverse-recognition": "反向识别",
+  "cross-concept": "跨概念题"
+};
+const weekTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
+  timeZone: "Asia/Shanghai",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false
+});
+
+function completedCategories(snapshot: ProgressSnapshot) {
+  return PROGRESS_CATEGORIES.filter((category) => snapshot.tiersByCategory[category] !== "none").length;
+}
+
+function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][ProgressTier]) {
+  if (cell.requirements.every((item) => item.target === 0)) {
+    return "暂无可衡量项";
+  }
+
+  return `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
+}
+
+function cellStatusClass(status: CellStatus) {
+  return status === "n/a" ? "na" : status;
+}
+
+function evidenceDetail(item: WeeklyEvidenceItem) {
+  return item.assessmentId
+    ?? item.projectId
+    ?? item.conceptId
+    ?? item.codeExampleTitle
+    ?? item.id;
+}
+
+function formatWeekTime(value: string) {
+  return weekTimeFormatter.format(new Date(value));
+}
+---
+
+<BaseLayout title="掌握度地图" description="用二维矩阵查看 Python 知识掌握证据。">
+  <section class="progress-hero">
+    <div>
+      <p class="eyebrow">Progress Map</p>
+      <h1>掌握度地图</h1>
+      <p class="lead">
+        这里不是刷题进度条，而是把概念阅读、代码运行、评估题和项目证据汇总成 8 类 × 4 档矩阵。
+      </p>
+    </div>
+    <div class="progress-summary" aria-label="进度概览">
+      <div>
+        <span>Schema</span>
+        <strong data-summary="schema">{initialSnapshot.schemaVersion}</strong>
+      </div>
+      <div>
+        <span>已点亮类别</span>
+        <strong data-summary="completed">{completedCategories(initialSnapshot)}</strong>
+      </div>
+      <div>
+        <span>证据来源</span>
+        <strong data-summary="source">Mock</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="section progress-panel" aria-labelledby="matrix-heading">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Matrix</p>
+        <h2 id="matrix-heading">8 类别 × 4 档</h2>
+      </div>
+      <p class="muted" data-progress-note>未检测到本地 attempts，当前显示演示数据。</p>
+    </div>
+
+    <div class="progress-matrix" role="table" aria-label="掌握度矩阵">
+      <div class="matrix-row matrix-head" role="row">
+        <div role="columnheader">类别</div>
+        {PROGRESS_TIERS.map((tier) => <div role="columnheader">{progressTierLabels[tier]}</div>)}
+      </div>
+      {PROGRESS_CATEGORIES.map((category) => (
+        <div class="matrix-row" role="row" data-category={category}>
+          <div class="category-cell" role="rowheader">
+            <strong>{progressCategoryLabels[category]}</strong>
+            <span>{category}</span>
+          </div>
+          {PROGRESS_TIERS.map((tier) => {
+            const cell = initialSnapshot.matrix[category][tier];
+            return (
+              <div
+                class={`matrix-cell ${cellStatusClass(cell.status)}`}
+                role="cell"
+                data-cell={`${category}:${tier}`}
+                aria-label={`${progressCategoryLabels[category]} ${progressTierLabels[tier]} ${cell.status}`}
+              >
+                <span class="cell-status" data-status>{cell.status}</span>
+                <strong data-progress>{Math.round(cell.progress * 100)}%</strong>
+                <span data-missing>{cellMissingLabel(cell)}</span>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section weekly-review" aria-labelledby="weekly-heading">
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Weekly Review</p>
+        <h2 id="weekly-heading">最近 7 天证据</h2>
+      </div>
+      <p class="muted" data-week-window>
+        {initialWeek.weekStart
+          ? `${formatWeekTime(initialWeek.weekStart)} 至 ${formatWeekTime(initialWeek.weekEnd)}`
+          : "等待有效时间窗口"}
+      </p>
+    </div>
+
+    <div class="weekly-summary-grid">
+      <div class="weekly-total">
+        <span>通过证据</span>
+        <strong data-week-total>{initialWeek.total}</strong>
+        <small>失败记录不计入，但仍用于卡壳模式。</small>
+      </div>
+
+      <div class="weekly-breakdown">
+        <span class="weekly-label">涉及类别</span>
+        <div class="weekly-category-list" data-week-categories>
+          {Object.entries(initialWeek.byCategory).length > 0 ? (
+            Object.entries(initialWeek.byCategory).map(([category, count]) => (
+              <span>{progressCategoryLabels[category as ProgressCategory]} {count}</span>
+            ))
+          ) : (
+            <span class="weekly-empty">最近 7 天暂无通过证据。</span>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <ol class="weekly-items" data-week-items>
+      {initialWeek.items.length > 0 ? (
+        initialWeek.items.slice(0, 8).map((item) => (
+          <li>
+            <time datetime={item.occurredAt}>{formatWeekTime(item.occurredAt)}</time>
+            <strong>{evidenceKindLabels[item.kind]}</strong>
+            <span>{progressCategoryLabels[item.category]} · {evidenceDetail(item)}</span>
+          </li>
+        ))
+      ) : (
+        <li class="weekly-empty">完成概念、代码或评估后，证据会在这里出现。</li>
+      )}
+    </ol>
+
+    <p class="return-guidance" data-return-guidance hidden></p>
+  </section>
+
+  <section class="section stalled-review" data-stalled-section aria-labelledby="stalled-heading" hidden>
+    <div class="section-header">
+      <div>
+        <p class="eyebrow">Re-entry</p>
+        <h2 id="stalled-heading">想从一个小问题重新进入吗？</h2>
+      </div>
+      <p class="muted">这些入口只来自你碰过但暂时停下的类别。</p>
+    </div>
+    <ul class="stalled-list" data-stalled-list></ul>
+  </section>
+
+  <section class="section progress-details">
+    <article class="card">
+      <div class="section-header compact">
+        <div>
+          <p class="eyebrow">Frontier</p>
+          <h2>下一步空缺</h2>
+        </div>
+      </div>
+      <ol class="frontier-list" data-frontier>
+        {initialSnapshot.activeFrontier.slice(0, 5).map((item) => (
+          <li>
+            <strong>{progressCategoryLabels[item.category]} · {progressTierLabels[item.tier]}</strong>
+            <span>{item.missing.map((missing) => `${missing.label} ${missing.current}/${missing.target}`).join("；")}</span>
+          </li>
+        ))}
+      </ol>
+    </article>
+
+    <article class="card">
+      <div class="section-header compact">
+        <div>
+          <p class="eyebrow">Patterns</p>
+          <h2>最近卡壳模式</h2>
+        </div>
+      </div>
+      <ul class="pattern-list" data-patterns>
+        {initialSnapshot.recentPatterns.length > 0 ? (
+          initialSnapshot.recentPatterns.map((item) => (
+            <li>
+              <strong>{item.pattern}</strong>
+              <span>{item.count} 次</span>
+            </li>
+          ))
+        ) : (
+          <li><span>暂无失败 attempt 记录。</span></li>
+        )}
+      </ul>
+    </article>
+  </section>
+</BaseLayout>
+
+<script id="progress-category-config" type="application/json" set:html={progressCategoryConfigJson} is:inline></script>
+<script id="recognition-assessments" type="application/json" set:html={recognitionAssessmentsJson} is:inline></script>
+
+<script>
+  import {
+    calculateProgress,
+    stalledCategories,
+    weeklySummary,
+    type CellStatus,
+    type ProgressCategoryConfig,
+    type ProgressCategory,
+    type ProgressEvidenceKind,
+    type ProgressTier,
+    PROGRESS_CATEGORIES,
+    PROGRESS_SCHEMA_VERSION,
+    PROGRESS_TIERS,
+    type ProgressAttempt,
+    type ProgressSnapshot,
+    type StalledCategory,
+    type WeeklyEvidenceItem,
+    type WeeklySummary,
+  } from "../lib/progress-calculator";
+  import {
+    mockProgressAttempts,
+    progressCategoryLabels,
+    progressTierLabels
+  } from "../lib/progress-fixtures";
+
+  const rollingWindowMs = 7 * 24 * 60 * 60 * 1000;
+  const evidenceKindLabels: Record<ProgressEvidenceKind, string> = {
+    "concept-read": "阅读概念",
+    "code-run": "运行代码",
+    assessment: "完成评估",
+    pep8: "PEP 8 检查",
+    "project-complete": "完成项目",
+    "reverse-recognition": "反向识别",
+    "cross-concept": "跨概念题"
+  };
+  const weekTimeFormatter = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  });
+  type ProgressSource = "Local" | "Mock";
+  type RecognitionAssessmentLink = {
+    id: string;
+    title: string;
+    category: ProgressCategory;
+  };
+
+  function readAttempts() {
+    try {
+      const raw = window.localStorage.getItem("pkb:attempts");
+      const parsed = raw ? JSON.parse(raw) : null;
+      const attempts = parsed?.schemaVersion === PROGRESS_SCHEMA_VERSION && Array.isArray(parsed?.attempts)
+        ? parsed.attempts
+        : [];
+
+      if (attempts.length === 0) {
+        return { attempts: mockProgressAttempts, source: "Mock" as const };
+      }
+
+      return { attempts: attempts as ProgressAttempt[], source: "Local" as const };
+    } catch {
+      return { attempts: mockProgressAttempts, source: "Mock" as const };
+    }
+  }
+
+  function readCategoryConfig(): ProgressCategoryConfig {
+    const element = document.getElementById("progress-category-config");
+    if (!element?.textContent) {
+      throw new Error("Progress category config is missing");
+    }
+
+    return JSON.parse(element.textContent) as ProgressCategoryConfig;
+  }
+
+  function readRecognitionAssessments(): RecognitionAssessmentLink[] {
+    const element = document.getElementById("recognition-assessments");
+    if (!element?.textContent) {
+      return [];
+    }
+
+    return JSON.parse(element.textContent) as RecognitionAssessmentLink[];
+  }
+
+  function setText(selector: string, value: string) {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+
+  function completedCategories(snapshot: ProgressSnapshot) {
+    return PROGRESS_CATEGORIES.filter((category) => snapshot.tiersByCategory[category] !== "none").length;
+  }
+
+  function cellMissingLabel(cell: ProgressSnapshot["matrix"][ProgressCategory][ProgressTier]) {
+    if (cell.requirements.every((item) => item.target === 0)) {
+      return "暂无可衡量项";
+    }
+
+    return `${cell.requirements.filter((item) => !item.complete).length} 项待补`;
+  }
+
+  function cellStatusClass(status: CellStatus) {
+    return status === "n/a" ? "na" : status;
+  }
+
+  function evidenceDetail(item: WeeklyEvidenceItem) {
+    return item.assessmentId
+      ?? item.projectId
+      ?? item.conceptId
+      ?? item.codeExampleTitle
+      ?? item.id;
+  }
+
+  function formatWeekTime(value: string) {
+    return weekTimeFormatter.format(new Date(value));
+  }
+
+  function renderWeeklySummary(summary: WeeklySummary) {
+    setText("[data-week-total]", String(summary.total));
+    setText(
+      "[data-week-window]",
+      summary.weekStart
+        ? `${formatWeekTime(summary.weekStart)} 至 ${formatWeekTime(summary.weekEnd)}`
+        : "等待有效时间窗口"
+    );
+
+    const categories = document.querySelector("[data-week-categories]");
+    if (categories) {
+      const entries = Object.entries(summary.byCategory) as [ProgressCategory, number][];
+      if (entries.length === 0) {
+        const empty = document.createElement("span");
+        empty.className = "weekly-empty";
+        empty.textContent = "最近 7 天暂无通过证据。";
+        categories.replaceChildren(empty);
+      } else {
+        const items = entries.map(([category, count]) => {
+          const item = document.createElement("span");
+          item.textContent = `${progressCategoryLabels[category]} ${count}`;
+          return item;
+        });
+        categories.replaceChildren(...items);
+      }
+    }
+
+    const list = document.querySelector("[data-week-items]");
+    if (list) {
+      if (summary.items.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "weekly-empty";
+        empty.textContent = "完成概念、代码或评估后，证据会在这里出现。";
+        list.replaceChildren(empty);
+      } else {
+        const items = summary.items.slice(0, 8).map((item) => {
+          const li = document.createElement("li");
+          const time = document.createElement("time");
+          const kind = document.createElement("strong");
+          const detail = document.createElement("span");
+          time.dateTime = item.occurredAt;
+          time.textContent = formatWeekTime(item.occurredAt);
+          kind.textContent = evidenceKindLabels[item.kind];
+          detail.textContent = `${progressCategoryLabels[item.category]} · ${evidenceDetail(item)}`;
+          li.append(time, kind, detail);
+          return li;
+        });
+        list.replaceChildren(...items);
+      }
+    }
+  }
+
+  function renderReturnGuidance(
+    snapshot: ProgressSnapshot,
+    summary: WeeklySummary,
+    source: ProgressSource
+  ) {
+    const guidance = document.querySelector<HTMLElement>("[data-return-guidance]");
+    const frontier = snapshot.activeFrontier[0];
+    if (!guidance) {
+      return;
+    }
+
+    if (source !== "Local" || summary.total > 0 || !frontier) {
+      guidance.hidden = true;
+      guidance.textContent = "";
+      return;
+    }
+
+    guidance.textContent = `欢迎回来。你上次的前沿在「${progressCategoryLabels[frontier.category]}」的「${progressTierLabels[frontier.tier]}」，可以从这里继续。`;
+    guidance.hidden = false;
+  }
+
+  function recognitionCandidate(
+    stalled: StalledCategory,
+    attempts: readonly ProgressAttempt[],
+    assessments: readonly RecognitionAssessmentLink[]
+  ) {
+    const attemptedIds = new Set(
+      attempts
+        .filter((attempt) => attempt.kind === "assessment" && attempt.assessmentId)
+        .map((attempt) => attempt.assessmentId as string)
+    );
+
+    return assessments.find((assessment) => (
+      assessment.category === stalled.category && !attemptedIds.has(assessment.id)
+    ));
+  }
+
+  function renderStalledCategories(
+    stalled: readonly StalledCategory[],
+    attempts: readonly ProgressAttempt[],
+    assessments: readonly RecognitionAssessmentLink[],
+    source: ProgressSource
+  ) {
+    const section = document.querySelector<HTMLElement>("[data-stalled-section]");
+    const list = document.querySelector<HTMLUListElement>("[data-stalled-list]");
+    if (!section || !list) {
+      return;
+    }
+
+    const suggestions = source === "Local"
+      ? stalled.flatMap((item) => {
+          const assessment = recognitionCandidate(item, attempts, assessments);
+          return assessment ? [{ item, assessment }] : [];
+        })
+      : [];
+
+    if (suggestions.length === 0) {
+      section.hidden = true;
+      list.replaceChildren();
+      return;
+    }
+
+    const rows = suggestions.map(({ item, assessment }) => {
+      const li = document.createElement("li");
+      const context = document.createElement("div");
+      const category = document.createElement("strong");
+      const detail = document.createElement("span");
+      const link = document.createElement("a");
+      category.textContent = `${progressCategoryLabels[item.category]} · ${progressTierLabels[item.currentTier === "none" ? "tier1" : item.currentTier]}`;
+      detail.textContent = "这里暂时停了一阵。用一道识别题找回上下文。";
+      link.href = `/assessments/${assessment.id}/`;
+      link.textContent = assessment.title;
+      link.setAttribute("data-stalled-assessment", assessment.id);
+      context.append(category, detail);
+      li.append(context, link);
+      return li;
+    });
+
+    list.replaceChildren(...rows);
+    section.hidden = false;
+  }
+
+  function renderSnapshot(snapshot: ProgressSnapshot, source: ProgressSource) {
+    setText('[data-summary="schema"]', String(snapshot.schemaVersion));
+    setText('[data-summary="completed"]', String(completedCategories(snapshot)));
+    setText('[data-summary="source"]', source);
+    setText(
+      "[data-progress-note]",
+      source === "Local"
+        ? "已读取本地 pkb:attempts，只读展示当前浏览器证据。"
+        : "未检测到本地 attempts，当前显示演示数据。"
+    );
+
+    for (const category of PROGRESS_CATEGORIES) {
+      for (const tier of PROGRESS_TIERS) {
+        const cell = snapshot.matrix[category][tier];
+        const element = document.querySelector(`[data-cell="${category}:${tier}"]`);
+        if (!element) {
+          continue;
+        }
+
+        element.className = `matrix-cell ${cellStatusClass(cell.status)}`;
+        element.setAttribute("aria-label", `${progressCategoryLabels[category]} ${progressTierLabels[tier]} ${cell.status}`);
+        const status = element.querySelector("[data-status]");
+        const progress = element.querySelector("[data-progress]");
+        const missing = element.querySelector("[data-missing]");
+        if (status) status.textContent = cell.status;
+        if (progress) progress.textContent = `${Math.round(cell.progress * 100)}%`;
+        if (missing) missing.textContent = cellMissingLabel(cell);
+      }
+    }
+
+    const frontier = document.querySelector("[data-frontier]");
+    if (frontier) {
+      const items = snapshot.activeFrontier.slice(0, 5).map((item) => {
+        const li = document.createElement("li");
+        const title = document.createElement("strong");
+        const detail = document.createElement("span");
+        title.textContent = `${progressCategoryLabels[item.category]} · ${progressTierLabels[item.tier]}`;
+        detail.textContent = item.missing
+          .map((requirement) => `${requirement.label} ${requirement.current}/${requirement.target}`)
+          .join("；");
+        li.append(title, detail);
+        return li;
+      });
+      frontier.replaceChildren(...items);
+    }
+
+    const patterns = document.querySelector("[data-patterns]");
+    if (patterns) {
+      if (snapshot.recentPatterns.length === 0) {
+        const li = document.createElement("li");
+        const empty = document.createElement("span");
+        empty.textContent = "暂无失败 attempt 记录。";
+        li.append(empty);
+        patterns.replaceChildren(li);
+      } else {
+        const items = snapshot.recentPatterns.map((item) => {
+          const li = document.createElement("li");
+          const title = document.createElement("strong");
+          const detail = document.createElement("span");
+          title.textContent = item.pattern;
+          detail.textContent = `${item.count} 次`;
+          li.append(title, detail);
+          return li;
+        });
+        patterns.replaceChildren(...items);
+      }
+    }
+  }
+
+  const categoryConfig = readCategoryConfig();
+  const recognitionAssessmentLinks = readRecognitionAssessments();
+
+  function refreshProgress() {
+    const { attempts, source } = readAttempts();
+    const asOf = new Date().toISOString();
+    const snapshot = calculateProgress(attempts, categoryConfig);
+    const week = weeklySummary(
+      attempts,
+      new Date(Date.parse(asOf) - rollingWindowMs).toISOString()
+    );
+    renderSnapshot(snapshot, source);
+    renderWeeklySummary(week);
+    renderReturnGuidance(snapshot, week, source);
+    renderStalledCategories(
+      stalledCategories(attempts, snapshot.tiersByCategory, asOf),
+      attempts,
+      recognitionAssessmentLinks,
+      source
+    );
+  }
+
+  refreshProgress();
+  window.addEventListener("pkb:progress-updated", refreshProgress);
+  window.addEventListener("storage", (event) => {
+    if (event.key === "pkb:attempts") {
+      refreshProgress();
+    }
+  });
+</script>
+
+<style>
+  .progress-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 24px;
+    align-items: end;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+
+  .progress-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .progress-summary div {
+    min-height: 88px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    background: var(--color-panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .progress-summary span {
+    display: block;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .progress-summary strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .progress-panel {
+    min-width: 0;
+  }
+
+  .progress-matrix {
+    overflow-x: auto;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-panel);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .matrix-row {
+    min-width: 820px;
+    display: grid;
+    grid-template-columns: 180px repeat(4, minmax(140px, 1fr));
+    border-top: 1px solid var(--color-line);
+  }
+
+  .matrix-row:first-child {
+    border-top: 0;
+  }
+
+  .matrix-head {
+    color: var(--color-muted);
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--color-soft);
+  }
+
+  .matrix-head > div,
+  .category-cell,
+  .matrix-cell {
+    min-width: 0;
+    padding: 12px;
+    border-left: 1px solid var(--color-line);
+  }
+
+  .matrix-head > div:first-child,
+  .category-cell {
+    border-left: 0;
+  }
+
+  .category-cell strong,
+  .category-cell span,
+  .matrix-cell span,
+  .matrix-cell strong {
+    display: block;
+  }
+
+  .category-cell strong {
+    line-height: 1.25;
+  }
+
+  .category-cell span,
+  .matrix-cell span {
+    color: var(--color-muted);
+    font-size: 12px;
+  }
+
+  .matrix-cell {
+    min-height: 90px;
+    border-left: 1px solid var(--color-line);
+    background: #f8fafc;
+  }
+
+  .matrix-cell strong {
+    margin: 8px 0 4px;
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .matrix-cell.complete {
+    background: rgb(22 138 91 / 10%);
+  }
+
+  .matrix-cell.complete .cell-status,
+  .matrix-cell.complete strong {
+    color: var(--color-green);
+  }
+
+  .matrix-cell.in_progress {
+    background: rgb(37 99 235 / 9%);
+  }
+
+  .matrix-cell.in_progress .cell-status,
+  .matrix-cell.in_progress strong {
+    color: var(--color-blue);
+  }
+
+  .matrix-cell.blocked {
+    background: rgb(183 121 31 / 9%);
+  }
+
+  .matrix-cell.blocked .cell-status,
+  .matrix-cell.blocked strong {
+    color: var(--color-amber);
+  }
+
+  .matrix-cell.na {
+    background: #f8fafc;
+  }
+
+  .matrix-cell.na .cell-status,
+  .matrix-cell.na strong {
+    color: var(--color-muted);
+  }
+
+  .weekly-review {
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .weekly-summary-grid {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.35fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+
+  .weekly-total span,
+  .weekly-total strong,
+  .weekly-total small,
+  .weekly-label {
+    display: block;
+  }
+
+  .weekly-total span,
+  .weekly-label {
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .weekly-total strong {
+    margin: 4px 0;
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .weekly-total small {
+    color: var(--color-muted);
+    font-size: 12px;
+  }
+
+  .weekly-category-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .weekly-category-list > span:not(.weekly-empty) {
+    padding: 5px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    background: var(--color-soft);
+    font-size: 13px;
+  }
+
+  .weekly-items {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .weekly-items li {
+    display: grid;
+    grid-template-columns: 120px minmax(100px, 0.35fr) minmax(0, 1fr);
+    gap: 14px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .weekly-items time,
+  .weekly-items span,
+  .weekly-empty {
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .return-guidance {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-blue);
+    font-weight: 700;
+  }
+
+  .stalled-review {
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .stalled-list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .stalled-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.35fr);
+    gap: 18px;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .stalled-list strong,
+  .stalled-list span {
+    display: block;
+  }
+
+  .stalled-list span {
+    margin-top: 3px;
+    color: var(--color-muted);
+    font-size: 13px;
+  }
+
+  .stalled-list a {
+    justify-self: end;
+    color: var(--color-blue);
+    font-weight: 700;
+  }
+
+  .progress-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 16px;
+  }
+
+  .section-header.compact {
+    margin-bottom: 10px;
+  }
+
+  .frontier-list,
+  .pattern-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .pattern-list {
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .frontier-list li,
+  .pattern-list li {
+    min-width: 0;
+  }
+
+  .frontier-list strong,
+  .frontier-list span,
+  .pattern-list strong,
+  .pattern-list span {
+    display: block;
+  }
+
+  .frontier-list span,
+  .pattern-list span {
+    color: var(--color-muted);
+    font-size: 14px;
+  }
+
+  @media (max-width: 860px) {
+    .progress-hero,
+    .progress-details {
+      grid-template-columns: 1fr;
+    }
+
+    .progress-summary {
+      grid-template-columns: 1fr;
+    }
+
+    .weekly-summary-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .weekly-items li {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+
+    .stalled-list li {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .stalled-list a {
+      justify-self: start;
+    }
+  }
+</style>

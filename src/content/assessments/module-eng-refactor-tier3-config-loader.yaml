@@ -1,0 +1,43 @@
+title: 重构配置读取函数
+description: 把脚本式 JSON 读取重构为有边界处理的函数。
+category: module-eng
+kind: refactor
+targetTier: tier3
+concepts:
+  - json
+  - try-except
+  - pathlib
+  - function
+prompt: |
+  将脚本式配置读取重构为 load_config(path) 函数。函数应返回字典；文件不存在或 JSON 无效时返回空字典。
+starterCode: |
+  import json
+
+  text = open("settings.json", encoding="utf-8").read()
+  config = json.loads(text)
+  print(config["theme"])
+testCases:
+  - name: loads valid JSON
+    code: |
+      from pathlib import Path
+      path = Path("settings.json")
+      path.write_text('{"theme": "dark"}', encoding="utf-8")
+      assert load_config(path) == {"theme": "dark"}
+  - name: returns empty dict for missing file
+    code: |
+      from pathlib import Path
+      assert load_config(Path("missing.json")) == {}
+referenceSolution: |
+  import json
+  from pathlib import Path
+  from typing import Any
+
+  def load_config(path: Path) -> dict[str, Any]:
+      try:
+          return json.loads(path.read_text(encoding="utf-8"))
+      except (FileNotFoundError, json.JSONDecodeError):
+          return {}
+rubric:
+  - 能把脚本重构成可测试函数。
+  - 能使用 pathlib 表达文件路径。
+  - 至少处理文件不存在或 JSON 无效的边界情况。

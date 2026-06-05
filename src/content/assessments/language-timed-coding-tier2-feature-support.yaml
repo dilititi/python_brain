@@ -1,0 +1,40 @@
+title: 限时探测解释器特性
+description: 在限定时间内用 sys.version_info 判断当前解释器的特性边界。
+category: language
+kind: timed-coding
+targetTier: tier2
+concepts:
+  - interpreter-runtime
+  - python-versions
+timeLimit: 360
+prompt: |
+  实现 feature_support()，返回一个 dict，包含两个键：
+  "walrus"（当前 Python 是否 >= 3.8）和 "match"（是否 >= 3.10），值为布尔。
+starterCode: |
+  import sys
+
+  def feature_support():
+      pass
+testCases:
+  - name: 返回恰好两个特性键
+    code: |
+      result = feature_support()
+      assert set(result.keys()) == {"walrus", "match"}
+  - name: 根据当前解释器版本判断特性
+    code: |
+      import sys
+      result = feature_support()
+      assert result["walrus"] == (sys.version_info >= (3, 8))
+      assert result["match"] == (sys.version_info >= (3, 10))
+referenceSolution: |
+  import sys
+
+  def feature_support():
+      return {
+          "walrus": sys.version_info >= (3, 8),
+          "match": sys.version_info >= (3, 10),
+      }
+rubric:
+  - 能用 sys.version_info 做版本比较而不是硬编码版本字符串。
+  - 能把多个特性边界组织成可读的返回结构。
+  - 通过给定测试用例。

@@ -21,8 +21,10 @@
 ```bash
 npm run validate:relations
 npm run audit:concepts
+npm run audit:assessments
 npm run test
 npm run test:code-examples
+npm run test:assessments
 npm run build
 npm run link:check
 npm run link:external:inventory
@@ -34,8 +36,10 @@ npm run link:external:inventory
 |---|---|---|
 | `npm run validate:relations` | 无 blocking error | error 时返回 `1` 并阻断；默认 warning-only 返回 `0` |
 | `npm run audit:concepts` | 无 concept blocking error；codeExamples 缺口也必须为 0 | blocking error 返回 `1`；codeExamples 已是严格阻断项 |
+| `npm run audit:assessments` | v1.2 assessment 文件名、kind 覆盖、concept 引用和题型结构均有效 | blocking error 返回 `1` 并阻断 |
 | `npm run test` | 所有测试通过 | 测试失败时返回 `1` 并阻断 |
 | `npm run test:code-examples` | 所有 `runnable !== false` 的 concept codeExamples 可在 Pyodide 跑通 | 语法错误或运行错误返回 `1` 并阻断 |
+| `npm run test:assessments` | 所有非 recognition assessment 的 `referenceSolution` 可通过 `testCases` | 语法错误、运行错误或断言失败返回 `1` 并阻断 |
 | `npm run build` | Astro content schema、类型检查和静态构建通过 | schema、类型或构建失败时返回 `1` 并阻断 |
 | `npm run link:check` | `dist` 内部链接和 anchor 全部可解析 | 缺失页面、资源或 anchor 时返回 `1` 并阻断 |
 | `npm run link:external:inventory` | content 外链均为 `https://`，并输出去重清单规模 | 非 https 外链返回 `1`；不访问网络 |
@@ -67,9 +71,19 @@ Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命�
 
 GitHub Actions 工作流 `.github/workflows/v1-gates.yml` 会在 PR 和 `main` push 时运行：
 
-- static gates：`validate:relations`、`audit:concepts`、`test`、`test:code-examples`、`build`、`link:check`
+- static gates：`validate:relations`、`audit:concepts`、`audit:assessments`、`test`、`test:code-examples`、`test:assessments`、`build`、`link:check`
 - Lighthouse beacon pages：构建静态站、启动 Astro preview、跑三页标杆 Lighthouse
 - external URL monitor：手动或每周定时运行 `npm run link:external`
+
+### v1.2 发布前浏览器闭环
+
+v1.2 release candidate 在合并和打 tag 前额外运行：
+
+```bash
+npm run test:e2e
+```
+
+该命令使用 Playwright 覆盖 recognition 题提交写入 `pkb:attempts`、attempt 驱动 `/progress` matrix 与最近 7 天证据，以及回归定位只对真实本地历史出现的边界。它需要安装 Chromium（首次执行运行 `npx playwright install chromium`），属于发布前 gate，不加入每次 PR 的常规 `v1-gates`，避免浏览器下载和启动拖慢普通内容改动。
 
 ## CLI 部署
 
@@ -92,8 +106,10 @@ npx vercel --prod --token <VERCEL_TOKEN>
 - `npm.cmd run validate:relations`
 - `npm.cmd run validate:relations -- --warning-exit-code=2`
 - `npm.cmd run audit:concepts`
+- `npm.cmd run audit:assessments`
 - `npm.cmd run test`
 - `npm.cmd run test:code-examples`
+- `npm.cmd run test:assessments`
 - `npm.cmd run build`
 - `npm.cmd run link:check`
 - `npm.cmd run link:external:inventory`

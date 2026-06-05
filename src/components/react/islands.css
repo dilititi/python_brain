@@ -15,7 +15,8 @@
 
 .graph-shell,
 .quiz-panel,
-.review-card {
+.review-card,
+.assessment-runner {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   padding: 14px;
@@ -86,6 +87,138 @@
   line-height: 1.25;
 }
 
+.assessment-runner {
+  display: grid;
+  gap: 16px;
+}
+
+.assessment-task {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.34fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.assessment-task h2 {
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+
+.assessment-task p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.assessment-meta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.assessment-meta div {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: var(--color-soft);
+}
+
+.assessment-meta dt {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.assessment-meta dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+
+.assessment-workspace,
+.assessment-choices,
+.assessment-feedback,
+.assessment-rubric {
+  display: grid;
+  gap: 12px;
+}
+
+.code-editor-host {
+  min-width: 0;
+}
+
+.editor-status {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.assessment-choices button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
+  min-height: 48px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  background: var(--color-panel);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.assessment-choices button.active {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+  background: #eff6ff;
+}
+
+.assessment-feedback p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.assessment-feedback p.pass {
+  color: var(--color-green);
+}
+
+.assessment-feedback p.fail {
+  color: var(--color-rose);
+}
+
+.test-results {
+  display: grid;
+  gap: 8px;
+}
+
+.test-results details {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  background: var(--color-soft);
+}
+
+.test-results summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.test-results pre {
+  margin: 10px 0 0;
+  white-space: pre-wrap;
+}
+
+.assessment-rubric h3 {
+  margin: 0;
+}
+
+.assessment-rubric ul {
+  margin: 0;
+}
+
 .quiz-options {
   display: grid;
   gap: 10px;
@@ -104,5 +237,9 @@
 @media (max-width: 860px) {
   .graph-canvas {
     min-height: 430px;
+  }
+
+  .assessment-task {
+    grid-template-columns: 1fr;
   }
 }

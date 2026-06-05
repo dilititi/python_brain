@@ -1,0 +1,25 @@
+title: Python 的类型纪律
+description: 判断 Python 属于哪种类型系统。
+category: language
+kind: recognition
+targetTier: tier1
+concepts:
+  - dynamic-strong-typing
+  - python-language
+prompt: |
+  下面哪一项最准确地描述 Python 的类型系统？
+choices:
+  - label: "动态类型 + 强类型：变量类型运行时确定，但不会隐式做危险转换"
+    value: dynamic-strong
+    correct: true
+    feedback: '"1" + 2 会 TypeError，说明强类型；变量类型运行时才定，说明动态。'
+  - label: "静态类型 + 强类型：编译期检查所有类型"
+    value: static-strong
+    correct: false
+    feedback: Python 不在编译期做完整类型检查。
+  - label: "动态类型 + 弱类型：会隐式把字符串和数字相加"
+    value: dynamic-weak
+    correct: false
+    feedback: Python 不会隐式把 str 和 int 相加，那会报错。
+rubric:
+  - 理解 Python 是动态强类型："1" + 2 会报错而不是隐式转换。

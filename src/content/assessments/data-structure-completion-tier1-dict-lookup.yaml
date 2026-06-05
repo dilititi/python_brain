@@ -1,0 +1,27 @@
+title: 补全字典读取
+description: 使用 dict.get 读取可选字段，并提供默认值。
+category: data-structure
+kind: completion
+targetTier: tier1
+concepts:
+  - dict
+  - string
+prompt: |
+  补全函数：从用户资料里读取 city 字段；如果缺失，返回 "Unknown"。
+starterCode: |
+  def display_city(profile):
+      return ____
+testCases:
+  - name: returns city when present
+    code: |
+      assert display_city({"name": "Ada", "city": "London"}) == "London"
+  - name: falls back when missing
+    code: |
+      assert display_city({"name": "Ada"}) == "Unknown"
+referenceSolution: |
+  def display_city(profile):
+      return profile.get("city", "Unknown")
+rubric:
+  - 能选择字典按 key 读取，而不是遍历所有值。
+  - 能处理 key 缺失的边界情况。
+  - 返回值保持字符串类型。

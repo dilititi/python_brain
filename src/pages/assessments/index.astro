@@ -1,0 +1,37 @@
+---
+import { getCollection } from "astro:content";
+import RelationCard from "../../components/astro/RelationCard.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const assessments = await getCollection("assessments");
+---
+
+<BaseLayout title="评估题" description="用静态评估题积累 Python 掌握度证据。">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">Assessments</p>
+      <h1>评估题</h1>
+      <p class="lead">每道题都会在本机浏览器里留下证据，用于点亮掌握度地图。</p>
+    </div>
+  </header>
+
+  <div class="grid cols-3">
+    {assessments.map((entry) => (
+      <RelationCard
+        href={`/assessments/${entry.id}/`}
+        title={entry.data.title}
+        description={entry.data.description ?? entry.data.prompt}
+        meta={`${entry.data.kind} · ${entry.data.targetTier}`}
+      />
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+</style>

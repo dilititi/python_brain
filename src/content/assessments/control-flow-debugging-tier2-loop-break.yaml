@@ -1,0 +1,36 @@
+title: 修复循环提前停止
+description: 找出循环找到目标后仍继续扫描的问题。
+category: control-flow
+kind: debugging
+targetTier: tier2
+concepts:
+  - for-loop
+  - break-continue-pass
+  - if-statement
+prompt: |
+  这个函数应该返回第一个匹配项，并在找到后停止扫描。现在它虽然能返回值，但没有表达“找到就停”的意图。请修复它。
+starterCode: |
+  def first_match(items, target):
+      found = None
+      for item in items:
+          if item == target:
+              found = item
+              continue
+      return found
+testCases:
+  - name: returns the first matching item
+    code: |
+      assert first_match(["a", "b", "b"], "b") == "b"
+  - name: returns None when no item matches
+    code: |
+      assert first_match(["a", "c"], "b") is None
+referenceSolution: |
+  def first_match(items, target):
+      for item in items:
+          if item == target:
+              return item
+      return None
+rubric:
+  - 能定位 continue 不是“找到后停止”的语义。
+  - 能用 return 或 break 表达找到目标后的控制流。
+  - 保留未找到时返回 None 的行为。

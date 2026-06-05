@@ -1,0 +1,32 @@
+title: 补全主版本判断
+description: 读取 sys.version_info.major 判断 Python 主版本。
+category: language
+kind: completion
+targetTier: tier1
+concepts:
+  - interpreter-runtime
+  - python-versions
+prompt: |
+  补全函数，判断当前运行时是否为 Python 3。
+starterCode: |
+  import sys
+
+  def is_python3():
+      return sys.version_info.major == ____
+testCases:
+  - name: current runtime is Python 3
+    code: |
+      assert is_python3() is True
+  - name: major version value is an int
+    code: |
+      import sys
+      assert isinstance(sys.version_info.major, int)
+referenceSolution: |
+  import sys
+
+  def is_python3():
+      return sys.version_info.major == 3
+rubric:
+  - 能通过 sys.version_info 读取运行时版本。
+  - 能区分主版本和次版本。
+  - 使用整数比较而不是字符串猜测。

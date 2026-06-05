@@ -1,0 +1,32 @@
+title: 可变默认参数的陷阱
+description: 判断可变默认参数在多次调用间的行为。
+category: function
+kind: recognition
+targetTier: tier1
+concepts:
+  - function-parameters
+  - function
+prompt: |
+  阅读代码，选择最终输出：
+
+  def add(item, bucket=[]):
+      bucket.append(item)
+      return bucket
+
+  add(1)
+  print(add(2))
+choices:
+  - label: "[1, 2]"
+    value: shared-list
+    correct: true
+    feedback: 默认列表只在定义时创建一次，两次调用共享同一对象。
+  - label: "[2]"
+    value: fresh-each-call
+    correct: false
+    feedback: 默认参数不会每次调用都新建，会复用同一个列表。
+  - label: "[1]"
+    value: first-only
+    correct: false
+    feedback: 第二次调用又往同一列表追加了 2。
+rubric:
+  - 理解可变默认参数只在定义时创建一次，会在多次调用间共享同一对象。

@@ -1,0 +1,30 @@
+title: 限时实现列对齐输出
+description: 在限定时间内用 f-string 把键值对左对齐成等宽列。
+category: syntax
+kind: timed-coding
+targetTier: tier2
+concepts:
+  - f-string
+  - variable
+timeLimit: 480
+prompt: |
+  实现 align_columns(rows)。rows 是 (key, value) 元组列表。
+  返回字符串列表，每行是 key 左对齐到所有 key 的最大宽度、空格、再接 value。空列表返回空列表。
+starterCode: |
+  def align_columns(rows):
+      pass
+testCases:
+  - name: 基本对齐到最长 key 宽度
+    code: |
+      assert align_columns([("a", 1), ("name", 2)]) == ["a    1", "name 2"]
+  - name: 空输入返回空列表
+    code: |
+      assert align_columns([]) == []
+referenceSolution: |
+  def align_columns(rows):
+      width = max((len(key) for key, _ in rows), default=0)
+      return [f"{key:<{width}} {value}" for key, value in rows]
+rubric:
+  - 能用 f-string 的对齐与动态宽度语法。
+  - 能处理空输入的边界情况。
+  - 通过给定测试用例。

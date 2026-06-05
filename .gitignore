@@ -6,6 +6,9 @@ src/generated/relations.json
 *.log
 dev-server.out.log
 dev-server.err.log
+test-results/
+playwright-report/
+blob-report/
 
 .DS_Store
 Thumbs.db

@@ -1,0 +1,31 @@
+title: for-else 何时执行 else
+description: 判断 for...else 中 else 分支的触发条件。
+category: control-flow
+kind: recognition
+targetTier: tier1
+concepts:
+  - for-loop
+  - break-continue-pass
+prompt: |
+  阅读代码，选择最终输出：
+
+  for n in [1, 2, 3]:
+      if n == 5:
+          break
+  else:
+      print("done")
+choices:
+  - label: done
+    value: prints-done
+    correct: true
+    feedback: 循环未被 break 中断、正常结束，所以 else 执行。
+  - label: 什么都不打印
+    value: prints-nothing
+    correct: false
+    feedback: for...else 的 else 在循环正常结束时会执行。
+  - label: 打印 1 2 3
+    value: prints-items
+    correct: false
+    feedback: 循环体里没有 print，只有 else 分支打印。
+rubric:
+  - 理解 for...else 的 else 在循环正常结束（未被 break 中断）时执行。

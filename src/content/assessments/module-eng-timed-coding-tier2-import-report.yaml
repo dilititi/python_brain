@@ -1,0 +1,33 @@
+title: 限时生成导入路径报告
+description: 用 pathlib 生成模块路径的可读报告。
+category: module-eng
+kind: timed-coding
+targetTier: tier2
+concepts:
+  - import-syntax
+  - module
+  - pathlib
+timeLimit: 720
+prompt: |
+  实现 module_report(path)，接收字符串或 Path，返回 "name=<文件名>; suffix=<扩展名>"。
+starterCode: |
+  def module_report(path):
+      pass
+testCases:
+  - name: reports a python module path
+    code: |
+      assert module_report("pkg/tools.py") == "name=tools.py; suffix=.py"
+  - name: accepts Path objects
+    code: |
+      from pathlib import Path
+      assert module_report(Path("config/settings.json")) == "name=settings.json; suffix=.json"
+referenceSolution: |
+  from pathlib import Path
+
+  def module_report(path):
+      module_path = Path(path)
+      return f"name={module_path.name}; suffix={module_path.suffix}"
+rubric:
+  - 能正确导入 pathlib.Path。
+  - 能把字符串路径转换成 Path。
+  - 能读取 name 和 suffix 两个路径属性。

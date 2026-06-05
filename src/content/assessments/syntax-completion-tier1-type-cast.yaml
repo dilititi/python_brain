@@ -1,0 +1,26 @@
+title: 补全类型转换
+description: 使用 int() 把文本数量转换成数字。
+category: syntax
+kind: completion
+targetTier: tier1
+concepts:
+  - type-casting
+prompt: |
+  补全函数，把字符串形式的数量加 1 后返回。
+starterCode: |
+  def next_count(raw_count):
+      return ____ + 1
+testCases:
+  - name: converts text before adding
+    code: |
+      assert next_count("41") == 42
+  - name: handles zero text
+    code: |
+      assert next_count("0") == 1
+referenceSolution: |
+  def next_count(raw_count):
+      return int(raw_count) + 1
+rubric:
+  - 能识别字符串和整数不能直接做数值加法。
+  - 能选择 int() 做显式转换。
+  - 返回整数而不是字符串。
