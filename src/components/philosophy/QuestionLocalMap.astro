@@ -1,0 +1,134 @@
+---
+type LocalMapNode = {
+  key: string;
+  label: string;
+  count: number;
+  href: string;
+  x: number;
+  y: number;
+};
+
+type LocalMapDetailItem = {
+  id: string;
+  title: string;
+  href: string;
+  meta?: ReadonlyArray<string>;
+  description?: string;
+};
+
+type LocalMapDetailGroup = {
+  key: string;
+  title: string;
+  count: number;
+  items: ReadonlyArray<LocalMapDetailItem>;
+};
+
+interface Props {
+  questionTitle: string;
+  questionHref: string;
+  nodes: ReadonlyArray<LocalMapNode>;
+  detailGroups?: ReadonlyArray<LocalMapDetailGroup>;
+  showDetailPanel?: boolean;
+  note?: string;
+}
+
+const {
+  questionTitle,
+  questionHref,
+  nodes,
+  detailGroups = [],
+  showDetailPanel = true,
+  note
+} = Astro.props as Props;
+const center = { x: 320, y: 190 };
+const visibleDetailGroups = showDetailPanel
+  ? detailGroups.filter((group) => group.items.length > 0)
+  : [];
+
+function countLabel(node: LocalMapNode) {
+  if (node.key === "claims") return `${node.count} ${node.count === 1 ? "claim" : "claims"}`;
+  if (node.key === "sources") return `${node.count} ${node.count === 1 ? "source" : "sources"}`;
+  return `${node.count} ${node.key}`;
+}
+---
+
+<section class="ph-section ph-local-map" aria-labelledby="local-map-heading" data-question-local-map>
+  <div class="ph-section-heading">
+    <p class="eyebrow">Question Local Map</p>
+    <h2 id="local-map-heading">问题局部地图</h2>
+    <p>这不是全站 graph，而是当前 question 周围最小一圈对象：理论回答、原典、立场变化、理解主张、概念和辅助资料。</p>
+    {note && <p>{note}</p>}
+  </div>
+
+  <div class="ph-local-map-frame">
+    <svg
+      data-map-renderer="svg"
+      viewBox="0 0 640 380"
+      role="img"
+      aria-labelledby="local-map-title local-map-desc"
+    >
+      <title id="local-map-title">{questionTitle} 的局部关系图</title>
+      <desc id="local-map-desc">中心是 question，周围是与它相关的 perspectives、readings、entries、claims、notions 和 sources。</desc>
+      <defs>
+        <marker id="map-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M 0 0 L 8 4 L 0 8 z" class="ph-local-map-arrow" />
+        </marker>
+      </defs>
+
+      {nodes.map((node) => (
+        <line
+          class="ph-local-map-edge"
+          x1={center.x}
+          y1={center.y}
+          x2={node.x}
+          y2={node.y}
+          marker-end="url(#map-arrow)"
+        />
+      ))}
+
+      <a href={questionHref}>
+        <g class="ph-local-map-node ph-local-map-node-main" data-map-node="question">
+          <rect x={center.x - 98} y={center.y - 38} width="196" height="76" rx="22" />
+          <text x={center.x} y={center.y - 6} text-anchor="middle">{questionTitle}</text>
+          <text x={center.x} y={center.y + 18} text-anchor="middle">question</text>
+        </g>
+      </a>
+
+      {nodes.map((node) => (
+        <a href={node.href}>
+          <g class="ph-local-map-node" data-map-node={node.key}>
+            <rect x={node.x - 78} y={node.y - 31} width="156" height="62" rx="18" />
+            <text x={node.x} y={node.y - 5} text-anchor="middle">{countLabel(node)}</text>
+            <text x={node.x} y={node.y + 17} text-anchor="middle">{node.label}</text>
+          </g>
+        </a>
+      ))}
+    </svg>
+  </div>
+
+  {visibleDetailGroups.length > 0 && (
+    <div class="ph-local-map-detail-panel" data-local-map-detail-panel>
+      {visibleDetailGroups.map((group) => (
+        <section class="ph-local-map-detail-group" data-local-map-group={group.key}>
+          <div class="ph-local-map-detail-heading">
+            <h3>{group.title}</h3>
+            <span><strong data-local-map-group-count>{group.count}</strong> items</span>
+          </div>
+          <ul class="ph-local-map-detail-list">
+            {group.items.map((item) => (
+              <li class="ph-local-map-detail-item" data-local-map-item={item.id}>
+                <a href={item.href}>{item.title}</a>
+                {item.meta && item.meta.length > 0 && (
+                  <div class="ph-card-meta">
+                    {item.meta.map((meta) => <span>{meta}</span>)}
+                  </div>
+                )}
+                {item.description && <p>{item.description}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  )}
+</section>

@@ -3,10 +3,12 @@ import { getCollection } from "astro:content";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 import { buildRecentStanceChanges } from "../../lib/philosophy-search";
 
-const [entries, questions, readings] = await Promise.all([
+const [entries, questions, readings, claims, sources] = await Promise.all([
   getCollection("entries"),
   getCollection("questions"),
-  getCollection("readings")
+  getCollection("readings"),
+  getCollection("understanding-claims"),
+  getCollection("sources")
 ]);
 
 const rows = buildRecentStanceChanges({
@@ -17,6 +19,68 @@ const rows = buildRecentStanceChanges({
   notions: [],
   sources: []
 });
+
+const statusLabels = {
+  open: "持续追问",
+  provisional: "已有暂定回答",
+  settled: "阶段性稳定",
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置",
+  saved: "已保存",
+  skimmed: "已浏览",
+  reading: "阅读中",
+  read: "已读",
+  extracted: "已提取",
+  rejected: "已弃用"
+} as const;
+const confidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+const reliabilityLabels = {
+  high: "高可靠性",
+  medium: "中等可靠性",
+  low: "低可靠性",
+  unknown: "可靠性未判断"
+} as const;
+const currentDate = new Date();
+const staleQuestionStatuses = new Set(["open", "provisional", "active", "developing"]);
+const evidenceModeTypes = new Set(["critique", "comparison", "application"]);
+
+function daysSince(date: string | undefined) {
+  if (!date) return Number.POSITIVE_INFINITY;
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return Number.POSITIVE_INFINITY;
+  return Math.floor((currentDate.getTime() - parsed.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+const stalledQuestions = questions
+  .map((question) => ({
+    question,
+    age: daysSince(question.data.updatedAt)
+  }))
+  .filter(({ question, age }) => staleQuestionStatuses.has(question.data.status) && age > 30);
+
+const claimEvidenceWarnings = claims.flatMap((claim) => {
+  const warnings: string[] = [];
+  if (["testing", "supported"].includes(claim.data.status) && claim.data.evidence.length === 0) {
+    warnings.push("testing / supported claim 还没有 evidence。");
+  }
+  if (claim.data.confidence === "high" && claim.data.evidence.length < 2) {
+    warnings.push("high confidence claim 的 evidence 少于 2 条。");
+  }
+  if (claim.data.confidence === "high" && !claim.data.evidence.some((item) => evidenceModeTypes.has(item.type))) {
+    warnings.push("high confidence claim 还没有 critique / comparison / application 类型 evidence。");
+  }
+  return warnings.map((warning) => ({ claim, warning }));
+});
+
+const unprocessedSources = sources.filter((source) => ["saved", "skimmed"].includes(source.data.status));
 ---
 
 <PhilosophyLayout
@@ -33,6 +97,90 @@ const rows = buildRecentStanceChanges({
     <h1>近期立场变化</h1>
     <p class="lead">这里不是普通博客归档，而是按时间回看：哪次阅读让我的判断从 Vn 变成 Vn+1，以及仍留下什么问题。</p>
   </header>
+
+  <section class="ph-section" aria-labelledby="review-dashboard-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Dashboard panels</p>
+      <h2 id="review-dashboard-heading">学习回顾面板</h2>
+      <p>把停滞问题、证据不足的理解主张和未处理资料先捞出来；这些是 warnings，不会让 build fail。</p>
+    </div>
+
+    <div class="ph-dashboard-grid">
+      <section class="ph-question-card" data-review-panel="stalled-questions">
+        <div class="ph-section-heading">
+          <h3>Stalled active questions</h3>
+          <p>超过 30 天未更新的开放/暂定问题。</p>
+        </div>
+        {stalledQuestions.length > 0 ? (
+          <ul class="ph-compact-list">
+            {stalledQuestions.map(({ question, age }) => (
+              <li>
+                <a href={`/questions/${question.id}/`}>{question.data.title}</a>
+                <p>{age} 天未更新。</p>
+                <div class="ph-card-meta">
+                  <span>{statusLabels[question.data.status]}</span>
+                  <span>更新于 {question.data.updatedAt}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="ph-empty">当前没有停滞问题。</p>
+        )}
+      </section>
+
+      <section class="ph-question-card" data-review-panel="claims-needing-evidence">
+        <div class="ph-section-heading">
+          <h3>Claims needing evidence</h3>
+          <p>证据数量或证据类型不足的 understanding claims。</p>
+        </div>
+        {claimEvidenceWarnings.length > 0 ? (
+          <ul class="ph-compact-list">
+            {claimEvidenceWarnings.map(({ claim, warning }) => (
+              <li>
+                <a href={`/understanding-claims/${claim.id}/`}>{claim.data.title}</a>
+                <p>{warning}</p>
+                <div class="ph-card-meta">
+                  <span>{statusLabels[claim.data.status]}</span>
+                  <span>{confidenceLabels[claim.data.confidence]}</span>
+                  <span>{claim.data.evidence.length} 条证据</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="ph-empty">当前没有证据不足的 claim。</p>
+        )}
+      </section>
+
+      <section class="ph-question-card" data-review-panel="unprocessed-sources">
+        <div class="ph-section-heading">
+          <h3>Unprocessed sources</h3>
+          <p>仍处在 saved / skimmed 的资料；medium / low / unknown reliability 会被标出。</p>
+        </div>
+        {unprocessedSources.length > 0 ? (
+          <ul class="ph-compact-list">
+            {unprocessedSources.map((source) => {
+              const needsReliabilityReview = source.data.reliability !== "high";
+              return (
+                <li>
+                  <a href={`/sources/${source.id}/`}>{source.data.title}</a>
+                  <p>{source.data.summary}</p>
+                  <div class="ph-card-meta">
+                    <span>{statusLabels[source.data.status]}</span>
+                    <span>{reliabilityLabels[source.data.reliability]}</span>
+                    {needsReliabilityReview && <span>需要可靠性复核</span>}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p class="ph-empty">当前没有未处理 source。</p>
+        )}
+      </section>
+    </div>
+  </section>
 
   <section class="ph-section" aria-labelledby="review-list-heading">
     <div class="ph-section-heading">
@@ -95,4 +243,3 @@ const rows = buildRecentStanceChanges({
     }
   </script>
 </PhilosophyLayout>
-

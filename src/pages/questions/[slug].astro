@@ -1,5 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import QuestionLocalMap from "../../components/philosophy/QuestionLocalMap.astro";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 import { deriveQuestionLearningState } from "../../lib/philosophy-state";
 
@@ -97,6 +98,111 @@ function stanceTitle(slug: string) {
 function readingTitle(slug: string) {
   return readingById.get(slug)?.data.title || slug;
 }
+
+function compactMeta(values: Array<string | undefined | false | null>) {
+  return values.filter((value): value is string => Boolean(value));
+}
+
+const localMapConfig = entry.data.localMap;
+type LocalMapType = (typeof localMapConfig.includeTypes)[number];
+const localMapIncludeTypes = new Set(localMapConfig.includeTypes);
+const localMapAllows = (type: LocalMapType) => localMapIncludeTypes.has(type);
+
+const perspectiveDetails = stances.map((stance) => {
+  const perspective = perspectiveById.get(stance.perspective);
+  return {
+    id: stance.perspective,
+    title: perspective?.data.title || stance.perspective,
+    href: `/perspectives/${stance.perspective}/`,
+    meta: compactMeta([
+      perspective?.data.tradition,
+      perspective?.data.thinkers?.join("、")
+    ]),
+    description: stance.note || perspective?.data.summary
+  };
+});
+
+const readingDetails = relatedReadingIds.map((readingId) => {
+  const reading = readingById.get(readingId);
+  return {
+    id: readingId,
+    title: reading?.data.title || readingId,
+    href: `/readings/${readingId}/`,
+    meta: compactMeta([
+      reading ? readingStatusLabels[reading.data.status] : undefined,
+      reading?.data.author,
+      reading?.data.year ? String(reading.data.year) : undefined
+    ]),
+    description: reading?.data.notes
+  };
+});
+
+const sourceDetails = relatedSources.map((source) => ({
+  id: source.id,
+  title: source.data.title || source.id,
+  href: `/sources/${source.id}/`,
+  meta: compactMeta([
+    source.data.type,
+    sourceReliabilityLabels[source.data.reliability],
+    sourceStatusLabels[source.data.status]
+  ]),
+  description: source.data.summary
+}));
+
+const notionDetails = relatedNotions.map((notion) => ({
+  id: notion.id,
+  title: notion.data.title || notion.id,
+  href: `/notions/${notion.id}/`,
+  meta: compactMeta([
+    notion.data.perspective ? stanceTitle(notion.data.perspective) : undefined
+  ]),
+  description: notion.data.summary
+}));
+
+const understandingClaimDetails = relatedUnderstandingClaims.map((claim) => ({
+  id: claim.id,
+  title: claim.data.title || claim.id,
+  href: `/understanding-claims/${claim.id}/`,
+  meta: compactMeta([
+    understandingClaimStatusLabels[claim.data.status],
+    understandingClaimConfidenceLabels[claim.data.confidence],
+    `${claim.data.evidence.length} 条证据`
+  ]),
+  description: claim.data.claim
+}));
+
+const entryDetails = questionEntries.map((item) => ({
+  id: item.id,
+  title: item.data.title || item.id,
+  href: `/entries/${item.id}/`,
+  meta: compactMeta([
+    item.data.date,
+    `V${item.data.fromVersion} → V${item.data.toVersion}`,
+    item.data.triggeredBy ? `触发阅读：${readingTitle(item.data.triggeredBy)}` : undefined
+  ]),
+  description: item.data.newStance
+}));
+
+const allLocalMapNodes = [
+  { type: "perspective", key: "perspectives", label: "theory answers", count: perspectiveDetails.length, href: "#perspectives-heading", x: 150, y: 78 },
+  { type: "reading", key: "readings", label: "primary texts", count: readingDetails.length, href: "#readings-heading", x: 320, y: 56 },
+  { type: "entry", key: "entries", label: "stance changes", count: entryDetails.length, href: "#timeline-heading", x: 490, y: 78 },
+  { type: "understanding-claim", key: "claims", label: "understanding", count: understandingClaimDetails.length, href: "#understanding-claims-heading", x: 510, y: 292 },
+  { type: "notion", key: "notions", label: "key notions", count: notionDetails.length, href: "#notions-heading", x: 320, y: 324 },
+  { type: "source", key: "sources", label: "supporting info", count: sourceDetails.length, href: "#sources-heading", x: 130, y: 292 }
+] as const;
+
+const localMapNodes = allLocalMapNodes.filter((node) => localMapAllows(node.type));
+const allLocalMapDetailGroups = [
+  { type: "perspective", key: "perspectives", title: "Perspectives", count: perspectiveDetails.length, items: perspectiveDetails },
+  { type: "reading", key: "readings", title: "Readings", count: readingDetails.length, items: readingDetails },
+  { type: "source", key: "sources", title: "Sources", count: sourceDetails.length, items: sourceDetails },
+  { type: "notion", key: "notions", title: "Notions", count: notionDetails.length, items: notionDetails },
+  { type: "understanding-claim", key: "understanding-claims", title: "Understanding Claims", count: understandingClaimDetails.length, items: understandingClaimDetails },
+  { type: "entry", key: "entries", title: "Entries", count: entryDetails.length, items: entryDetails }
+] as const;
+const localMapDetailGroups = allLocalMapDetailGroups.filter((group) => localMapAllows(group.type));
+const showLocalMapDetailPanel = localMapConfig.variant === "detail-panel" && localMapConfig.showDetailPanel;
 ---
 
 <PhilosophyLayout
@@ -123,6 +229,20 @@ function readingTitle(slug: string) {
     </div>
     <p class="ph-current-answer" data-question-current-answer>{entry.data.currentAnswer || "尚未形成暂定回答。"}</p>
   </section>
+
+  {localMapConfig.enabled && (
+    <QuestionLocalMap
+      questionTitle={entry.data.title || entry.id}
+      questionHref={`/questions/${entry.id}/`}
+      nodes={localMapNodes}
+      detailGroups={localMapDetailGroups}
+      showDetailPanel={showLocalMapDetailPanel}
+      note={localMapConfig.note}
+    />
+  )}
+  {entry.id === "what-is-history" && (
+    <p><a class="ph-inline-link" href="/questions/what-is-history/essay/">阅读 essay 实验页 →</a></p>
+  )}
 
   <section class="ph-section" aria-labelledby="dimensions-heading">
     <div class="ph-section-heading">

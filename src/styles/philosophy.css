@@ -145,7 +145,8 @@
 
 .ph-answer-grid,
 .ph-reading-grid,
-.ph-question-grid {
+.ph-question-grid,
+.ph-dashboard-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
@@ -260,6 +261,173 @@
 .ph-review-list {
   display: grid;
   gap: 16px;
+}
+
+.ph-compact-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ph-compact-list li {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.ph-compact-list li + li {
+  border-top: 1px dashed var(--color-line);
+  padding-top: 12px;
+}
+
+.ph-compact-list a {
+  color: var(--color-blue);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ph-compact-list p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.ph-local-map-frame {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background:
+    radial-gradient(circle at 50% 50%, rgb(45 105 224 / 8%), transparent 38%),
+    var(--color-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.ph-local-map svg {
+  display: block;
+  width: 100%;
+  min-width: 620px;
+  height: auto;
+}
+
+.ph-local-map-edge {
+  stroke: rgb(45 105 224 / 30%);
+  stroke-width: 1.4;
+}
+
+.ph-local-map-arrow {
+  fill: rgb(45 105 224 / 45%);
+}
+
+.ph-local-map-node rect {
+  fill: var(--color-panel);
+  stroke: var(--color-line);
+  stroke-width: 1.4;
+  filter: drop-shadow(0 10px 18px rgb(20 32 54 / 8%));
+}
+
+.ph-local-map-node-main rect {
+  fill: rgb(45 105 224 / 10%);
+  stroke: rgb(45 105 224 / 45%);
+}
+
+.ph-local-map-node text {
+  fill: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.ph-local-map-node text + text {
+  fill: var(--color-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.ph-local-map a:focus-visible .ph-local-map-node rect,
+.ph-local-map a:hover .ph-local-map-node rect {
+  stroke: var(--color-blue);
+  stroke-width: 2;
+}
+
+.ph-local-map-detail-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.ph-local-map-detail-group {
+  min-width: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  background: var(--color-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.ph-local-map-detail-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-line);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+}
+
+.ph-local-map-detail-heading h3,
+.ph-local-map-detail-heading span,
+.ph-local-map-detail-item p {
+  margin: 0;
+}
+
+.ph-local-map-detail-heading h3 {
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.ph-local-map-detail-heading span {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.ph-local-map-detail-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ph-local-map-detail-item {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ph-local-map-detail-item + .ph-local-map-detail-item {
+  border-top: 1px dashed var(--color-line);
+  padding-top: 12px;
+}
+
+.ph-local-map-detail-item a {
+  color: var(--color-blue);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ph-local-map-detail-item p {
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .ph-evidence-grid,
@@ -471,6 +639,8 @@
   .ph-answer-grid,
   .ph-reading-grid,
   .ph-question-grid,
+  .ph-dashboard-grid,
+  .ph-local-map-detail-panel,
   .ph-detail-grid {
     grid-template-columns: 1fr;
   }

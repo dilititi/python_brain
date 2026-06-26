@@ -99,6 +99,46 @@ const questionStance = z.object({
   )
 });
 
+const localMapNodeType = z.enum([
+  "perspective",
+  "reading",
+  "source",
+  "notion",
+  "understanding-claim",
+  "entry"
+]);
+
+const questionLocalMapSchema = z.object({
+  enabled: z.boolean().default(false),
+  variant: z.enum(["summary", "detail-panel", "object-map"]).default("summary"),
+  includeTypes: z.array(localMapNodeType).default([
+    "perspective",
+    "reading",
+    "source",
+    "notion",
+    "understanding-claim"
+  ]),
+  maxNodes: z.number().int().min(5).max(40).default(20),
+  showLegend: z.boolean().default(true),
+  showFilters: z.boolean().default(true),
+  showDetailPanel: z.boolean().default(true),
+  note: z.string().optional()
+}).default({
+  enabled: false,
+  variant: "summary",
+  includeTypes: [
+    "perspective",
+    "reading",
+    "source",
+    "notion",
+    "understanding-claim"
+  ],
+  maxNodes: 20,
+  showLegend: true,
+  showFilters: true,
+  showDetailPanel: true
+});
+
 const questionSchema = z
   .object({
     title: z.string(),
@@ -108,6 +148,7 @@ const questionSchema = z
     stances: z.array(questionStance).default([]), // 模块2：理论回答矩阵的数据来源
     relatedReadings: z.array(slugRef).default([]), // 模块4：相关著作卡片
     openQuestions: z.array(z.string()).default([]),
+    localMap: questionLocalMapSchema,
     updatedAt: dateString
   })
   .superRefine((data, ctx) => {

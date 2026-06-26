@@ -1,0 +1,117 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import QuestionLocalMap from "../../../components/philosophy/QuestionLocalMap.astro";
+import PhilosophyLayout from "../../../layouts/PhilosophyLayout.astro";
+
+const [questions, perspectives, entries, sources, notions, understandingClaims] = await Promise.all([
+  getCollection("questions"),
+  getCollection("perspectives"),
+  getCollection("entries"),
+  getCollection("sources"),
+  getCollection("notions"),
+  getCollection("understanding-claims")
+]);
+
+const question = questions.find((item) => item.id === "what-is-history");
+if (!question) throw new Error("questions/what-is-history is required for the essay experiment");
+
+const perspectiveById = new Map(perspectives.map((item) => [item.id, item]));
+const relatedEntries = entries
+  .filter((item) => item.data.question === question.id)
+  .sort((a, b) => a.data.fromVersion - b.data.fromVersion || a.data.date.localeCompare(b.data.date));
+const relatedSources = sources.filter((source) => source.data.relatedQuestions.includes(question.id));
+const relatedClaims = understandingClaims.filter((claim) =>
+  claim.data.relatedQuestions.includes(question.id) || (claim.data.targetType === "question" && claim.data.target === question.id)
+);
+const relatedNotionIds = new Set<string>();
+question.data.stances.forEach((stance) => {
+  perspectiveById.get(stance.perspective)?.data.keyNotions.forEach((notion) => relatedNotionIds.add(notion));
+});
+relatedSources.forEach((source) => source.data.relatedNotions.forEach((notion) => relatedNotionIds.add(notion)));
+const relatedNotions = [...relatedNotionIds]
+  .map((id) => notions.find((notion) => notion.id === id))
+  .filter((item): item is CollectionEntry<"notions"> => Boolean(item));
+const allGaps = relatedClaims.flatMap((claim) => claim.data.gaps);
+const localMapNodes = [
+  { key: "perspectives", label: "theory answers", count: question.data.stances.length, href: "/questions/what-is-history/#perspectives-heading", x: 150, y: 78 },
+  { key: "readings", label: "primary texts", count: question.data.relatedReadings.length, href: "/questions/what-is-history/#readings-heading", x: 320, y: 56 },
+  { key: "entries", label: "stance changes", count: relatedEntries.length, href: "/questions/what-is-history/#timeline-heading", x: 490, y: 78 },
+  { key: "claims", label: "understanding", count: relatedClaims.length, href: "/questions/what-is-history/#understanding-claims-heading", x: 510, y: 292 },
+  { key: "notions", label: "key notions", count: relatedNotions.length, href: "/questions/what-is-history/#notions-heading", x: 320, y: 324 },
+  { key: "sources", label: "supporting info", count: relatedSources.length, href: "/questions/what-is-history/#sources-heading", x: 130, y: 292 }
+];
+---
+
+<PhilosophyLayout
+  title="历史是什么？essay 实验"
+  description="把 what-is-history question 的矩阵、阅读和立场变化临时组织成一篇实验性长文。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: question.data.title, href: "/questions/what-is-history/" },
+    { label: "essay 实验" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Essay experiment</p>
+    <h1>历史是什么？essay 实验</h1>
+    <p class="lead">这不是最终文章，而是把 question workspace 中的矩阵、阅读、entry 和 understanding claims 临时压成一条论证线。</p>
+    <p><a class="ph-inline-link" href="/questions/what-is-history/">返回问题工作台</a></p>
+  </header>
+
+  <div data-essay-local-map>
+    <QuestionLocalMap
+      questionTitle={question.data.title}
+      questionHref="/questions/what-is-history/"
+      nodes={localMapNodes}
+    />
+  </div>
+
+  <article class="ph-section ph-prose">
+    <section aria-labelledby="essay-thesis-heading">
+      <div class="ph-section-heading">
+        <p class="eyebrow">Working thesis</p>
+        <h2 id="essay-thesis-heading">暂定论点</h2>
+      </div>
+      <p class="ph-current-answer">{question.data.currentAnswer}</p>
+    </section>
+
+    <section class="ph-section" aria-labelledby="essay-perspectives-heading">
+      <div class="ph-section-heading">
+        <h2 id="essay-perspectives-heading">理论回答如何互相牵制</h2>
+      </div>
+      <p>黑格尔、马克思主义、结构主义和福柯不是四个并列词条，而是对同一个问题的四种压力测试：历史是否有统一方向、是否由物质矛盾推进、是否受深层结构限制，以及是否只能在局部的话语和权力技术中被描述。</p>
+      <p>当前的写作判断是：这些回答都不能被直接吞并为一个更大的百科解释。它们更像四个坐标轴，迫使我说明自己是在什么尺度上谈历史。</p>
+    </section>
+
+    <section class="ph-section" aria-labelledby="essay-evolution-heading">
+      <div class="ph-section-heading">
+        <h2 id="essay-evolution-heading">我的立场如何变化</h2>
+      </div>
+      {relatedEntries.length > 0 ? (
+        <ol>
+          {relatedEntries.map((entry) => (
+            <li>
+              <strong>V{entry.data.fromVersion} → V{entry.data.toVersion}：</strong>
+              {entry.data.newStance}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p>还没有 entry 能支撑这篇 essay 的立场变化段落。</p>
+      )}
+    </section>
+
+    <section class="ph-section" aria-labelledby="essay-gaps-heading">
+      <div class="ph-section-heading">
+        <h2 id="essay-gaps-heading">还缺什么证据</h2>
+      </div>
+      {allGaps.length > 0 ? (
+        <ul>{allGaps.map((gap) => <li>{gap}</li>)}</ul>
+      ) : (
+        <p>目前还没有从 understanding claims 聚合出的证据缺口。</p>
+      )}
+      <p>下一步不是扩大图谱，而是回到具体章节、概念和 entry，把这些缺口逐个变成可验证的证据。</p>
+    </section>
+  </article>
+</PhilosophyLayout>

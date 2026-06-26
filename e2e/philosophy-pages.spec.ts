@@ -31,6 +31,101 @@ test("question page compares answers and presents stance evolution", async ({ pa
   await expect(page.locator("[data-question-next-reading]")).toContainText("精神现象学");
 });
 
+test("question page renders a pure SVG local map", async ({ page }) => {
+  await page.goto("/questions/what-is-history/");
+
+  const map = page.locator("[data-question-local-map]");
+  await expect(map).toBeVisible();
+  await expect(map.locator("svg")).toHaveAttribute("data-map-renderer", "svg");
+  await expect(map.locator("[data-map-node='question']")).toContainText("历史是什么？");
+  await expect(map.locator("[data-map-node='perspectives']")).toContainText("4 perspectives");
+  await expect(map.locator("[data-map-node='readings']")).toContainText("3 readings");
+  await expect(map.locator("[data-map-node='entries']")).toContainText("2 entries");
+  await expect(map.locator("[data-map-node='claims']")).toContainText("1 claim");
+  await expect(map.locator("[data-map-node='notions']")).toContainText("6 notions");
+  await expect(map.locator("[data-map-node='sources']")).toContainText("1 source");
+  await expect(map.locator(".react-flow")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "阅读 essay 实验页 →" })).toHaveAttribute(
+    "href",
+    "/questions/what-is-history/essay/"
+  );
+});
+
+test("question local map detail panel groups related objects", async ({ page }) => {
+  await page.goto("/questions/what-is-history/");
+
+  const panel = page.locator("[data-local-map-detail-panel]");
+  await expect(panel).toBeVisible();
+
+  const groups = [
+    { key: "perspectives", title: "Perspectives", count: "4", item: "福柯", href: "/perspectives/foucault/" },
+    { key: "readings", title: "Readings", count: "3", item: "规训与惩罚", href: "/readings/discipline-and-punish/" },
+    { key: "sources", title: "Sources", count: "1", item: "Stanford Encyclopedia: Philosophy of History", href: "/sources/stanford-encyclopedia-philosophy-of-history/" },
+    { key: "notions", title: "Notions", count: "6", item: "权力 / 知识", href: "/notions/power-knowledge/" },
+    { key: "understanding-claims", title: "Understanding Claims", count: "1", item: "我理解福柯的权力 / 知识了吗？", href: "/understanding-claims/foucault-power-knowledge-claim/" },
+    { key: "entries", title: "Entries", count: "2", item: "从统一方向到局部规律", href: "/entries/2026-06-21-foucault-history-discontinuity/" }
+  ];
+
+  for (const group of groups) {
+    const section = panel.locator(`[data-local-map-group="${group.key}"]`);
+    await expect(section.getByRole("heading", { name: group.title })).toBeVisible();
+    await expect(section.locator("[data-local-map-group-count]")).toHaveText(group.count);
+    await expect(section.locator("[data-local-map-item]")).toHaveCount(Number(group.count));
+    await expect(section.getByRole("link", { name: group.item })).toHaveAttribute("href", group.href);
+  }
+});
+
+test("question local map detail panel does not overflow on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 840 });
+  await page.goto("/questions/what-is-history/");
+
+  const panel = page.locator("[data-local-map-detail-panel]");
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("Perspectives");
+  const fitsViewport = await panel.evaluate((element) => element.scrollWidth <= element.clientWidth + 1);
+  expect(fitsViewport).toBe(true);
+});
+
+test("what-is-history essay experiment is readable and linked back to the workspace", async ({ page }) => {
+  await page.goto("/questions/what-is-history/essay/");
+
+  await expect(page.getByRole("heading", { level: 1, name: "历史是什么？essay 实验" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暂定论点" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "理论回答如何互相牵制" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "我的立场如何变化" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "还缺什么证据" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "返回问题工作台" })).toHaveAttribute(
+    "href",
+    "/questions/what-is-history/"
+  );
+  await expect(page.locator("[data-essay-local-map] svg")).toHaveAttribute("data-map-renderer", "svg");
+});
+
+test("only question pages with an essay experiment expose the essay link", async ({ page }) => {
+  await page.goto("/questions/what-is-history/");
+  await expect(page.getByRole("link", { name: "阅读 essay 实验页 →" })).toHaveAttribute(
+    "href",
+    "/questions/what-is-history/essay/"
+  );
+
+  await page.goto("/questions/");
+  const otherQuestionIds = await page.locator("[data-question-card]").evaluateAll((cards) => (
+    cards
+      .map((card) => card.getAttribute("data-question-card"))
+      .filter((id): id is string => Boolean(id) && id !== "what-is-history")
+  ));
+
+  if (otherQuestionIds.length === 0) {
+    await expect(page.locator('[data-question-card]:not([data-question-card="what-is-history"])')).toHaveCount(0);
+    return;
+  }
+
+  for (const questionId of otherQuestionIds) {
+    await page.goto(`/questions/${questionId}/`);
+    await expect(page.getByRole("link", { name: "阅读 essay 实验页 →" })).toHaveCount(0);
+  }
+});
+
 test("supporting philosophy objects remain readable and linked back to questions", async ({ page }) => {
   await page.goto("/perspectives/foucault/");
   await expect(page.getByRole("heading", { level: 1, name: "福柯" })).toBeVisible();
@@ -167,6 +262,76 @@ test("review page summarizes recent stance changes newest first", async ({ page 
   await expect(page.locator('[data-review-card="2026-06-21-foucault-history-discontinuity"]')).toBeVisible();
 });
 
+test("philosophy next dashboard aggregates next learning tasks", async ({ page }) => {
+  await page.goto("/philosophy/next/");
+
+  await expect(page.getByRole("heading", { level: 1, name: "下一步学习" })).toBeVisible();
+
+  const claimTasks = page.locator('[data-next-section="claim-tasks"]');
+  await expect(claimTasks).toContainText("重读《规训与惩罚》关于规训权力的章节");
+  await expect(claimTasks.getByRole("link", { name: "我理解福柯的权力 / 知识了吗？" }).first()).toHaveAttribute(
+    "href",
+    "/understanding-claims/foucault-power-knowledge-claim/"
+  );
+
+  const questionTasks = page.locator('[data-next-section="question-open-questions"]');
+  await expect(questionTasks).toContainText("局部规律如何避免退化成不可比较的碎片描述");
+  await expect(questionTasks.getByRole("link", { name: "历史是什么？" }).first()).toHaveAttribute(
+    "href",
+    "/questions/what-is-history/"
+  );
+
+  const readings = page.locator('[data-next-section="readings-to-continue"]');
+  await expect(readings).toContainText("精神现象学");
+  await expect(readings.getByRole("link", { name: "资本论" })).toHaveAttribute("href", "/readings/capital/");
+
+  const sources = page.locator('[data-next-section="sources-to-process"]');
+  await expect(sources).toContainText("Stanford Encyclopedia: Philosophy of History");
+  await expect(sources).toContainText("高可靠性");
+  await expect(sources.getByRole("link", { name: "历史是什么？" })).toHaveAttribute(
+    "href",
+    "/questions/what-is-history/"
+  );
+});
+
+test("philosophy gaps dashboard separates gaps counter evidence and next tasks", async ({ page }) => {
+  await page.goto("/philosophy/gaps/");
+
+  const gaps = page.locator('[data-gap-issue-section="gaps"]');
+  await expect(gaps.getByRole("heading", { name: "Gaps" })).toBeVisible();
+  await expect(gaps).toContainText("还需要用章节细读验证“生产性”的边界");
+  await expect(gaps.getByRole("link", { name: "我理解福柯的权力 / 知识了吗？" }).first()).toHaveAttribute(
+    "href",
+    "/understanding-claims/foucault-power-knowledge-claim/"
+  );
+
+  const counterEvidence = page.locator('[data-gap-issue-section="counter-evidence"]');
+  await expect(counterEvidence.getByRole("heading", { name: "Counter Evidence" })).toBeVisible();
+  await expect(counterEvidence).toContainText("抵抗如何不只是既有规则的再生产");
+
+  const nextTasks = page.locator('[data-gap-issue-section="next-tasks"]');
+  await expect(nextTasks.getByRole("heading", { name: "Next Tasks" })).toBeVisible();
+  await expect(nextTasks).toContainText("把“权力 / 知识”和“话语”两个 notion 的差异写成一个小对照");
+});
+
+test("philosophy review dashboard highlights stalled questions evidence warnings and unprocessed sources", async ({ page }) => {
+  await page.goto("/philosophy/review/");
+
+  await expect(page.locator('[data-review-panel="stalled-questions"]')).toContainText("Stalled active questions");
+  await expect(page.locator('[data-review-panel="stalled-questions"]')).toContainText("当前没有停滞问题");
+
+  await expect(page.locator('[data-review-panel="claims-needing-evidence"]')).toContainText("Claims needing evidence");
+  await expect(page.locator('[data-review-panel="claims-needing-evidence"]')).toContainText("当前没有证据不足的 claim");
+
+  const sources = page.locator('[data-review-panel="unprocessed-sources"]');
+  await expect(sources).toContainText("Unprocessed sources");
+  await expect(sources).toContainText("Stanford Encyclopedia: Philosophy of History");
+  await expect(sources.getByRole("link", { name: "Stanford Encyclopedia: Philosophy of History" })).toHaveAttribute(
+    "href",
+    "/sources/stanford-encyclopedia-philosophy-of-history/"
+  );
+});
+
 test("question workspace exposes notions and concrete open questions", async ({ page }) => {
   await page.goto("/questions/what-is-history/");
 
@@ -254,4 +419,12 @@ test("understanding gaps review groups claim gaps and next tasks", async ({ page
     "href",
     "/understanding-claims/foucault-power-knowledge-claim/"
   );
+});
+
+test("legacy understanding gaps route remains a compatibility page", async ({ page }) => {
+  await page.goto("/review/understanding-gaps/");
+
+  await page.waitForURL("**/philosophy/gaps/");
+  await expect(page).toHaveURL(/\/philosophy\/gaps\/$/);
+  await expect(page.getByRole("heading", { level: 1, name: "理解缺口回顾" })).toBeVisible();
 });
