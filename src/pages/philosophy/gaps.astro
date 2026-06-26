@@ -1,0 +1,118 @@
+---
+import { getCollection } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+const claims = await getCollection("understanding-claims");
+
+const statusLabels = {
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置"
+} as const;
+const confidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+const targetTypeLabels = {
+  question: "问题",
+  notion: "概念",
+  perspective: "理论视角",
+  reading: "原典阅读",
+  source: "辅助资料",
+  entry: "立场变化",
+  concept: "Python 知识点",
+  case: "Python 案例",
+  project: "Python 项目",
+  person: "人物",
+  path: "路径",
+  other: "其他"
+} as const;
+const statusPriority = {
+  draft: 0,
+  testing: 1,
+  contested: 2,
+  revised: 3,
+  supported: 4,
+  retired: 5
+} as const;
+
+const reviewClaims = [...claims].sort((a, b) => (
+  statusPriority[a.data.status] - statusPriority[b.data.status]
+  || (b.data.updatedAt ?? "").localeCompare(a.data.updatedAt ?? "")
+  || a.data.title.localeCompare(b.data.title, "zh-CN")
+));
+---
+
+<PhilosophyLayout
+  title="理解缺口回顾"
+  description="集中查看 understanding claims 中仍需验证的缺口、反证和下一步任务。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "理解缺口回顾" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Review</p>
+    <h1>理解缺口回顾</h1>
+    <p class="lead">这里把每条 understanding claim 的 gaps、counterEvidence 和 nextTasks 聚合出来，优先处理草稿、检验中和存在反证的理解主张。</p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="understanding-gaps-heading">
+    <div class="ph-section-heading">
+      <h2 id="understanding-gaps-heading">需要继续验证的理解</h2>
+      <p>{reviewClaims.length} 条 understanding claim</p>
+    </div>
+
+    {reviewClaims.length > 0 ? (
+      <div class="ph-review-list">
+        {reviewClaims.map((claim) => (
+          <article class="ph-question-card" data-understanding-gap-card={claim.id}>
+            <div class="ph-card-meta">
+              <span>{statusLabels[claim.data.status]}</span>
+              <span>{confidenceLabels[claim.data.confidence]}</span>
+              <span>{targetTypeLabels[claim.data.targetType]} / {claim.data.target || "未绑定"}</span>
+            </div>
+            <h2>{claim.data.title}</h2>
+            <p>{claim.data.claim || "这条草稿还没有写下理解主张。"}</p>
+
+            <div class="ph-gap-panel">
+              <section>
+                <h3>Gaps</h3>
+                {claim.data.gaps.length > 0 ? (
+                  <ul>{claim.data.gaps.map((gap) => <li>{gap}</li>)}</ul>
+                ) : (
+                  <p class="muted">暂未记录 gaps。</p>
+                )}
+              </section>
+              <section>
+                <h3>Counter evidence</h3>
+                {claim.data.counterEvidence.length > 0 ? (
+                  <ul>{claim.data.counterEvidence.map((item) => <li>{item}</li>)}</ul>
+                ) : (
+                  <p class="muted">暂未记录 counterEvidence。</p>
+                )}
+              </section>
+              <section>
+                <h3>Next tasks</h3>
+                {claim.data.nextTasks.length > 0 ? (
+                  <ol>{claim.data.nextTasks.map((task) => <li>{task}</li>)}</ol>
+                ) : (
+                  <p class="muted">暂未记录 nextTasks。</p>
+                )}
+              </section>
+            </div>
+
+            <a href={`/understanding-claims/${claim.id}/`}>查看理解主张</a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有 understanding claim 可供回顾。</p>
+    )}
+  </section>
+</PhilosophyLayout>

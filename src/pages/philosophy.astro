@@ -1,0 +1,117 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { deriveQuestionLearningState } from "../lib/philosophy-state";
+import "../styles/philosophy.css";
+
+const [questions, entries, readings] = await Promise.all([
+  getCollection("questions"),
+  getCollection("entries"),
+  getCollection("readings")
+]);
+
+const sortedQuestions = [...questions].sort((a, b) => a.data.title.localeCompare(b.data.title, "zh-CN"));
+const today = new Date().toISOString().slice(0, 10);
+const learningStates = sortedQuestions.map((question) => ({
+  question,
+  state: deriveQuestionLearningState(question, readings, today)
+}));
+const nextReadings = learningStates.filter((item) => item.state.nextReading);
+const stalledQuestions = learningStates.filter((item) => item.state.isStalled);
+const statusLabels = {
+  open: "持续追问",
+  provisional: "已有暂定回答",
+  settled: "阶段性稳定"
+} as const;
+---
+
+<BaseLayout title="思想工作台" description="从问题出发，比较理论回答，并记录阅读中的立场演化。">
+  <header class="ph-hero">
+    <p class="eyebrow">Philosophy</p>
+    <h1>问题驱动的思想工作台</h1>
+    <p class="lead">这里不按作者或书目组织百科，而从仍在追问的问题出发，连接理论回答、原典阅读与每一次立场变化。</p>
+  </header>
+
+  <section class="ph-section" data-learning-dashboard aria-labelledby="next-reading-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Next action</p>
+      <h2 id="next-reading-heading">现在读什么</h2>
+      <p>优先继续在读文本；没有在读时，按 Question 中声明的顺序选择第一条未读原典。</p>
+    </div>
+    {nextReadings.length > 0 ? (
+      <div class="ph-reading-grid">
+        {nextReadings.map(({ question, state }) => {
+          const reading = state.nextReading;
+          if (!reading) return null;
+          return (
+            <article class="ph-reading-card" data-next-reading={question.id}>
+              <span class="ph-status">{reading.data.status === "reading" ? "继续阅读" : "下一本"}</span>
+              <h3><a href={`/readings/${reading.id}/`}>{reading.data.title}</a></h3>
+              <p>服务问题：<a href={`/questions/${question.id}/`}>{question.data.title}</a></p>
+              <p class="muted">还有 {state.pendingReadings.length} 条 reading 未完成。</p>
+            </article>
+          );
+        })}
+      </div>
+    ) : <p class="ph-empty">当前问题关联的 readings 已全部完成。</p>}
+    <p><a class="ph-inline-link" href="/readings/">查看全部阅读状态 →</a></p>
+  </section>
+
+  <section class="ph-section" aria-labelledby="review-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Recent changes</p>
+      <h2 id="review-heading">近期怎么改变了判断</h2>
+      <p>从 entry 时间线回看哪些阅读触发了 V0→V1→V2 的判断变化。</p>
+      <a class="ph-inline-link" href="/philosophy/review/">查看近期立场变化 →</a>
+      <a class="ph-inline-link" href="/philosophy/gaps/">查看理解缺口回顾 →</a>
+    </div>
+  </section>
+
+  <section class="ph-section" aria-labelledby="stalled-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Review queue</p>
+      <h2 id="stalled-heading">停滞问题</h2>
+      <p>未阶段性稳定且至少 30 天没有更新的问题，会进入这里。</p>
+    </div>
+    {stalledQuestions.length > 0 ? (
+      <div class="ph-question-grid">
+        {stalledQuestions.map(({ question, state }) => (
+          <article class="ph-question-card" data-stalled-question={question.id}>
+            <span class="ph-status">停滞 {state.daysSinceUpdate} 天</span>
+            <h3><a href={`/questions/${question.id}/`}>{question.data.title}</a></h3>
+            <p>{question.data.currentAnswer}</p>
+          </article>
+        ))}
+      </div>
+    ) : <p class="ph-empty" data-stalled-empty>当前没有停滞问题。</p>}
+  </section>
+
+  <section class="ph-section" aria-labelledby="questions-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Questions first</p>
+      <h2 id="questions-heading">正在追问</h2>
+      <a class="ph-inline-link" href="/questions/">查看问题索引 →</a>
+    </div>
+    {sortedQuestions.length > 0 ? (
+      <div class="ph-question-grid">
+        {sortedQuestions.map((question) => {
+          const entryCount = entries.filter((entry) => entry.data.question === question.id).length;
+          return (
+            <article class="ph-question-card" data-question-card={question.id}>
+              <span class="ph-status">{statusLabels[question.data.status] ?? "持续追问"}</span>
+              <h2><a href={`/questions/${question.id}/`}>{question.data.title || "未命名问题"}</a></h2>
+              <p>{question.data.currentAnswer || "暂未形成回答。"}</p>
+              <div class="ph-card-meta">
+                <span>{question.data.stances?.length ?? 0} 个理论回答</span>
+                <span>{entryCount} 次立场变化</span>
+              </div>
+              <a href={`/questions/${question.id}/`}>进入问题工作台 →</a>
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有问题。新增 question 内容后，它会出现在这里。</p>
+    )}
+  </section>
+</BaseLayout>

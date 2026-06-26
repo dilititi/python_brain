@@ -1,9 +1,20 @@
+import { getCollection } from "astro:content";
+import { buildPhilosophySearchDocuments, type SearchDocument } from "./philosophy-search";
 import { getAllContent } from "./relations";
 
 export async function getSearchDocuments() {
   const { concepts, cases, projects, people, paths } = await getAllContent();
+  const [questions, perspectives, readings, notions, entries, sources, understandingClaims] = await Promise.all([
+    getCollection("questions"),
+    getCollection("perspectives"),
+    getCollection("readings"),
+    getCollection("notions"),
+    getCollection("entries"),
+    getCollection("sources"),
+    getCollection("understanding-claims")
+  ]);
 
-  return [
+  const pythonDocuments: SearchDocument[] = [
     ...concepts.map((entry) => ({
       id: `concept:${entry.id}`,
       title: entry.data.title,
@@ -39,5 +50,18 @@ export async function getSearchDocuments() {
       href: `/path/${entry.id}/`,
       kind: "方向"
     }))
+  ];
+
+  return [
+    ...pythonDocuments,
+    ...buildPhilosophySearchDocuments({
+      questions,
+      perspectives,
+      readings,
+      notions,
+      entries,
+      sources,
+      understandingClaims
+    })
   ];
 }

@@ -1,0 +1,85 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("entries");
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<"entries"> }
+const { entry } = Astro.props as Props;
+const { Content } = await render(entry);
+const [questions, readings] = await Promise.all([getCollection("questions"), getCollection("readings")]);
+const question = questions.find((item) => item.id === entry.data.question);
+const reading = readings.find((item) => item.id === entry.data.triggeredBy);
+---
+
+<PhilosophyLayout
+  title={entry.data.title}
+  description={`${entry.data.date || "日期未记录"} 的思考版本变化。`}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    ...(question ? [{ label: question.data.title, href: `/questions/${question.id}/` }] : []),
+    { label: entry.data.title }
+  ]}
+>
+  <header class="ph-hero">
+    <span class="ph-status">V{entry.data.fromVersion} → V{entry.data.toVersion}</span>
+    <p class="eyebrow">Stance entry · {entry.data.date || "日期未记录"}</p>
+    <h1>{entry.data.title}</h1>
+    <p class="lead">
+      问题：{question ? <a class="ph-inline-link" href={`/questions/${question.id}/`}>{question.data.title}</a> : entry.data.question || "未关联"}
+    </p>
+    <p class="lead">
+      触发阅读：{reading ? <a class="ph-inline-link" href={`/readings/${reading.id}/`}>{reading.data.title}</a> : entry.data.triggeredBy || "未记录"}
+    </p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="stance-change-heading">
+    <div class="ph-section-heading"><h2 id="stance-change-heading">这一次改变</h2></div>
+    <div class="ph-answer-grid">
+      <article class="ph-answer-card">
+        <span class="ph-version">V{entry.data.fromVersion}</span>
+        <h3>阅读前：V{entry.data.fromVersion}</h3>
+        <p>{entry.data.priorStance || "阅读前立场未记录。"}</p>
+      </article>
+      <article class="ph-answer-card">
+        <span class="ph-version">V{entry.data.toVersion}</span>
+        <h3>阅读后：V{entry.data.toVersion}</h3>
+        <p>{entry.data.newStance || "阅读后的变化未记录。"}</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="ph-section" aria-labelledby="reason-heading">
+    <div class="ph-section-heading"><h2 id="reason-heading">为什么改变</h2></div>
+    <p class="ph-current-answer">{entry.data.reason}</p>
+  </section>
+
+  <section class="ph-section" aria-labelledby="evidence-heading">
+    <div class="ph-section-heading"><h2 id="evidence-heading">判断依据</h2></div>
+    <ul>{entry.data.evidence.map((item) => <li>{item}</li>)}</ul>
+  </section>
+
+  <section class="ph-section" aria-labelledby="accepted-heading">
+    <div class="ph-section-heading"><h2 id="accepted-heading">我接受了什么</h2></div>
+    <ul>{entry.data.accepted.map((item) => <li>{item}</li>)}</ul>
+  </section>
+
+  <section class="ph-section" aria-labelledby="doubts-heading">
+    <div class="ph-section-heading"><h2 id="doubts-heading">我仍然怀疑什么</h2></div>
+    <ul>{entry.data.doubts.map((item) => <li>{item}</li>)}</ul>
+  </section>
+
+  <section class="ph-section" aria-labelledby="new-questions-heading">
+    <div class="ph-section-heading"><h2 id="new-questions-heading">由此产生的新问题</h2></div>
+    <ul>{entry.data.newQuestions.map((item) => <li>{item}</li>)}</ul>
+  </section>
+
+  <section class="ph-section" aria-labelledby="entry-notes-heading">
+    <div class="ph-section-heading"><h2 id="entry-notes-heading">变化记录正文</h2></div>
+    <div class="content-flow ph-prose"><Content /></div>
+  </section>
+</PhilosophyLayout>

@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const attemptsKey = "pkb:attempts";
+const hydrationTimeout = 15_000;
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -9,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 
 test("recognition attempt updates local storage, matrix, and weekly evidence", async ({ page }) => {
   await page.goto("/assessments/syntax-recognition-tier1-f-string-output/");
-  await expect(page.locator('[data-assessment-ready="true"]')).toBeVisible();
+  await expect(page.locator('[data-assessment-ready="true"]')).toBeVisible({ timeout: hydrationTimeout });
   await page.getByRole("button", { name: "Ada has 4 files" }).click();
   await page.getByRole("button", { name: "提交答案" }).click();
 

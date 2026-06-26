@@ -1,0 +1,98 @@
+---
+import { getCollection } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+import { buildRecentStanceChanges } from "../../lib/philosophy-search";
+
+const [entries, questions, readings] = await Promise.all([
+  getCollection("entries"),
+  getCollection("questions"),
+  getCollection("readings")
+]);
+
+const rows = buildRecentStanceChanges({
+  entries,
+  questions,
+  readings,
+  perspectives: [],
+  notions: [],
+  sources: []
+});
+---
+
+<PhilosophyLayout
+  title="近期立场变化"
+  description="按时间回看阅读如何改变当前判断。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "近期立场变化" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Review</p>
+    <h1>近期立场变化</h1>
+    <p class="lead">这里不是普通博客归档，而是按时间回看：哪次阅读让我的判断从 Vn 变成 Vn+1，以及仍留下什么问题。</p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="review-list-heading">
+    <div class="ph-section-heading">
+      <h2 id="review-list-heading">判断变化记录</h2>
+      <p>最新变化排在最前；每张卡只摘要证据链，完整说明仍在 entry 页面。</p>
+    </div>
+    <div class="ph-filter-panel" data-review-filters>
+      <label>
+        <span>筛选问题</span>
+        <select aria-label="筛选问题" data-review-filter="question">
+          <option value="all">全部问题</option>
+          {questions.map((question) => <option value={question.id}>{question.data.title}</option>)}
+        </select>
+      </label>
+      <p class="muted" data-review-count>{rows.length} 次变化</p>
+    </div>
+
+    {rows.length > 0 ? (
+      <div class="ph-review-list">
+        {rows.map((row) => (
+          <article class="ph-timeline-node" data-review-card={row.id} data-review-question={row.questionId}>
+            <span class="ph-version">{row.date} · V{row.fromVersion} → V{row.toVersion}</span>
+            <h3><a href={row.href}>{row.title}</a></h3>
+            <p><strong>问题：</strong><a href={`/questions/${row.questionId}/`}>{row.questionTitle}</a></p>
+            {row.readingId && <p><strong>触发阅读：</strong><a href={`/readings/${row.readingId}/`}>{row.readingTitle}</a></p>}
+            <p><strong>为什么改变：</strong>{row.reason}</p>
+            <p><strong>新立场：</strong>{row.newStance}</p>
+            {row.accepted.length > 0 && <p><strong>接受：</strong>{row.accepted.join("；")}</p>}
+            {row.doubts.length > 0 && <p><strong>怀疑：</strong>{row.doubts.join("；")}</p>}
+            {row.newQuestions.length > 0 && <p><strong>新问题：</strong>{row.newQuestions.join("；")}</p>}
+          </article>
+        ))}
+      </div>
+    ) : <p class="ph-empty">还没有 entry 变化记录。</p>}
+    <p class="ph-empty" data-review-empty hidden>没有匹配当前问题的变化记录。</p>
+  </section>
+
+  <script>
+    const filters = document.querySelector("[data-review-filters]");
+    if (filters) {
+      const select = filters.querySelector<HTMLSelectElement>("select[data-review-filter='question']");
+      const cards = document.querySelectorAll<HTMLElement>("[data-review-card]");
+      const count = document.querySelector<HTMLElement>("[data-review-count]");
+      const empty = document.querySelector<HTMLElement>("[data-review-empty]");
+
+      function update() {
+        const question = select?.value ?? "all";
+        let visibleCount = 0;
+        cards.forEach((card) => {
+          const visible = question === "all" || card.dataset.reviewQuestion === question;
+          card.hidden = !visible;
+          if (visible) visibleCount += 1;
+        });
+        if (count) count.textContent = `${visibleCount} 次变化`;
+        if (empty) empty.hidden = visibleCount !== 0;
+      }
+
+      select?.addEventListener("change", update);
+      update();
+    }
+  </script>
+</PhilosophyLayout>
+

@@ -1,8 +1,13 @@
 import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
+import { philosophyCollections } from "./content.philosophy";
+import { philosophySlugPattern } from "./lib/philosophy-authoring";
 
 const slugRef = z.string().min(1);
+const philosophySlugRef = z.string().regex(philosophySlugPattern, {
+  message: "reference must be a kebab-case slug"
+});
 
 const track = z.enum([
   "beginner",
@@ -367,11 +372,47 @@ const assessments = defineCollection({
   schema: assessmentSchema
 });
 
+const sources = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/sources" }),
+  schema: z.object({
+    title: z.string(),
+    url: httpsUrl,
+    type: z.enum([
+      "book",
+      "paper",
+      "encyclopedia",
+      "article",
+      "blog",
+      "video",
+      "course",
+      "documentation",
+      "news",
+      "forum",
+      "other"
+    ]),
+    authors: z.array(z.string()).default([]),
+    publisher: z.string().optional(),
+    year: z.union([z.string(), z.number()]).optional(),
+    language: z.string().optional(),
+    reliability: z.enum(["high", "medium", "low", "unknown"]).default("unknown"),
+    status: z.enum(["saved", "skimmed", "reading", "read", "extracted", "rejected"]).default("saved"),
+    relatedQuestions: z.array(philosophySlugRef).default([]),
+    relatedNotions: z.array(philosophySlugRef).default([]),
+    relatedPerspectives: z.array(philosophySlugRef).default([]),
+    summary: z.string(),
+    whySaved: z.string(),
+    useFor: z.array(z.string()).default([]),
+    limitations: z.array(z.string()).default([])
+  })
+});
+
 export const collections = {
   concepts,
   cases,
   projects,
   people,
   paths,
-  assessments
+  assessments,
+  sources,
+  ...philosophyCollections
 };

@@ -1,0 +1,35 @@
+---
+type EvidenceLink = {
+  href: string;
+  title: string;
+  meta: string;
+};
+
+interface Props {
+  item: {
+    type: string;
+    refType: string;
+    ref?: string;
+    note?: string;
+    strength: "weak" | "moderate" | "strong";
+    link?: EvidenceLink;
+  };
+}
+
+const { item } = Astro.props as Props;
+---
+
+<article class="ph-evidence-card" data-evidence-item>
+  <div class="ph-card-meta">
+    <span>type: {item.type}</span>
+    <span>refType: {item.refType}</span>
+    <span class={`ph-strength ph-strength-${item.strength}`}>{item.strength}</span>
+  </div>
+  {item.link ? (
+    <h3><a href={item.link.href}>{item.link.title}</a></h3>
+  ) : (
+    <h3>{item.ref || "未绑定具体对象"}</h3>
+  )}
+  {item.ref && <p class="muted">ref: {item.ref}</p>}
+  <p>{item.note || "尚未写下这条证据如何支持主张。"}</p>
+</article>

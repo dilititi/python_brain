@@ -1,0 +1,76 @@
+---
+import { getCollection } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+const readings = await getCollection("readings");
+const statusLabels = { unread: "未读", reading: "在读", finished: "已读完" } as const;
+const statusRank = { reading: 0, unread: 1, finished: 2 } as const;
+const sortedReadings = [...readings].sort((left, right) => (
+  statusRank[left.data.status] - statusRank[right.data.status]
+  || left.data.title.localeCompare(right.data.title, "zh-CN")
+));
+---
+
+<PhilosophyLayout
+  title="阅读状态"
+  description="查看 primary texts 的未读、在读和已完成状态。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "阅读状态" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Readings</p>
+    <h1>阅读状态</h1>
+    <p class="lead">这里只追踪需要长期跟读、持续写笔记并可能触发立场变化的 primary texts。</p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="reading-list-heading">
+    <div class="ph-section-heading">
+      <h2 id="reading-list-heading">全部 readings</h2>
+      <p>状态来自 MDX frontmatter；页面不在浏览器里维护第二份数据。</p>
+    </div>
+    <div class="ph-filter-bar" data-reading-filters role="group" aria-label="筛选 readings">
+      <button type="button" data-filter="all" aria-pressed="true">全部</button>
+      <button type="button" data-filter="unread" aria-pressed="false">未读</button>
+      <button type="button" data-filter="reading" aria-pressed="false">在读</button>
+      <button type="button" data-filter="finished" aria-pressed="false">已读完</button>
+    </div>
+    <div class="ph-reading-grid">
+      {sortedReadings.map((reading) => (
+        <article
+          class="ph-reading-card"
+          data-reading-index-card={reading.id}
+          data-reading-status={reading.data.status}
+        >
+          <span class="ph-status">{statusLabels[reading.data.status]}</span>
+          <h3><a href={`/readings/${reading.id}/`}>{reading.data.title}</a></h3>
+          <p>{reading.data.author}{reading.data.year ? ` · ${reading.data.year}` : ""}</p>
+          {reading.data.notes && <p>{reading.data.notes}</p>}
+          <p class="muted">更新于 {reading.data.updatedAt}</p>
+          <a href={`/readings/${reading.id}/`}>打开阅读笔记 →</a>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <script>
+    const filterGroup = document.querySelector("[data-reading-filters]");
+    if (filterGroup) {
+      const buttons = filterGroup.querySelectorAll<HTMLButtonElement>("button[data-filter]");
+      const cards = document.querySelectorAll<HTMLElement>("[data-reading-index-card]");
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const filter = button.dataset.filter ?? "all";
+          buttons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          cards.forEach((card) => {
+            card.hidden = filter !== "all" && card.dataset.readingStatus !== filter;
+          });
+        });
+      });
+    }
+  </script>
+</PhilosophyLayout>
+

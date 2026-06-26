@@ -1,0 +1,72 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import RelationCard from "../../components/astro/RelationCard.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+export async function getStaticPaths() {
+  const readings = await getCollection("readings");
+  return readings.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<"readings"> }
+const { entry } = Astro.props as Props;
+const { Content } = await render(entry);
+const [perspectives, questions, entries] = await Promise.all([
+  getCollection("perspectives"),
+  getCollection("questions"),
+  getCollection("entries")
+]);
+const perspective = perspectives.find((item) => item.id === entry.data.perspective);
+const relatedQuestions = questions.filter((question) =>
+  question.data.relatedReadings?.includes(entry.id) ||
+  entries.some((item) => item.data.question === question.id && item.data.triggeredBy === entry.id)
+);
+const statusLabels = { unread: "未读", reading: "在读", finished: "已读完" } as const;
+---
+
+<PhilosophyLayout
+  title={entry.data.title || "未命名 reading"}
+  description={`${entry.data.author || "作者未记录"}的原典阅读笔记。`}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "Readings", href: "/readings/" },
+    { label: entry.data.title || "未命名 reading" }
+  ]}
+>
+  <header class="ph-hero">
+    <span class="ph-status">{statusLabels[entry.data.status] ?? "未读"}</span>
+    <p class="eyebrow">Primary text</p>
+    <h1>{entry.data.title || "未命名 reading"}</h1>
+    {entry.data.originalTitle && <p class="lead">{entry.data.originalTitle}</p>}
+  </header>
+
+  <div class="ph-detail-grid ph-section">
+    <main>
+      <section aria-labelledby="reading-notes-heading">
+        <div class="ph-section-heading"><h2 id="reading-notes-heading">阅读笔记</h2></div>
+        <div class="content-flow ph-prose"><Content /></div>
+      </section>
+    </main>
+    <aside class="ph-detail-sidebar">
+      <section class="ph-fact-card">
+        <h2>书目信息</h2>
+        <dl class="ph-facts">
+          <div><dt>作者</dt><dd>{entry.data.author || "未记录"}</dd></div>
+          <div><dt>年份</dt><dd>{entry.data.year ?? "未记录"}</dd></div>
+          <div><dt>阅读状态</dt><dd>{statusLabels[entry.data.status] ?? "未读"}</dd></div>
+          <div><dt>更新时间</dt><dd>{entry.data.updatedAt}</dd></div>
+          <div><dt>理论视角</dt><dd>{perspective ? <a class="ph-inline-link" href={`/perspectives/${perspective.id}/`}>{perspective.data.title}</a> : entry.data.perspective || "未关联"}</dd></div>
+        </dl>
+        {entry.data.notes && <p class="muted">{entry.data.notes}</p>}
+      </section>
+    </aside>
+  </div>
+
+  <section class="ph-section" aria-labelledby="reading-questions-heading">
+    <div class="ph-section-heading"><h2 id="reading-questions-heading">这本 reading 支撑哪些 questions</h2></div>
+    {relatedQuestions.length > 0 ? (
+      <div class="grid cols-3">{relatedQuestions.map((question) => <RelationCard href={`/questions/${question.id}/`} title={question.data.title} description={question.data.currentAnswer} meta="question" />)}</div>
+    ) : <p class="ph-empty">还没有 question 关联这条 reading。</p>}
+  </section>
+</PhilosophyLayout>

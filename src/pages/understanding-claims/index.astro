@@ -1,0 +1,186 @@
+---
+import { getCollection } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+const [claims, questions, readings] = await Promise.all([
+  getCollection("understanding-claims"),
+  getCollection("questions"),
+  getCollection("readings")
+]);
+
+const questionById = new Map(questions.map((question) => [question.id, question]));
+const readingById = new Map(readings.map((reading) => [reading.id, reading]));
+const sortedClaims = [...claims].sort((a, b) => (
+  (b.data.updatedAt ?? "").localeCompare(a.data.updatedAt ?? "")
+  || a.data.title.localeCompare(b.data.title, "zh-CN")
+));
+
+const statusLabels = {
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置"
+} as const;
+const confidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+const targetTypeLabels = {
+  question: "问题",
+  notion: "概念",
+  perspective: "理论视角",
+  reading: "原典阅读",
+  source: "辅助资料",
+  entry: "立场变化",
+  concept: "Python 知识点",
+  case: "Python 案例",
+  project: "Python 项目",
+  person: "人物",
+  path: "路径",
+  other: "其他"
+} as const;
+---
+
+<PhilosophyLayout
+  title="理解主张"
+  description="把“我理解了”拆成可追踪、可验证、可修订的证据档案。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "理解主张" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Understanding claims</p>
+    <h1>理解主张</h1>
+    <p class="lead">这里不是百科，也不是读书摘抄；它记录“我声称自己理解了什么、凭什么、还缺什么证据、下一步如何验证”。</p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="claims-list-heading">
+    <div class="ph-section-heading">
+      <h2 id="claims-list-heading">正在接受检验的理解</h2>
+    </div>
+
+    <div class="ph-filter-panel" data-understanding-claim-filters>
+      <label>
+        <span>状态</span>
+        <select aria-label="状态" data-claim-filter="status">
+          <option value="all">全部状态</option>
+          <option value="draft">草稿</option>
+          <option value="testing">检验中</option>
+          <option value="supported">已有证据支持</option>
+          <option value="contested">存在反证</option>
+          <option value="revised">已修订</option>
+          <option value="retired">已搁置</option>
+        </select>
+      </label>
+      <label>
+        <span>信心</span>
+        <select aria-label="信心" data-claim-filter="confidence">
+          <option value="all">全部信心</option>
+          <option value="low">低信心</option>
+          <option value="medium">中等信心</option>
+          <option value="high">高信心</option>
+        </select>
+      </label>
+      <label>
+        <span>目标类型</span>
+        <select aria-label="目标类型" data-claim-filter="targetType">
+          <option value="all">全部目标类型</option>
+          <option value="question">问题</option>
+          <option value="notion">概念</option>
+          <option value="perspective">理论视角</option>
+          <option value="reading">原典阅读</option>
+          <option value="source">辅助资料</option>
+          <option value="concept">Python 知识点</option>
+          <option value="case">Python 案例</option>
+          <option value="project">Python 项目</option>
+          <option value="path">路径</option>
+          <option value="other">其他</option>
+        </select>
+      </label>
+      <p class="muted" data-understanding-claim-count>{sortedClaims.length} 条 understanding claim</p>
+    </div>
+
+    {sortedClaims.length > 0 ? (
+      <div class="ph-question-grid">
+        {sortedClaims.map((claim) => (
+          <article
+            class="ph-question-card"
+            data-understanding-claim-card={claim.id}
+            data-claim-status={claim.data.status}
+            data-claim-confidence={claim.data.confidence}
+            data-claim-target-type={claim.data.targetType}
+          >
+            <div class="ph-card-meta">
+              <span>{statusLabels[claim.data.status]}</span>
+              <span>{confidenceLabels[claim.data.confidence]}</span>
+              <span>目标：{targetTypeLabels[claim.data.targetType]} / {claim.data.target || "未绑定"}</span>
+              <span>{claim.data.evidence.length} 条证据</span>
+              <span>{claim.data.gaps.length} 个缺口</span>
+              <span>{claim.data.nextTasks.length} 个下一步</span>
+              {claim.data.updatedAt && <span>更新于 {claim.data.updatedAt}</span>}
+            </div>
+            <h2><a href={`/understanding-claims/${claim.id}/`}>{claim.data.title}</a></h2>
+            <p>{claim.data.claim}</p>
+            {claim.data.relatedQuestions.length > 0 && (
+              <div class="ph-card-meta">
+                <span>关联问题：</span>
+                {claim.data.relatedQuestions.map((slug) => <span>{questionById.get(slug)?.data.title || slug}</span>)}
+              </div>
+            )}
+            {claim.data.relatedReadings.length > 0 && (
+              <div class="ph-card-meta">
+                <span>关联阅读：</span>
+                {claim.data.relatedReadings.map((slug) => <span>{readingById.get(slug)?.data.title || slug}</span>)}
+              </div>
+            )}
+            {claim.data.gaps.length > 0 && <p class="muted"><strong>仍缺：</strong>{claim.data.gaps[0]}</p>}
+            <a href={`/understanding-claims/${claim.id}/`}>查看证据档案 →</a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有 understanding claim。可以先从某个 question 或 notion 中抽出一个最小理解主张。</p>
+    )}
+    <p class="ph-empty" data-understanding-claim-empty hidden>没有匹配当前筛选条件的 understanding claim。</p>
+  </section>
+
+  <script>
+    const filters = document.querySelector("[data-understanding-claim-filters]");
+    if (filters) {
+      const selects = filters.querySelectorAll<HTMLSelectElement>("select[data-claim-filter]");
+      const cards = document.querySelectorAll<HTMLElement>("[data-understanding-claim-card]");
+      const count = document.querySelector<HTMLElement>("[data-understanding-claim-count]");
+      const empty = document.querySelector<HTMLElement>("[data-understanding-claim-empty]");
+
+      function matches(card: HTMLElement) {
+        const values = Object.fromEntries([...selects].map((select) => [select.dataset.claimFilter, select.value]));
+        const status = values.status;
+        const confidence = values.confidence;
+        const targetType = values.targetType;
+
+        return (status === "all" || card.dataset.claimStatus === status)
+          && (confidence === "all" || card.dataset.claimConfidence === confidence)
+          && (targetType === "all" || card.dataset.claimTargetType === targetType);
+      }
+
+      function update() {
+        let visibleCount = 0;
+        cards.forEach((card) => {
+          const visible = matches(card);
+          card.hidden = !visible;
+          if (visible) visibleCount += 1;
+        });
+        if (count) count.textContent = `${visibleCount} 条 understanding claim`;
+        if (empty) empty.hidden = visibleCount !== 0;
+      }
+
+      selects.forEach((select) => select.addEventListener("change", update));
+      update();
+    }
+  </script>
+</PhilosophyLayout>

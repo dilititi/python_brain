@@ -1,0 +1,115 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import RelationCard from "../../components/astro/RelationCard.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+export async function getStaticPaths() {
+  const sources = await getCollection("sources");
+  return sources.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<"sources"> }
+const { entry } = Astro.props as Props;
+const { Content } = await render(entry);
+const [questions, perspectives] = await Promise.all([
+  getCollection("questions"),
+  getCollection("perspectives")
+]);
+const questionById = new Map(questions.map((question) => [question.id, question]));
+const perspectiveById = new Map(perspectives.map((perspective) => [perspective.id, perspective]));
+const reliabilityLabels = { high: "高", medium: "中等", low: "低", unknown: "未判断" } as const;
+const statusLabels = { saved: "已保存", skimmed: "已浏览", reading: "阅读中", read: "已读", extracted: "已提取", rejected: "已弃用" } as const;
+---
+
+<PhilosophyLayout
+  title={entry.data.title || "未命名资料"}
+  description={entry.data.summary || "辅助资料及其使用判断。"}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "辅助资料库", href: "/sources/" },
+    { label: entry.data.title || "未命名资料" }
+  ]}
+>
+  <header class="ph-hero">
+    <span class="ph-status">{statusLabels[entry.data.status]}</span>
+    <p class="eyebrow">Source · {entry.data.type}</p>
+    <h1>{entry.data.title || "未命名资料"}</h1>
+    <p class="lead">{entry.data.summary || "暂未概括这份资料。"}</p>
+    <p><a class="ph-inline-link" href={entry.data.url} target="_blank" rel="noreferrer">打开原始资料 ↗</a></p>
+  </header>
+
+  <div class="ph-detail-grid ph-section">
+    <main>
+      <section aria-labelledby="why-saved-heading">
+        <div class="ph-section-heading"><h2 id="why-saved-heading">为什么保存</h2></div>
+        <p class="ph-current-answer">{entry.data.whySaved || "尚未记录保存原因。"}</p>
+      </section>
+
+      <section class="ph-section" aria-labelledby="use-for-heading">
+        <div class="ph-section-heading"><h2 id="use-for-heading">适合用来做什么</h2></div>
+        {entry.data.useFor.length > 0 ? <ul>{entry.data.useFor.map((item) => <li>{item}</li>)}</ul> : <p class="ph-empty">尚未记录用途。</p>}
+      </section>
+
+      <section class="ph-section" aria-labelledby="limitations-heading">
+        <div class="ph-section-heading"><h2 id="limitations-heading">局限</h2></div>
+        {entry.data.limitations.length > 0 ? <ul>{entry.data.limitations.map((item) => <li>{item}</li>)}</ul> : <p class="ph-empty">尚未记录局限。</p>}
+      </section>
+
+      <section class="ph-section" aria-labelledby="source-notes-heading">
+        <div class="ph-section-heading"><h2 id="source-notes-heading">处理笔记</h2></div>
+        <div class="content-flow ph-prose"><Content /></div>
+      </section>
+    </main>
+
+    <aside class="ph-detail-sidebar">
+      <section class="ph-fact-card">
+        <h2>资料判断</h2>
+        <dl class="ph-facts">
+          <div><dt>类型</dt><dd>{entry.data.type}</dd></div>
+          <div><dt>可靠性</dt><dd>{reliabilityLabels[entry.data.reliability]}</dd></div>
+          <div><dt>状态</dt><dd>{statusLabels[entry.data.status]}</dd></div>
+          <div><dt>作者</dt><dd>{entry.data.authors.length > 0 ? entry.data.authors.join("、") : "未记录"}</dd></div>
+          <div><dt>发布者</dt><dd>{entry.data.publisher || "未记录"}</dd></div>
+          <div><dt>年份</dt><dd>{entry.data.year ?? "未记录"}</dd></div>
+          <div><dt>语言</dt><dd>{entry.data.language || "未记录"}</dd></div>
+        </dl>
+      </section>
+      {entry.data.relatedNotions.length > 0 && (
+        <section class="ph-fact-card">
+          <h2>相关 notions</h2>
+          <ul class="tag-list">{entry.data.relatedNotions.map((notion) => <li class="tag">{notion}</li>)}</ul>
+        </section>
+      )}
+    </aside>
+  </div>
+
+  <section class="ph-section" aria-labelledby="source-questions-heading">
+    <div class="ph-section-heading"><h2 id="source-questions-heading">服务于哪些问题</h2></div>
+    {entry.data.relatedQuestions.length > 0 ? (
+      <div class="grid cols-3">
+        {entry.data.relatedQuestions.map((slug) => {
+          const question = questionById.get(slug);
+          return question
+            ? <RelationCard href={`/questions/${question.id}/`} title={question.data.title} description={question.data.currentAnswer} meta="question" />
+            : <RelationCard href="/philosophy/" title={slug} description="question 内容尚未创建" meta="missing" />;
+        })}
+      </div>
+    ) : <p class="ph-empty">这份资料尚未关联 question。</p>}
+  </section>
+
+  <section class="ph-section" aria-labelledby="source-perspectives-heading">
+    <div class="ph-section-heading"><h2 id="source-perspectives-heading">关联 perspectives</h2></div>
+    {entry.data.relatedPerspectives.length > 0 ? (
+      <div class="grid cols-3">
+        {entry.data.relatedPerspectives.map((slug) => {
+          const perspective = perspectiveById.get(slug);
+          return perspective
+            ? <RelationCard href={`/perspectives/${perspective.id}/`} title={perspective.data.title} description={perspective.data.summary} meta="perspective" />
+            : <RelationCard href="/philosophy/" title={slug} description="perspective 内容尚未创建" meta="missing" />;
+        })}
+      </div>
+    ) : <p class="ph-empty">这份资料尚未关联 perspective。</p>}
+  </section>
+</PhilosophyLayout>
+
