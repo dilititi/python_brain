@@ -1,6 +1,7 @@
 ---
 import { getCollection, render, type CollectionEntry } from "astro:content";
 import RelationCard from "../../components/astro/RelationCard.astro";
+import AbilityTags from "../../components/philosophy/AbilityTags.astro";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 
 export async function getStaticPaths() {
@@ -62,6 +63,11 @@ const understandingClaimConfidenceLabels = {
     <h1>{entry.data.title}</h1>
     <p class="lead">{entry.data.summary}</p>
   </header>
+
+  <AbilityTags
+    abilities={entry.data.abilities}
+    title="此概念涉及的能力维度"
+  />
 
   <section class="ph-section" aria-labelledby="notion-notes-heading">
     <div class="ph-section-heading"><h2 id="notion-notes-heading">概念笔记</h2></div>

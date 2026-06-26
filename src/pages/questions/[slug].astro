@@ -1,5 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import AbilityTags from "../../components/philosophy/AbilityTags.astro";
 import QuestionLocalMap from "../../components/philosophy/QuestionLocalMap.astro";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 import { deriveQuestionLearningState } from "../../lib/philosophy-state";
@@ -221,6 +222,11 @@ const showLocalMapDetailPanel = localMapConfig.variant === "detail-panel" && loc
     <p class="lead">问题原文：{entry.data.title || "暂未记录问题原文。"}</p>
     {entry.data.updatedAt && <p class="muted">更新于 {entry.data.updatedAt}</p>}
   </header>
+
+  <AbilityTags
+    abilities={entry.data.abilities}
+    title="此问题涉及的能力维度"
+  />
 
   <section class="ph-section" aria-labelledby="current-answer-heading">
     <div class="ph-section-heading">

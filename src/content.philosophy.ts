@@ -40,12 +40,19 @@
 import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
 import { z } from "astro/zod";
+import {
+  abilityDimensionOrder,
+  type AbilityDimension,
+} from "./data/philosophy/abilities";
 import { philosophySlugPattern } from "./lib/philosophy-authoring";
 
 const slugRef = z.string().regex(philosophySlugPattern, {
   message: "reference must be a kebab-case slug"
 });
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const abilityDimension = z.enum(
+  [...abilityDimensionOrder] as [AbilityDimension, ...AbilityDimension[]]
+);
 
 const perspectives = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/perspectives" }),
@@ -79,7 +86,8 @@ const notions = defineCollection({
   schema: z.object({
     title: z.string(),
     perspective: slugRef.optional(),
-    summary: z.string()
+    summary: z.string(),
+    abilities: z.array(abilityDimension).max(4).default([])
   })
 });
 
@@ -143,6 +151,7 @@ const questionSchema = z
   .object({
     title: z.string(),
     status: z.enum(["open", "provisional", "settled"]).default("open"),
+    abilities: z.array(abilityDimension).max(4).default([]),
     currentAnswer: z.string(), // 模块1：我的当前回答（摘要，正文里展开）
     dimensions: z.array(questionDimension).default([]), // 这套维度只对本问题成立
     stances: z.array(questionStance).default([]), // 模块2：理论回答矩阵的数据来源

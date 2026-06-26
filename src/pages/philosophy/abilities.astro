@@ -1,0 +1,81 @@
+---
+import { getCollection } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+import { groupPhilosophyContentByAbility } from "../../lib/philosophy-abilities";
+
+const [notions, questions] = await Promise.all([
+  getCollection("notions"),
+  getCollection("questions")
+]);
+
+const groups = groupPhilosophyContentByAbility({ notions, questions });
+---
+
+<PhilosophyLayout
+  title="能力维度"
+  description="用能力维度重新观察正在追问的问题和正在使用的概念。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "能力维度" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Ability Lens</p>
+    <h1>能力维度</h1>
+    <p class="lead">这是一个轻量 lens：用能力维度重新观察 questions 和 notions，而不是把学习过程改造成测量系统。</p>
+    <p class="muted">这里的数量表示该能力维度下关联的内容数量，不代表能力得分。</p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="ability-dimensions-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Grouped content</p>
+      <h2 id="ability-dimensions-heading">按能力维度查看内容</h2>
+      <p>每组只列出显式标注的 question 和 notion；未标注内容不会被归入任何维度。</p>
+    </div>
+
+    <div class="ph-ability-grid">
+      {groups.map((group) => (
+        <article class="ph-ability-card" data-ability-group={group.ability}>
+          <div class="ph-ability-card-heading">
+            <div>
+              <p class="eyebrow">{group.ability}</p>
+              <h2>{group.meta.label}</h2>
+            </div>
+            <span>{group.total}</span>
+          </div>
+          <p>{group.meta.description}</p>
+          <p class="muted"><strong>关联内容数量：</strong>{group.total}</p>
+
+          <div class="ph-ability-lists">
+            <section aria-label={`${group.meta.label}相关 questions`}>
+              <h3>相关 questions</h3>
+              {group.questions.length > 0 ? (
+                <ul class="ph-compact-list">
+                  {group.questions.map((question) => (
+                    <li><a href={`/questions/${question.id}/`}>{question.data.title}</a></li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="ph-empty">暂无关联 question。</p>
+              )}
+            </section>
+
+            <section aria-label={`${group.meta.label}相关 notions`}>
+              <h3>相关 notions</h3>
+              {group.notions.length > 0 ? (
+                <ul class="ph-compact-list">
+                  {group.notions.map((notion) => (
+                    <li><a href={`/notions/${notion.id}/`}>{notion.data.title}</a></li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="ph-empty">暂无关联 notion。</p>
+              )}
+            </section>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</PhilosophyLayout>
