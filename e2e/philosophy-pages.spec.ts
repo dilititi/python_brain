@@ -266,8 +266,10 @@ test("philosophy next dashboard aggregates next learning tasks", async ({ page }
   await page.goto("/philosophy/next/");
 
   await expect(page.getByRole("heading", { level: 1, name: "下一步学习" })).toBeVisible();
+  await expect(page.locator(".ph-hero")).toContainText("我下一步该读什么、写什么、补什么证据？");
 
   const claimTasks = page.locator('[data-next-section="claim-tasks"]');
+  await expect(claimTasks.getByRole("heading", { name: "补什么证据 / 写什么" })).toBeVisible();
   await expect(claimTasks).toContainText("重读《规训与惩罚》关于规训权力的章节");
   await expect(claimTasks.getByRole("link", { name: "我理解福柯的权力 / 知识了吗？" }).first()).toHaveAttribute(
     "href",
@@ -275,6 +277,7 @@ test("philosophy next dashboard aggregates next learning tasks", async ({ page }
   );
 
   const questionTasks = page.locator('[data-next-section="question-open-questions"]');
+  await expect(questionTasks.getByRole("heading", { name: "还要写清楚什么问题" })).toBeVisible();
   await expect(questionTasks).toContainText("局部规律如何避免退化成不可比较的碎片描述");
   await expect(questionTasks.getByRole("link", { name: "历史是什么？" }).first()).toHaveAttribute(
     "href",
@@ -282,16 +285,22 @@ test("philosophy next dashboard aggregates next learning tasks", async ({ page }
   );
 
   const readings = page.locator('[data-next-section="readings-to-continue"]');
+  await expect(readings.getByRole("heading", { name: "下一步该读什么" })).toBeVisible();
   await expect(readings).toContainText("精神现象学");
   await expect(readings.getByRole("link", { name: "资本论" })).toHaveAttribute("href", "/readings/capital/");
 
   const sources = page.locator('[data-next-section="sources-to-process"]');
+  await expect(sources.getByRole("heading", { name: "还没处理完的资料" })).toBeVisible();
   await expect(sources).toContainText("Stanford Encyclopedia: Philosophy of History");
   await expect(sources).toContainText("高可靠性");
   await expect(sources.getByRole("link", { name: "历史是什么？" })).toHaveAttribute(
     "href",
     "/questions/what-is-history/"
   );
+
+  const stalled = page.locator('[data-next-section="stalled-questions"]');
+  await expect(stalled.getByRole("heading", { name: "需要重新推进的停滞问题" })).toBeVisible();
+  await expect(stalled).toContainText("来自 /philosophy/review 的 stalled questions");
 });
 
 test("philosophy gaps dashboard separates gaps counter evidence and next tasks", async ({ page }) => {

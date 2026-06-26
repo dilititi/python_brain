@@ -40,6 +40,15 @@ const reliabilityLabels = {
   low: "低可靠性",
   unknown: "可靠性未判断"
 } as const;
+const currentDate = new Date();
+const stalledQuestionStatuses = new Set(["open", "provisional", "active", "developing"]);
+
+function daysSince(date: string | undefined) {
+  if (!date) return Number.POSITIVE_INFINITY;
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return Number.POSITIVE_INFINITY;
+  return Math.floor((currentDate.getTime() - parsed.getTime()) / (1000 * 60 * 60 * 24));
+}
 
 function questionsForReading(readingId: string) {
   return questions.filter((question) => question.data.relatedReadings.includes(readingId));
@@ -61,6 +70,12 @@ const readingsToContinue = readings.filter((reading) => reading.data.status !== 
 const sourcesToProcess = sources.filter((source) => (
   ["saved", "skimmed", "reading"].includes(source.data.status)
 ));
+const stalledQuestions = questions
+  .map((question) => ({
+    question,
+    age: daysSince(question.data.updatedAt)
+  }))
+  .filter(({ question, age }) => stalledQuestionStatuses.has(question.data.status) && age > 30);
 ---
 
 <PhilosophyLayout
@@ -75,13 +90,13 @@ const sourcesToProcess = sources.filter((source) => (
   <header class="ph-hero">
     <p class="eyebrow">Review dashboard</p>
     <h1>下一步学习</h1>
-    <p class="lead">这页不做全局图谱，只回答一个朴素问题：接下来最该读什么、补什么证据、处理哪些资料。</p>
+    <p class="lead">这页不做全局图谱，只回答一个朴素问题：我下一步该读什么、写什么、补什么证据？</p>
   </header>
 
   <section class="ph-section" data-next-section="claim-tasks" aria-labelledby="claim-tasks-heading">
     <div class="ph-section-heading">
       <p class="eyebrow">Claim next tasks</p>
-      <h2 id="claim-tasks-heading">理解主张的下一步任务</h2>
+      <h2 id="claim-tasks-heading">补什么证据 / 写什么</h2>
       <p>{claimTasks.length} 个任务来自 understanding-claims.nextTasks。</p>
     </div>
     {claimTasks.length > 0 ? (
@@ -105,7 +120,7 @@ const sourcesToProcess = sources.filter((source) => (
   <section class="ph-section" data-next-section="question-open-questions" aria-labelledby="question-open-heading">
     <div class="ph-section-heading">
       <p class="eyebrow">Question open questions</p>
-      <h2 id="question-open-heading">还没回答完的问题</h2>
+      <h2 id="question-open-heading">还要写清楚什么问题</h2>
       <p>{questionOpenQuestions.length} 个开放问题来自 questions.openQuestions。</p>
     </div>
     {questionOpenQuestions.length > 0 ? (
@@ -202,6 +217,30 @@ const sourcesToProcess = sources.filter((source) => (
       </div>
     ) : (
       <p class="ph-empty">当前没有待处理 source。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-next-section="stalled-questions" aria-labelledby="stalled-next-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Stalled questions</p>
+      <h2 id="stalled-next-heading">需要重新推进的停滞问题</h2>
+      <p>来自 /philosophy/review 的 stalled questions：开放或暂定问题超过 30 天没有更新。</p>
+    </div>
+    {stalledQuestions.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {stalledQuestions.map(({ question, age }) => (
+          <article class="ph-question-card">
+            <div class="ph-card-meta">
+              <span>{statusLabels[question.data.status]}</span>
+              <span>{age} 天未更新</span>
+            </div>
+            <h3><a href={`/questions/${question.id}/`}>{question.data.title}</a></h3>
+            <p>{question.data.currentAnswer}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">当前没有停滞问题。</p>
     )}
   </section>
 </PhilosophyLayout>

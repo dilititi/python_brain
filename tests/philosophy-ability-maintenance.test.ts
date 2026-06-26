@@ -77,9 +77,12 @@ test("all active questions and core notions have bounded ability tags", () => {
 test("what-is-understanding has a first-draft problem page instead of fixture prose", () => {
   const content = readProjectFile("src", "content", "questions", "what-is-understanding.mdx");
 
+  assert.match(content, /## 为什么这是问题/);
   assert.match(content, /## 第一版回答/);
   assert.match(content, /## 对照维度/);
+  assert.match(content, /## 与当前系统的关系/);
   assert.match(content, /## 下一步阅读与验证/);
+  assert.ok(content.length > 1800, "what-is-understanding should be a complete first version, not a stub");
   assert.doesNotMatch(content, /作为未标注能力维度的工作台样本/);
 });
 
@@ -89,6 +92,9 @@ test("what-is-history essay contains concrete argument paragraphs", () => {
   assert.match(essay, /历史不是一种答案，而是一组尺度选择/);
   assert.match(essay, /福柯让我放弃的是/);
   assert.match(essay, /我现在更愿意把历史理解为/);
+  assert.match(essay, /历史解释的单位不是整个世界史/);
+  assert.match(essay, /主体能动性不是结构外的自由/);
+  assert.match(essay, /下一步要补的不是更多名字/);
 });
 
 test("core understanding claims have supplemented evidence, gaps, and next tasks", () => {
@@ -99,5 +105,20 @@ test("core understanding claims have supplemented evidence, gaps, and next tasks
     assert.ok(Array.isArray(claim.data.evidence) && claim.data.evidence.length >= 4, `${claim.slug} needs at least four evidence items`);
     assert.ok(Array.isArray(claim.data.gaps) && claim.data.gaps.length >= 3, `${claim.slug} needs at least three gaps`);
     assert.ok(Array.isArray(claim.data.nextTasks) && claim.data.nextTasks.length >= 3, `${claim.slug} needs at least three next tasks`);
+  }
+});
+
+test("foucault power knowledge evidence is anchored in entries and readings", () => {
+  const claim = frontmatter("understanding-claims").find((entry) => entry.slug === "foucault-power-knowledge-claim");
+  assert.ok(claim);
+  assert.ok(Array.isArray(claim.data.evidence));
+  assert.equal(claim.data.evidence.length, 4);
+
+  for (const item of claim.data.evidence) {
+    assert.ok(["reading", "entry"].includes(item.refType), `evidence must point to reading or entry, got ${item.refType}`);
+    assert.equal(typeof item.ref, "string");
+    const collection = item.refType === "reading" ? "readings" : "entries";
+    const content = readProjectFile("src", "content", collection, `${item.ref}.mdx`);
+    assert.match(content, /## Claim evidence anchors/);
   }
 });
