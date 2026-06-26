@@ -1,14 +1,16 @@
 ---
 import { getCollection } from "astro:content";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+import { groupPhilosophyContentByAbility } from "../../lib/philosophy-abilities";
 import { buildRecentStanceChanges } from "../../lib/philosophy-search";
 
-const [entries, questions, readings, claims, sources] = await Promise.all([
+const [entries, questions, readings, claims, sources, notions] = await Promise.all([
   getCollection("entries"),
   getCollection("questions"),
   getCollection("readings"),
   getCollection("understanding-claims"),
-  getCollection("sources")
+  getCollection("sources"),
+  getCollection("notions")
 ]);
 
 const rows = buildRecentStanceChanges({
@@ -50,6 +52,7 @@ const reliabilityLabels = {
 } as const;
 const currentDate = new Date();
 const staleQuestionStatuses = new Set(["open", "provisional", "active", "developing"]);
+const activeQuestionStatuses = new Set(["open", "provisional", "active", "developing"]);
 const evidenceModeTypes = new Set(["critique", "comparison", "application"]);
 
 function daysSince(date: string | undefined) {
@@ -81,6 +84,14 @@ const claimEvidenceWarnings = claims.flatMap((claim) => {
 });
 
 const unprocessedSources = sources.filter((source) => ["saved", "skimmed"].includes(source.data.status));
+const activeQuestions = questions.filter((question) => activeQuestionStatuses.has(question.data.status));
+const untaggedActiveQuestions = activeQuestions.filter((question) => question.data.abilities.length === 0);
+const untaggedCoreNotions = notions.filter((notion) => notion.data.abilities.length === 0);
+const abilityGroups = groupPhilosophyContentByAbility({ notions, questions });
+const maxAbilityTotal = Math.max(...abilityGroups.map((group) => group.total));
+const minAbilityTotal = Math.min(...abilityGroups.map((group) => group.total));
+const concentratedAbilityGroups = abilityGroups.filter((group) => group.total === maxAbilityTotal && group.total > 0);
+const leastCoveredAbilityGroups = abilityGroups.filter((group) => group.total === minAbilityTotal);
 ---
 
 <PhilosophyLayout
@@ -178,6 +189,66 @@ const unprocessedSources = sources.filter((source) => ["saved", "skimmed"].inclu
         ) : (
           <p class="ph-empty">当前没有未处理 source。</p>
         )}
+      </section>
+
+      <section class="ph-question-card" data-review-panel="ability-coverage">
+        <div class="ph-section-heading">
+          <h3>Ability Lens coverage</h3>
+          <p>只回看 questions / notions 的能力维度标注；这里的数量表示关联内容数量。</p>
+        </div>
+
+        <div class="ph-ability-review-block">
+          <h4>未标注 active questions</h4>
+          {untaggedActiveQuestions.length > 0 ? (
+            <ul class="ph-compact-list">
+              {untaggedActiveQuestions.map((question) => (
+                <li><a href={`/questions/${question.id}/`}>{question.data.title}</a></li>
+              ))}
+            </ul>
+          ) : (
+            <p class="ph-empty">当前 active questions 都已标注 abilities。</p>
+          )}
+        </div>
+
+        <div class="ph-ability-review-block">
+          <h4>未标注核心 notions</h4>
+          {untaggedCoreNotions.length > 0 ? (
+            <ul class="ph-compact-list">
+              {untaggedCoreNotions.map((notion) => (
+                <li><a href={`/notions/${notion.id}/`}>{notion.data.title}</a></li>
+              ))}
+            </ul>
+          ) : (
+            <p class="ph-empty">当前核心 notions 都已标注 abilities。</p>
+          )}
+        </div>
+
+        <div class="ph-ability-review-block">
+          <h4>每个 ability 下的内容数量</h4>
+          <ul class="ph-compact-list">
+            {abilityGroups.map((group) => (
+              <li data-ability-review-count={group.ability}>
+                <span><strong>{group.meta.label}</strong>：{group.total} 个关联内容</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div class="ph-ability-review-block">
+          <h4>内容最少的 ability 维度</h4>
+          <p class="muted">这些维度的关联内容较少，尚未充分覆盖。</p>
+          <ul class="ph-compact-list">
+            {leastCoveredAbilityGroups.map((group) => (
+              <li>
+                <span><strong>{group.meta.label}</strong>：{group.total} 个关联内容</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p class="muted">
+          当前内容集中于这些维度：{concentratedAbilityGroups.map((group) => group.meta.label).join("、") || "暂无明显集中维度"}。
+        </p>
       </section>
     </div>
   </section>

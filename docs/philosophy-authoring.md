@@ -49,6 +49,16 @@ Source 默认状态为 `saved`、可靠性为 `unknown`。阅读后再更新：
 
 不要把需要长期跟读和持续写笔记的原典放进 sources；那类内容属于 readings。也不要把 readings 写进旧的 works-registry，后者仍是 Python 内容域的 citation registry。
 
+## Ability Lens 标注原则
+
+Ability Lens 是给问题和概念提供一个轻量观察角度，不是测评系统，也不是个人画像。填写 `abilities` 时遵守这些原则：
+
+- abilities 只用于 questions / notions。
+- 每个内容最多 4 个，宁可少标，也不要为了覆盖面而凑满。
+- 只标主要维度：问这个问题或使用这个概念时真正被动员的维度才写入 frontmatter。
+- total 不是分数；页面里的数量只表示该维度关联了多少内容。
+- 不要给 readings / understanding-claims 标 abilities；readings 仍记录阅读状态，understanding-claims 仍记录证据、缺口和下一步任务。
+
 ## Slug 规则
 
 questions、perspectives、readings、notions、sources 使用小写 kebab-case：
@@ -93,4 +103,3 @@ npm run build
 ```
 
 `dev` 和 `build` 都会先执行关系校验。不要为了让页面构建成功而删除有效关系；应修复缺失目标或错误 slug。
-

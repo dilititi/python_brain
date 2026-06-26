@@ -359,10 +359,10 @@ test("understanding claims are browsable and embedded in question and notion wor
   await expect(claim).toContainText("检验中");
   await expect(claim).toContainText("中等信心");
   await expect(claim).toContainText("目标：概念 / power-knowledge");
-  await expect(claim).toContainText("3 条证据");
-  await expect(claim).toContainText("2 个缺口");
-  await expect(claim).toContainText("2 个下一步");
-  await expect(claim).toContainText("更新于 2026-06-23");
+  await expect(claim).toContainText("4 条证据");
+  await expect(claim).toContainText("3 个缺口");
+  await expect(claim).toContainText("3 个下一步");
+  await expect(claim).toContainText("更新于 2026-06-26");
 
   await page.getByLabel("状态").selectOption("draft");
   await expect(claim).toBeHidden();

@@ -27,11 +27,15 @@ test("question page renders ability tags when abilities are present", async ({ p
   await expect(tags).toContainText("内省");
 });
 
-test("question page without abilities does not render an empty tag module", async ({ page }) => {
+test("what-is-understanding question also renders bounded ability tags", async ({ page }) => {
   await page.goto("/questions/what-is-understanding/");
 
   await expect(page.getByRole("heading", { level: 1, name: "理解是什么？" })).toBeVisible();
-  await expect(page.locator("[data-ability-tags]")).toHaveCount(0);
+  const tags = page.locator("[data-ability-tags]");
+  await expect(tags).toContainText("此问题涉及的能力维度");
+  await expect(tags).toContainText("语言");
+  await expect(tags).toContainText("逻辑");
+  await expect(tags).toContainText("内省");
 });
 
 test("notion pages render tags only when abilities exist", async ({ page }) => {
@@ -44,5 +48,9 @@ test("notion pages render tags only when abilities exist", async ({ page }) => {
   await expect(tags).toContainText("内省");
 
   await page.goto("/notions/philosophy-of-history/");
-  await expect(page.locator("[data-ability-tags]")).toHaveCount(0);
+  const philosophyOfHistoryTags = page.locator("[data-ability-tags]");
+  await expect(philosophyOfHistoryTags).toContainText("此概念涉及的能力维度");
+  await expect(philosophyOfHistoryTags).toContainText("存在");
+  await expect(philosophyOfHistoryTags).toContainText("逻辑");
+  await expect(philosophyOfHistoryTags).toContainText("语言");
 });
