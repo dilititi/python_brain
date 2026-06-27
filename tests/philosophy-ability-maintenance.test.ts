@@ -77,6 +77,11 @@ test("all active questions and core notions have bounded ability tags", () => {
 test("what-is-understanding has a first-draft problem page instead of fixture prose", () => {
   const content = readProjectFile("src", "content", "questions", "what-is-understanding.mdx");
 
+  assert.match(content, /## 理解是什么？/);
+  assert.match(content, /## 理解和明白、掌握、精通有什么区别？/);
+  assert.match(content, /## 为什么 understanding claim 需要 evidence？/);
+  assert.match(content, /## 什么算证据？/);
+  assert.match(content, /## 什么算缺口？/);
   assert.match(content, /## 为什么这是问题/);
   assert.match(content, /## 第一版回答/);
   assert.match(content, /## 对照维度/);
@@ -89,7 +94,17 @@ test("what-is-understanding has a first-draft problem page instead of fixture pr
 test("what-is-history essay contains concrete argument paragraphs", () => {
   const essay = readProjectFile("src", "pages", "questions", "what-is-history", "essay.astro");
 
+  assert.match(essay, /id="essay-current-answer-heading">当前暂定回答/);
+  assert.match(essay, /id="essay-hegel-heading">黑格尔：历史作为理性自我认识/);
+  assert.match(essay, /id="essay-marx-heading">马克思：历史作为物质矛盾与阶级斗争/);
+  assert.match(essay, /id="essay-structuralism-heading">结构主义：历史表层之下的关系系统/);
+  assert.match(essay, /id="essay-foucault-heading">福柯：历史作为断裂的话语与权力技术/);
+  assert.match(essay, /id="essay-position-change-heading">我的立场变化/);
+  assert.match(essay, /id="essay-unresolved-heading">仍未解决的问题/);
   assert.match(essay, /历史不是一种答案，而是一组尺度选择/);
+  assert.match(essay, /黑格尔提醒我/);
+  assert.match(essay, /马克思主义提醒我/);
+  assert.match(essay, /结构主义提醒我/);
   assert.match(essay, /福柯让我放弃的是/);
   assert.match(essay, /我现在更愿意把历史理解为/);
   assert.match(essay, /历史解释的单位不是整个世界史/);

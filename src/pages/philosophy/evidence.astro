@@ -1,0 +1,279 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+const [
+  claims,
+  questions,
+  notions,
+  perspectives,
+  readings,
+  sources,
+  entries,
+  concepts,
+  cases,
+  projects,
+  people,
+  paths
+] = await Promise.all([
+  getCollection("understanding-claims"),
+  getCollection("questions"),
+  getCollection("notions"),
+  getCollection("perspectives"),
+  getCollection("readings"),
+  getCollection("sources"),
+  getCollection("entries"),
+  getCollection("concepts"),
+  getCollection("cases"),
+  getCollection("projects"),
+  getCollection("people"),
+  getCollection("paths")
+]);
+
+type Claim = CollectionEntry<"understanding-claims">;
+type EvidenceItem = Claim["data"]["evidence"][number];
+type EvidenceRow = {
+  claim: Claim;
+  item: EvidenceItem;
+  index: number;
+  anchorKey: string;
+  anchorTitle: string;
+  anchorHref?: string;
+  anchored: boolean;
+};
+
+const statusLabels = {
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置"
+} as const;
+
+const confidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+
+const strengthOrder = ["strong", "moderate", "weak"] as const;
+
+const anchorByKey = new Map<string, { title: string; href: string }>();
+
+function registerAnchor(refType: string, ref: string, title: string, href: string) {
+  anchorByKey.set(`${refType}:${ref}`, { title, href });
+}
+
+questions.forEach((entry) => registerAnchor("question", entry.id, entry.data.title, `/questions/${entry.id}/`));
+notions.forEach((entry) => registerAnchor("notion", entry.id, entry.data.title, `/notions/${entry.id}/`));
+perspectives.forEach((entry) => registerAnchor("perspective", entry.id, entry.data.title, `/perspectives/${entry.id}/`));
+readings.forEach((entry) => registerAnchor("reading", entry.id, entry.data.title, `/readings/${entry.id}/`));
+sources.forEach((entry) => registerAnchor("source", entry.id, entry.data.title, `/sources/${entry.id}/`));
+entries.forEach((entry) => registerAnchor("entry", entry.id, entry.data.title, `/entries/${entry.id}/`));
+concepts.forEach((entry) => registerAnchor("concept", entry.id, entry.data.title, `/concepts/${entry.id}/`));
+cases.forEach((entry) => registerAnchor("case", entry.id, entry.data.title, `/cases/${entry.id}/`));
+projects.forEach((entry) => registerAnchor("project", entry.id, entry.data.title, `/projects/${entry.id}/`));
+people.forEach((entry) => registerAnchor("person", entry.id, entry.data.name, `/people/${entry.id}/`));
+paths.forEach((entry) => registerAnchor("path", entry.id, entry.data.title, `/paths/${entry.id}/`));
+
+function fallbackAnchorTitle(item: EvidenceItem) {
+  if (item.refType === "none") return "无本地锚点";
+  if (item.refType === "external") return item.ref ?? "外部资料";
+  return item.ref ?? `${item.refType} 未绑定`;
+}
+
+function anchorKey(item: EvidenceItem) {
+  return `${item.refType}:${item.ref ?? "none"}`;
+}
+
+const evidenceRows: EvidenceRow[] = claims.flatMap((claim) =>
+  claim.data.evidence.map((item, index) => {
+    const key = anchorKey(item);
+    const anchor = anchorByKey.get(key);
+    return {
+      claim,
+      item,
+      index,
+      anchorKey: key,
+      anchorTitle: anchor?.title ?? fallbackAnchorTitle(item),
+      anchorHref: anchor?.href,
+      anchored: Boolean(anchor)
+    };
+  })
+);
+
+const rowsByAnchor = [...evidenceRows]
+  .sort((a, b) =>
+    a.item.refType.localeCompare(b.item.refType) ||
+    a.anchorTitle.localeCompare(b.anchorTitle, "zh-CN") ||
+    strengthOrder.indexOf(a.item.strength) - strengthOrder.indexOf(b.item.strength)
+  )
+  .reduce<Map<string, EvidenceRow[]>>((groups, row) => {
+    const current = groups.get(row.anchorKey) ?? [];
+    current.push(row);
+    groups.set(row.anchorKey, current);
+    return groups;
+  }, new Map());
+
+const rowsByStrength = strengthOrder.map((strength) => ({
+  strength,
+  rows: evidenceRows.filter((row) => row.item.strength === strength)
+}));
+
+const weakEvidence = evidenceRows.filter((row) => row.item.strength === "weak");
+
+const anchoredClaims = claims
+  .map((claim) => {
+    const rows = evidenceRows.filter((row) => row.claim.id === claim.id);
+    const anchoredCount = rows.filter((row) => row.anchored).length;
+    return {
+      claim,
+      total: rows.length,
+      anchoredCount
+    };
+  })
+  .sort((a, b) => b.anchoredCount - a.anchoredCount || a.claim.data.title.localeCompare(b.claim.data.title, "zh-CN"));
+---
+
+<PhilosophyLayout
+  title="证据锚点索引"
+  description="按 refType、ref 和 strength 聚合 understanding claims 的 evidence。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "证据锚点索引" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Evidence Anchor Index</p>
+    <h1>证据锚点索引</h1>
+    <p class="lead">这里不做全局图谱，只把 understanding-claims.evidence 拉成一张可回顾的证据索引：哪些 readings / entries 正在支撑我的理解主张？哪些 evidence 还是 weak？哪些 claim 的证据已经锚到真实内容？</p>
+  </header>
+
+  <section class="ph-section" data-evidence-section="by-ref-type" aria-labelledby="evidence-by-ref-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Anchor groups</p>
+      <h2 id="evidence-by-ref-heading">按 refType / ref 分组</h2>
+      <p>{evidenceRows.length} 条 evidence 被归入 {rowsByAnchor.size} 个锚点。</p>
+    </div>
+
+    {rowsByAnchor.size > 0 ? (
+      <div class="ph-evidence-grid">
+        {[...rowsByAnchor.entries()].map(([key, rows]) => {
+          const first = rows[0];
+          return (
+            <article class="ph-evidence-card" data-evidence-group-ref={key}>
+              <div class="ph-card-meta">
+                <span>{first.item.refType}</span>
+                <span>{rows.length} 条 evidence</span>
+                {first.anchored ? <span>已锚到本地内容</span> : <span>未锚到本地内容</span>}
+              </div>
+              <h3>{first.anchorTitle}</h3>
+              {first.anchorHref ? <p><a href={first.anchorHref}>打开锚点</a></p> : <p class="muted">暂无可跳转锚点。</p>}
+              <ul class="ph-compact-list">
+                {rows.map((row) => (
+                  <li data-evidence-item>
+                    <div class="ph-card-meta">
+                      <span class={`ph-strength ph-strength-${row.item.strength}`}>{row.item.strength}</span>
+                      <span>{row.item.type}</span>
+                    </div>
+                    <a href={`/understanding-claims/${row.claim.id}/`}>{row.claim.data.title}</a>
+                    <p>{row.item.note ?? "这条 evidence 还没有说明 note。"}</p>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="ph-empty">当前还没有 evidence。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-evidence-section="by-strength" aria-labelledby="evidence-by-strength-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Strength review</p>
+      <h2 id="evidence-by-strength-heading">按 strength 分组</h2>
+      <p>把 strong / moderate / weak 分开看，方便决定下一步是补证据还是降信心。</p>
+    </div>
+
+    <div class="ph-dashboard-grid">
+      {rowsByStrength.map(({ strength, rows }) => (
+        <section class="ph-question-card" data-evidence-strength-group={strength}>
+          <div class="ph-section-heading">
+            <h3>{strength}</h3>
+            <p>{rows.length} 条 evidence</p>
+          </div>
+          {rows.length > 0 ? (
+            <ul class="ph-compact-list">
+              {rows.map((row) => (
+                <li data-evidence-item>
+                  <a href={`/understanding-claims/${row.claim.id}/`}>{row.claim.data.title}</a>
+                  <p>{row.anchorTitle}：{row.item.note ?? "还没有说明 note。"}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="ph-empty">当前没有 {strength} evidence。</p>
+          )}
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="ph-section" data-evidence-section="weak-evidence" aria-labelledby="weak-evidence-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Weak evidence</p>
+      <h2 id="weak-evidence-heading">Weak evidence</h2>
+      <p>这里专门显示还不能撑起主张的弱证据。</p>
+    </div>
+
+    {weakEvidence.length > 0 ? (
+      <div class="ph-evidence-grid">
+        {weakEvidence.map((row) => (
+          <article class="ph-evidence-card" data-evidence-item>
+            <div class="ph-card-meta">
+              <span class="ph-strength ph-strength-weak">weak</span>
+              <span>{row.item.type}</span>
+              <span>{row.item.refType}</span>
+            </div>
+            <h3><a href={`/understanding-claims/${row.claim.id}/`}>{row.claim.data.title}</a></h3>
+            <p>{row.anchorTitle}</p>
+            <p>{row.item.note ?? "这条 weak evidence 还没有说明 note。"}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">当前没有 weak evidence。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-evidence-section="anchored-claims" aria-labelledby="anchored-claims-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Claim coverage</p>
+      <h2 id="anchored-claims-heading">已经锚到真实内容的 claim</h2>
+      <p>逐条 claim 检查 evidence 是否真的指向本地 reading、entry 或其它内容对象。</p>
+    </div>
+
+    {anchoredClaims.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {anchoredClaims.map(({ claim, total, anchoredCount }) => (
+          <article class="ph-question-card" data-evidence-anchored-claim={claim.id}>
+            <div class="ph-card-meta">
+              <span>{statusLabels[claim.data.status]}</span>
+              <span>{confidenceLabels[claim.data.confidence]}</span>
+              <span>{anchoredCount} / {total} 条 evidence 已锚到真实内容</span>
+            </div>
+            <h3>{claim.data.title}</h3>
+            <p>{claim.data.claim}</p>
+            <p><a href={`/understanding-claims/${claim.id}/`}>查看 claim</a></p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">当前还没有 understanding claim evidence。</p>
+    )}
+  </section>
+</PhilosophyLayout>
