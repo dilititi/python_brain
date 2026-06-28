@@ -95,6 +95,19 @@ test("invalid URL focus safely falls back to the default center", async ({ page 
   await expect.poll(() => new URL(page.url()).searchParams.get("focus")).toBeNull();
 });
 
+test("key reading inspector uses a meaningful content description", async ({ page }) => {
+  await page.goto("/?focus=reading:discipline-and-punish");
+  await expect(page.locator("[data-philosophy-graph-home]")).toHaveAttribute(
+    "data-focus-ready",
+    "true",
+  );
+
+  const description = page.locator("[data-inspector-description]");
+  await expect(description).toBeVisible();
+  await expect(description).not.toContainText("还没有适合首页展示的摘要");
+  expect((await description.textContent())?.trim().length ?? 0).toBeGreaterThan(20);
+});
+
 test("node type legend explains all seven colors", async ({ page }) => {
   await page.goto("/");
   const legend = page.locator("[data-node-legend]");

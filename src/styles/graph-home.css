@@ -266,7 +266,7 @@ body.graph-home-body {
 
 .ph-home-reset {
   display: inline-flex;
-  min-height: 32px;
+  min-height: 36px;
   align-items: center;
   gap: 7px;
   border: 1px solid rgb(255 255 255 / 9%);
@@ -424,11 +424,15 @@ body.graph-home-body {
 }
 
 .ph-home-description {
+  display: -webkit-box;
+  overflow: hidden;
   margin: 20px 0 0;
   color: #b0b7c6;
   font-family: "Iowan Old Style", "Noto Serif SC", "Songti SC", serif;
   font-size: 14px;
   line-height: 1.78;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
 }
 
 .ph-home-neighbors {
@@ -483,6 +487,7 @@ body.graph-home-body {
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
+  min-height: 44px;
   padding-top: 22px;
   color: #e8ecf8;
   font-size: 12px;
@@ -703,6 +708,10 @@ body.graph-home-body {
 
   .ph-home-inspector h1 {
     font-size: 28px;
+  }
+
+  .ph-home-description {
+    -webkit-line-clamp: 9;
   }
 
   .ph-home-detail-link {

@@ -1,11 +1,64 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import matter from "gray-matter";
 import {
   buildPhilosophyHomeGraph,
   type PhilosophyHomeNodeKind,
 } from "../src/lib/philosophy-home-graph";
+import { findPhilosophyHomeMatches } from "../src/lib/philosophy-home-search";
+
+async function loadPublishedCollection(directoryName: string) {
+  const directory = fileURLToPath(
+    new URL(`../src/content/${directoryName}/`, import.meta.url),
+  );
+  const files = (await readdir(directory)).filter((file) => /\.mdx?$/.test(file));
+
+  return Promise.all(files.map(async (file) => ({
+    id: file.replace(/\.mdx?$/, ""),
+    data: matter(await readFile(`${directory}/${file}`, "utf8")).data,
+  })));
+}
+
+async function loadPublishedGraph() {
+  const [
+    questions,
+    notions,
+    readings,
+    sources,
+    entries,
+    understandingClaims,
+    perspectives,
+  ] = await Promise.all([
+    loadPublishedCollection("questions"),
+    loadPublishedCollection("notions"),
+    loadPublishedCollection("readings"),
+    loadPublishedCollection("sources"),
+    loadPublishedCollection("entries"),
+    loadPublishedCollection("understanding-claims"),
+    loadPublishedCollection("perspectives"),
+  ]);
+
+  return buildPhilosophyHomeGraph({
+    questions,
+    notions,
+    readings,
+    sources,
+    entries,
+    understandingClaims,
+    perspectives,
+  } as unknown as Parameters<typeof buildPhilosophyHomeGraph>[0]);
+}
+
+function neighborIds(
+  graph: ReturnType<typeof buildPhilosophyHomeGraph>,
+  nodeId: string,
+): Set<string> {
+  return new Set(graph.edges
+    .filter((edge) => edge.source === nodeId || edge.target === nodeId)
+    .map((edge) => edge.source === nodeId ? edge.target : edge.source));
+}
 
 function fixture(): Parameters<typeof buildPhilosophyHomeGraph>[0] {
   return {
@@ -176,4 +229,66 @@ test("the view model remains separate from content schema concepts", async () =>
 
   assert.doesNotMatch(source, /KnowledgeNode/);
   assert.doesNotMatch(source, /defineCollection/);
+});
+
+test("published history graph exposes a representative first-hop neighborhood", async () => {
+  const graph = await loadPublishedGraph();
+  const neighbors = neighborIds(graph, "question:what-is-history");
+
+  assert.equal(graph.defaultCenterId, "question:what-is-history");
+  assert.ok(neighbors.size >= 4);
+  for (const expected of [
+    "notion:philosophy-of-history",
+    "notion:power-knowledge",
+    "notion:structure",
+    "notion:dialectic",
+    "reading:discipline-and-punish",
+    "claim:foucault-power-knowledge-claim",
+    "perspective:foucault",
+  ]) {
+    assert.ok(neighbors.has(expected), `default center should connect to ${expected}`);
+  }
+});
+
+test("published key nodes are connected and provide useful inspector descriptions", async () => {
+  const graph = await loadPublishedGraph();
+  const keyNodeIds = [
+    "question:what-is-history",
+    "question:what-is-understanding",
+    "claim:foucault-power-knowledge-claim",
+    "reading:discipline-and-punish",
+    "perspective:foucault",
+    "notion:philosophy-of-history",
+    "notion:power-knowledge",
+    "notion:structure",
+    "notion:dialectic",
+  ];
+
+  for (const nodeId of keyNodeIds) {
+    const node = graph.nodes.find((candidate) => candidate.id === nodeId);
+    assert.ok(node, `${nodeId} should exist`);
+    assert.ok(neighborIds(graph, nodeId).size > 0, `${nodeId} should not be isolated`);
+    assert.ok(node.description?.trim(), `${nodeId} should have an inspector description`);
+  }
+});
+
+test("published graph search reaches the four core inquiry clusters", async () => {
+  const graph = await loadPublishedGraph();
+  const matches = (query: string) => new Set(
+    findPhilosophyHomeMatches(graph.nodes, query).map((node) => node.id),
+  );
+
+  assert.ok(
+    matches("历史").has("question:what-is-history")
+      || matches("历史").has("notion:philosophy-of-history"),
+  );
+  assert.ok([...matches("福柯")].some((id) =>
+    id === "perspective:foucault"
+      || id === "claim:foucault-power-knowledge-claim"
+      || id === "reading:discipline-and-punish"));
+  assert.ok(
+    matches("权力").has("notion:power-knowledge")
+      || matches("权力").has("claim:foucault-power-knowledge-claim"),
+  );
+  assert.ok(matches("理解").has("question:what-is-understanding"));
 });

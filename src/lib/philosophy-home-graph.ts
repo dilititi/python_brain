@@ -146,15 +146,21 @@ export function buildPhilosophyHomeGraph(
 
   for (const entry of input.readings) {
     const status = getString(entry.data, "status");
+    const description = getString(entry.data, "notes");
 
     nodes.push({
       id: `reading:${entry.id}`,
       label: getString(entry.data, "title") ?? entry.id,
       kind: "reading",
       href: `/readings/${entry.id}/`,
+      description,
       keywords: compactKeywords([
         entry.id,
         getString(entry.data, "title"),
+        getString(entry.data, "originalTitle"),
+        getString(entry.data, "author"),
+        getString(entry.data, "perspective"),
+        description,
         status,
       ]),
       status,
@@ -293,6 +299,9 @@ export function buildPhilosophyHomeGraph(
     for (const source of input.sources) {
       if (getStringArray(source.data, "relatedQuestions").includes(question.id)) {
         addEdge(questionId, `source:${source.id}`, "question-source");
+        for (const notionId of getStringArray(source.data, "relatedNotions")) {
+          addEdge(questionId, `notion:${notionId}`, "question-notion");
+        }
       }
     }
 

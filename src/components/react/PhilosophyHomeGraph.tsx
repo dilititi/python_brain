@@ -163,10 +163,18 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
       const positions = new Map<string, { x: number; y: number }>();
       positions.set(centerId, { x: 0, y: 0 });
       const neighborCount = visibleGraph.neighbors.length;
-      const radius = neighborCount > 8 ? 245 : 205;
+      const useTwoRings = neighborCount > 12;
+      const innerRingCount = useTwoRings ? Math.ceil(neighborCount / 2) : neighborCount;
 
       visibleGraph.neighbors.forEach((node, index) => {
-        const angle = (Math.PI * 2 * index) / Math.max(neighborCount, 1) - Math.PI / 2;
+        const isOuterRing = useTwoRings && index >= innerRingCount;
+        const ringIndex = isOuterRing ? index - innerRingCount : index;
+        const ringCount = isOuterRing ? neighborCount - innerRingCount : innerRingCount;
+        const radius = useTwoRings ? (isOuterRing ? 286 : 174) : neighborCount > 8 ? 245 : 205;
+        const angleOffset = isOuterRing
+          ? -Math.PI / 2 + Math.PI / Math.max(ringCount, 1)
+          : -Math.PI / 2;
+        const angle = (Math.PI * 2 * ringIndex) / Math.max(ringCount, 1) + angleOffset;
         positions.set(node.id, {
           x: Math.cos(angle) * radius,
           y: Math.sin(angle) * radius,
@@ -205,7 +213,7 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
               color: "#f7f8ff",
               content: "data(label)",
               "font-family": "Iowan Old Style, Noto Serif SC, Songti SC, serif",
-              "font-size": 10,
+              "font-size": 9,
               "font-weight": 600,
               height: 32,
               "label": "data(label)",
@@ -215,14 +223,14 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
               "underlay-opacity": 0.1,
               "underlay-padding": 8,
               "text-background-color": "#08090d",
-              "text-background-opacity": 0.78,
+              "text-background-opacity": 0.86,
               "text-background-padding": "3px",
               "text-margin-y": 9,
               "text-outline-color": "#08090d",
               "text-outline-width": 2,
               "text-valign": "bottom",
               "text-wrap": "wrap",
-              "text-max-width": "104px",
+              "text-max-width": "96px",
               width: 32,
             },
           },
@@ -230,15 +238,15 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
             selector: "node[isCenter = 1]",
             style: {
               "border-color": "#ffffff",
-              "border-width": 3,
+              "border-width": 3.5,
               "font-size": 14,
               "font-weight": 700,
-              height: 64,
-              "underlay-opacity": 0.28,
-              "underlay-padding": 16,
+              height: 68,
+              "underlay-opacity": 0.2,
+              "underlay-padding": 13,
               "text-margin-y": 16,
               "text-max-width": "156px",
-              width: 64,
+              width: 68,
             },
           },
           {
@@ -252,11 +260,11 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
             style: {
               "curve-style": "straight",
               "line-color": "#526079",
-              opacity: 0.58,
+              opacity: 0.44,
               "target-arrow-color": "#70809d",
               "target-arrow-shape": "triangle",
               "arrow-scale": 0.58,
-              width: 1.2,
+              width: 1,
             },
           },
         ],
@@ -489,8 +497,9 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
                 {selectedNode.confidence && <span>confidence · {selectedNode.confidence}</span>}
               </div>
             )}
-            <p className="ph-home-description">
-              {selectedNode.description ?? "这个节点暂时没有摘要；可以进入详情页继续阅读和补写。"}
+            <p className="ph-home-description" data-inspector-description>
+              {selectedNode.description
+                ?? "这条笔记还没有适合首页展示的摘要。进入详情页，可以继续查看正文与关联材料。"}
             </p>
             {visibleGraph.neighbors.length > 0 && (
               <div className="ph-home-neighbors">

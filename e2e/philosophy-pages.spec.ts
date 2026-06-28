@@ -19,7 +19,8 @@ test("question page compares answers and presents stance evolution", async ({ pa
   await page.goto("/questions/what-is-history/");
 
   await expect(page.getByRole("heading", { level: 1, name: "历史是什么？" })).toBeVisible();
-  await expect(page.locator('[data-question-current-answer]')).toContainText("历史不是单一逻辑的展开");
+  await expect(page.locator('[data-question-current-answer]')).toContainText("历史哲学");
+  await expect(page.locator('[data-question-current-answer]')).toContainText("局部规律");
   await expect(page.locator('[data-stance-matrix]')).toContainText("福柯");
   await expect(page.locator('[data-stance-matrix]')).toContainText("权力 - 知识构型");
   await expect(page.locator('[data-perspective-card="foucault"]')).toContainText("对这个问题的回答");
