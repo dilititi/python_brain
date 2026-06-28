@@ -8,6 +8,12 @@ test("root is a dark search-centered philosophy graph", async ({ page }) => {
 
   await expect(home).toBeVisible();
   await expect(page.getByRole("combobox", { name: "搜索思想节点" })).toBeVisible();
+  await expect(page.locator(".ph-home-identity")).toContainText("思想工作台");
+  await expect(page.locator(".ph-home-identity")).toContainText("QUESTION-DRIVEN GRAPH");
+  await expect(page.getByRole("combobox", { name: "搜索思想节点" })).toHaveAttribute(
+    "placeholder",
+    "搜索问题、概念、理论、阅读……",
+  );
   await expect(page.locator("[data-graph-canvas]")).toBeVisible();
   await expect(inspector).toHaveAttribute("data-center-id", "question:what-is-history");
   await expect(inspector).toContainText("历史是什么？");
@@ -122,11 +128,33 @@ test("node type legend explains all seven colors", async ({ page }) => {
 test("graph homepage keeps philosophy actions and the legacy Python graph reachable", async ({ page }) => {
   await page.goto("/");
 
+  await expect(page.getByRole("link", { name: "学习回顾" })).toHaveAttribute("href", "/philosophy/review/");
   await expect(page.getByRole("link", { name: "下一步学习" })).toHaveAttribute("href", "/philosophy/next/");
   await expect(page.getByRole("link", { name: "证据锚点" })).toHaveAttribute("href", "/philosophy/evidence/");
   await expect(page.getByRole("link", { name: "理解缺口" })).toHaveAttribute("href", "/philosophy/gaps/");
   await expect(page.getByRole("link", { name: "能力维度" })).toHaveAttribute("href", "/philosophy/abilities/");
   await expect(page.getByRole("link", { name: "Python 知识库" })).toHaveAttribute("href", "/graph/");
+});
+
+test("every graph shortcut resolves and workflow pages link back to the graph", async ({ page, request }) => {
+  const shortcuts = [
+    "/philosophy/review/",
+    "/philosophy/next/",
+    "/philosophy/evidence/",
+    "/philosophy/gaps/",
+    "/philosophy/abilities/",
+    "/graph/",
+  ];
+
+  for (const href of shortcuts) {
+    const response = await request.get(href);
+    expect(response.ok(), `${href} should resolve`).toBe(true);
+  }
+
+  for (const href of shortcuts.slice(0, 3)) {
+    await page.goto(href);
+    await expect(page.getByRole("link", { name: "返回首页图谱" })).toHaveAttribute("href", "/");
+  }
 });
 
 test("search and inspector remain usable on a mobile viewport", async ({ page }) => {

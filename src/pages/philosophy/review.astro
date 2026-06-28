@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import PhilosophyWorkflowNav from "../../components/philosophy/PhilosophyWorkflowNav.astro";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 import { groupPhilosophyContentByAbility } from "../../lib/philosophy-abilities";
 import { buildRecentStanceChanges } from "../../lib/philosophy-search";
@@ -108,6 +109,8 @@ const leastCoveredAbilityGroups = abilityGroups.filter((group) => group.total ==
     <h1>近期立场变化</h1>
     <p class="lead">这里不是普通博客归档，而是按时间回看：哪次阅读让我的判断从 Vn 变成 Vn+1，以及仍留下什么问题。</p>
   </header>
+
+  <PhilosophyWorkflowNav current="review" />
 
   <section class="ph-section" aria-labelledby="review-dashboard-heading">
     <div class="ph-section-heading">

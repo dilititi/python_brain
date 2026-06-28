@@ -1,0 +1,28 @@
+---
+type WorkflowPage = "review" | "next" | "evidence";
+
+interface Props {
+  current: WorkflowPage;
+}
+
+const { current } = Astro.props;
+const links: Array<{ id: WorkflowPage; href: string; label: string }> = [
+  { id: "review", href: "/philosophy/review/", label: "学习回顾" },
+  { id: "next", href: "/philosophy/next/", label: "下一步学习" },
+  { id: "evidence", href: "/philosophy/evidence/", label: "证据锚点" }
+];
+---
+
+<nav class="ph-workflow-nav" aria-label="Philosophy 工作流导航">
+  <a class="ph-workflow-home" href="/">返回首页图谱</a>
+  <div>
+    {links.map((link) => (
+      <a
+        href={link.href}
+        aria-current={current === link.id ? "page" : undefined}
+      >
+        {link.label}
+      </a>
+    ))}
+  </div>
+</nav>

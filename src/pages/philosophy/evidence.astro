@@ -1,5 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import PhilosophyWorkflowNav from "../../components/philosophy/PhilosophyWorkflowNav.astro";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 
 const [
@@ -150,6 +151,8 @@ const anchoredClaims = claims
     <h1>证据锚点索引</h1>
     <p class="lead">这里不做全局图谱，只把 understanding-claims.evidence 拉成一张可回顾的证据索引：哪些 readings / entries 正在支撑我的理解主张？哪些 evidence 还是 weak？哪些 claim 的证据已经锚到真实内容？</p>
   </header>
+
+  <PhilosophyWorkflowNav current="evidence" />
 
   <section class="ph-section" data-evidence-section="by-ref-type" aria-labelledby="evidence-by-ref-heading">
     <div class="ph-section-heading">

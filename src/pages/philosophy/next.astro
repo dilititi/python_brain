@@ -1,5 +1,6 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
+import PhilosophyWorkflowNav from "../../components/philosophy/PhilosophyWorkflowNav.astro";
 import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
 
 const [claims, questions, readings, sources] = await Promise.all([
@@ -92,6 +93,8 @@ const stalledQuestions = questions
     <h1>下一步学习</h1>
     <p class="lead">这页不做全局图谱，只回答一个朴素问题：我下一步该读什么、写什么、补什么证据？</p>
   </header>
+
+  <PhilosophyWorkflowNav current="next" />
 
   <section class="ph-section" data-next-section="claim-tasks" aria-labelledby="claim-tasks-heading">
     <div class="ph-section-heading">

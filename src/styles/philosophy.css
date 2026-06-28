@@ -18,6 +18,44 @@
   margin: 0;
 }
 
+.ph-workflow-nav {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--color-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.ph-workflow-nav div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ph-workflow-nav a {
+  border-radius: 999px;
+  padding: 7px 11px;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ph-workflow-nav a:hover,
+.ph-workflow-nav a[aria-current="page"] {
+  background: var(--color-soft);
+  color: var(--color-blue);
+}
+
+.ph-workflow-nav .ph-workflow-home {
+  color: var(--color-blue);
+}
+
 .ph-status {
   width: fit-content;
   display: inline-flex;
@@ -724,6 +762,20 @@
 }
 
 @media (max-width: 760px) {
+  .ph-workflow-nav {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ph-workflow-nav div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ph-workflow-nav a {
+    text-align: center;
+  }
+
   .ph-answer-grid,
   .ph-reading-grid,
   .ph-question-grid,

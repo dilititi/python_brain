@@ -39,6 +39,7 @@ const kindLabels: Record<PhilosophyHomeNodeKind, string> = {
 };
 
 const quickLinks = [
+  { href: "/philosophy/review/", label: "学习回顾" },
   { href: "/philosophy/next/", label: "下一步学习" },
   { href: "/philosophy/evidence/", label: "证据锚点" },
   { href: "/philosophy/gaps/", label: "理解缺口" },
@@ -364,7 +365,7 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
       <header className="ph-home-searchbar">
         <a className="ph-home-identity" href="/philosophy/" aria-label="进入思想工作台">
           <Network aria-hidden="true" size={18} />
-          <span><strong>问题笔记</strong><small>LOCAL GRAPH</small></span>
+          <span><strong>思想工作台</strong><small>QUESTION-DRIVEN GRAPH</small></span>
         </a>
 
         <form className="ph-home-search" role="search" onSubmit={handleSubmit}>
@@ -381,7 +382,7 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
             }}
             onBlur={() => setResultsOpen(false)}
             onKeyDown={handleSearchKeyDown}
-            placeholder="搜索：历史、理解、福柯、权力……"
+            placeholder="搜索问题、概念、理论、阅读……"
             autoComplete="off"
             aria-label="搜索思想节点"
             aria-autocomplete="list"
@@ -403,7 +404,7 @@ export default function PhilosophyHomeGraph({ graph }: Props) {
                 ? `${searchResults.length} 个匹配 · 使用方向键选择`
                 : query
                   ? `当前中心 · ${selectedNode?.label ?? "未选择"}`
-                  : "输入关键词，选择新的中心节点"}
+                  : "搜索一个问题或概念，把它移到图谱中心"}
           </span>
           {resultsOpen && (
             <div

@@ -208,6 +208,11 @@ pre {
     padding-bottom: 2px;
   }
 
+  .nav-links a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   .grid.cols-2,
   .grid.cols-3 {
     grid-template-columns: 1fr;

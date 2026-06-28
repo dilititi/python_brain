@@ -93,6 +93,21 @@ npm run validate:relations
 4. 检查 entry 是否从 V0 开始、每次只前进一个版本，且下一条 `priorStance` 与上一条 `newStance` 完全一致。
 5. 重新运行关系校验，直到退出码为 0。
 
+## 首页图谱如何生成
+
+根首页 `/` 的图谱不是新的内容系统，而是既有 philosophy collections 的只读 view model。`src/pages/index.astro` 在构建时读取 questions、notions、readings、sources、entries、understanding-claims、perspectives，再交给 `buildPhilosophyHomeGraph()` 生成首页节点和关系边。它不会写回内容，也不会修改 `content.philosophy.ts`。
+
+节点 id 使用 collection 类型前缀，例如 `question:what-is-history`、`reading:discipline-and-punish`。关系边来自 frontmatter 中已有的 slug 字符串：Question 的 related 字段、Source / Entry / Claim 的 `relatedQuestions`，以及 Claim evidence 的 `refType + ref`。重复关系会在 view model 中去重。
+
+浏览器只渲染“当前中心节点 + 一阶邻居”，不会把全站节点一次性铺开。默认优先以 `question:what-is-history` 为中心；搜索会在 label、id、keywords 和 description 中做本地匹配，选择结果后只切换中心。地址栏的 `?focus=reading:discipline-and-punish` 可以直接聚焦一个节点。
+
+作者不需要手工维护 graph 文件。要让图谱更有用，应当：
+
+1. 给内容写清楚 title、summary / currentPosition / claim 等已有摘要字段。
+2. 使用已经定义的 related 字段建立真实关系，并继续填写合法的 slug 字符串。
+3. 新增或修改关系后运行 `npm run validate:relations` 和发布前检查。
+4. 不为首页图谱新增统一 collection、KnowledgeNode、数字权重或能力评分。
+
 ## 发布前检查
 
 ```powershell
