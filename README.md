@@ -1,9 +1,55 @@
-# Python 知识外脑
+# 思想工作台
 
-一个基于 Astro Content Collections 的 Python 学习外脑原型。它把概念、代码、案例、人物、作品和历史作为同一个知识节点的六个侧面，同时保留案例库、项目库、人物谱系和学习路径这些独立入口。
+一个问题驱动的哲学阅读与立场演化系统。它不是百科，也不是普通读书笔记：Question 是入口，不同理论围绕同一个问题形成可比较的回答，Readings 与 Sources 提供证据，Entries 记录立场变化，Understanding Claims 暴露当前判断的证据、缺口和下一步任务。
 
-## 公网连接（暂时的）
-https://python-brain-zmmb.onrender.com/
+生产站点：[https://python-brain.vercel.app/](https://python-brain.vercel.app/)
+
+## 从哪里开始
+
+- `/`：搜索驱动的局部知识图谱；搜索问题、概念、理论或阅读，并查看中心节点的一阶邻居。
+- `/questions/`：问题工作台总览。
+- `/philosophy/review/`：学习回顾。
+- `/philosophy/next/`：下一步阅读、写作和补证据任务。
+- `/philosophy/evidence/`：证据锚点。
+- `/philosophy/gaps/`：理解缺口、反证与下一步任务。
+- `/philosophy/abilities/`：不带评分的 Ability Lens。
+
+`/questions/what-is-history/` 是当前最完整的问题页；`/questions/what-is-history/essay/` 是 essay 实验页。
+
+## Philosophy 内容模型
+
+Philosophy 内容使用 Astro 6.4 Content Layer、MDX 和 `src/content.config.ts`。跨 collection 关系继续使用 slug 字符串，不维护独立 graph collection。
+
+- `questions`：核心追问、比较维度、理论立场和当前暂定回答。
+- `perspectives`：对同一个问题的理论回答。
+- `readings`：长期跟读并持续写笔记的原典。
+- `sources`：用于定位背景、证据和文献的辅助资料。
+- `entries`：从 V0 到 V1、V2 的立场变化记录。
+- `understanding-claims`：接受 evidence、gaps、counterEvidence 与 nextTasks 检验的理解主张。
+- `notions`：Philosophy 模块中的概念节点。
+
+首页图谱只是这些 collections 的只读 view model，只渲染当前中心节点及其一阶邻居。详细维护约定见 [Philosophy 内容工作流](docs/philosophy-authoring.md)。
+
+## 作者命令
+
+```bash
+npm run new:question -- --id=what-is-freedom --title="自由是什么？"
+npm run new:source -- --id=example-source --title="Example" --url=https://example.com --type=article --summary="摘要" --why-saved="保存原因" --question=what-is-history
+npm run new:understanding-claim -- --id=example-claim --title="示例理解主张"
+```
+
+所有作者命令都支持 `--dry-run`。新增或修改关系后先运行 `npm run validate:relations`。
+
+## Python 知识库：辅助模块
+
+仓库仍保留原有 Python 学习系统，作为角落里的辅助入口，不参与 Philosophy 首页主图：
+
+- `/concepts/`：Python 概念页。
+- `/graph/`：旧 Python 全站关系图。
+- `/assessments/` 与 `/progress/`：本地测评和学习证据矩阵。
+- `cases`、`projects`、`people`、`paths`：案例、项目、人物和学习路径。
+
+旧的 `works-registry.yaml` 属于 Python citation registry；它不等同于 Philosophy 的 `readings`。
 
 ## 本地运行
 
@@ -12,40 +58,26 @@ npm install
 npm run dev
 ```
 
-常用命令：
+发布前检查：
 
 ```bash
-npm run build
 npm run validate:relations
+npm run audit:concepts
+npm run audit:assessments
+npm test
+npm run test:e2e
+npm run test:code-examples
+npm run test:assessments
+npm run build
+npm run link:check
+npm run link:external:inventory
 ```
 
-## 内容模型
+项目使用 Astro 静态输出，Vercel 构建目录为 `dist/`。完整 gate 与部署语义见 [部署说明](docs/deployment.md)。
 
-- `src/content/concepts/`：知识点，每个概念都声明前置、相关、应用、人物、作品和历史。
-- `src/content/cases/`：真实案例，通过 `concepts` 字段反向注入概念页。
-- `src/content/projects/`：项目练习，连接多个案例和概念。
-- `src/content/people/`：人物谱系，连接人物、作品和概念。
-- `src/content/paths/`：学习路径，使用 YAML 存储节点序列和里程碑。
+## 维护文档
 
-Astro v6 的内容集合配置入口是 `src/content.config.ts`。双向关系聚合在 `src/lib/relations.ts`，全站图谱生成在 `src/lib/graph.ts`。
-
-## 当前 MVP
-
-- 42 个概念节点
-- 18 个真实案例
-- 7 个项目练习
-- 6 位人物锚点
-- 5 条学习路径
-
-`npm run validate:relations` 会检查内容数量、引用完整性和最小连通子图约束。
-
-## 工程对接
-
-- [工程定位审查 v1.0](docs/project-positioning-v1.md)
+- [Philosophy 内容工作流](docs/philosophy-authoring.md)
+- [v1.2 发布交接](docs/handoff-v1.2.md)
 - [内容编辑准则](docs/content-guidelines.md)
-
-## 部署
-
-Vercel 配置见 `vercel.json`。项目使用 Astro 静态输出，构建命令为 `npm run build`，输出目录为 `dist/`。
-
-详细步骤见 [部署说明](docs/deployment.md)。
+- [Changelog](CHANGELOG.md)

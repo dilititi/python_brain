@@ -67,7 +67,7 @@ npm run validate:relations -- --warning-exit-code=2
 
 Vercel Build Command 不应直接使用会返回 `2` 的 warning monitoring 命令；Vercel 只适合作为硬阻断部署 gate，继续使用 `npm run build`，并在合并前由本地或 GitHub Actions 跑完整前置检查。
 
-标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。Lighthouse >= 90 已接入 GitHub Actions 的 `lighthouse-beacons` job，覆盖 `/concepts/decorator/`、`/concepts/python-language/`、`/concepts/function-parameters/` 三个标杆页，检查 performance 和 accessibility。外部 URL 监控已自动化为 `npm run link:external`，但因为它依赖外部站点和网络状态，只在 GitHub Actions 的手动触发与每周定时任务中运行，不作为 PR/Vercel 部署硬阻断。
+标杆页验收里的内部 link check 已自动化为 `npm run link:check`，默认检查静态构建产物中的站内 href/src 和 hash anchor，不依赖网络。Lighthouse >= 90 已接入 GitHub Actions 的 `lighthouse-beacons` job，覆盖 `/concepts/decorator/`、`/concepts/python-language/`、`/concepts/function-parameters/` 三个标杆页，检查 performance 和 accessibility。Lighthouse 对每个 URL 运行 3 次并使用中位数，继续保持 performance / accessibility `minScore: 0.9`，不通过降低门槛吸收冷启动抖动。外部 URL 监控已自动化为 `npm run link:external`，但因为它依赖外部站点和网络状态，只在 GitHub Actions 的手动触发与每周定时任务中运行，不作为 PR/Vercel 部署硬阻断。
 
 GitHub Actions 工作流 `.github/workflows/v1-gates.yml` 会在 PR 和 `main` push 时运行：
 
@@ -118,3 +118,19 @@ npx vercel --prod --token <VERCEL_TOKEN>
 其中 `validate:relations` 输出 `Relations valid`；`audit:concepts` 当前应输出 clean，不应再列出 codeExamples warning 库存；`test:code-examples` 当前应输出 Pyodide runnable 示例全部通过。当前不存在 `summary` / `whyImportant` 或 `codeExamples` warning 库存。
 
 Vercel production 已由用户完成部署，生产域名为 `https://python-brain.vercel.app/`。后续仍以 GitHub Actions 绿灯和生产站点关键路由可访问共同判定发布健康。
+
+### v1.2.0 发布收口
+
+`v1.2.0` release candidate 不新增页面、content schema、依赖或 CI 功能。合并 release PR 后，必须等待 `main` 的 Static gates、Lighthouse beacon pages 与 Vercel deployment 全部完成，再抽样以下生产路由：
+
+- `/`
+- `/questions/what-is-history/`
+- `/questions/what-is-history/essay/`
+- `/philosophy/review/`
+- `/philosophy/next/`
+- `/philosophy/evidence/`
+- `/philosophy/gaps/`
+- `/philosophy/abilities/`
+- `/concepts/`
+
+所有路由返回 200，且首页桌面与 390px 移动端搜索、节点切换、inspector 和辅助 Python 入口可用后，才在该 release merge commit 上创建 annotated tag `v1.2.0` 和 GitHub Release。GitHub 仓库 description 同步为“问题驱动的哲学阅读与立场演化思想工作台，保留 Python 知识库辅助入口。”

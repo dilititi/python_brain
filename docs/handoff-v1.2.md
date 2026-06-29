@@ -211,11 +211,33 @@ PEP 8 检查是 Tier 2 证据的一部分，但 ruff WASM 在浏览器中的体�
 - [x] `/progress` 为停留类别选择一道尚未做过的 recognition 题；Mock、新用户和 `tier2+` 类别不显示。
 - [x] Playwright 覆盖 recognition 提交写入 attempt、attempt 驱动 matrix / weekly，以及新用户不提示的边界。
 - [x] `test:e2e` 保持发布前 gate，不进入每次 PR 的常规 `v1-gates`。
-- [ ] GitHub Actions 绿灯并完成 Vercel production 抽样。
-- 写 release handoff。
-- 全量 gates 通过后打 annotated tag `v1.2.0`。
+- [x] GitHub Actions Static gates、Lighthouse beacon pages 已完成，Vercel production 主入口抽样返回 200。
+- [x] `v1.2.0` release handoff 已写入本文件，并把正式发布动作限制在 release PR 合并之后。
+- annotated tag `v1.2.0` 必须指向通过全量 gates 与生产抽样的 release PR merge commit；tag 状态以 GitHub Release 为准，不再反向修改该 commit。
 
 阶段三的“停留触发”不是反向识别题，不产生 `reverseRecognitionPassed` 或 `crossConceptPassed`。不要因此解除 `DISABLED_REQUIREMENTS`；只有对应题型和 category config 数据来源同时落地时，才能在同一 PR 启用这些维度。
+
+## v1.2.0 Release Handoff
+
+`v1.2.0` 的主产品身份是“思想工作台”：一个问题驱动的哲学阅读与立场演化系统。V4.8/V4.9 是这次发布内部的 Philosophy 功能轨迹；仓库名与 package 名继续保留 `python-brain`，旧 Python concepts、graph、assessments 和 progress 作为辅助模块继续可访问。
+
+本次发布包含：
+
+- Graph-first 搜索驱动首页、局部一阶邻居与 inspector。
+- Question、Perspective、Reading、Source、Entry、Notion 与 Understanding Claim 工作流。
+- Review、Next、Evidence、Gaps、Ability Lens 和 Question Local Map detail panel。
+- `what-is-history` essay 实验页与 Philosophy 作者命令。
+- 移动端导航和 CodeRunner/Lighthouse 稳定性修复。
+
+2026-06-29 的发布基线已经完成 GitHub Actions 与 Vercel production 抽样。Release PR 只同步 README、CHANGELOG、版本字段和发布文档，不修改 content schema、页面行为或依赖。最终 release merge commit 还必须重新通过完整 gates，并确认 `/`、核心 Philosophy 工作流页面与 `/concepts/` 返回 200。
+
+完成生产验收后执行：
+
+```bash
+git tag -a v1.2.0 -m "v1.2.0: graph-first philosophy workspace"
+git push origin v1.2.0
+gh release create v1.2.0 --verify-tag --title "v1.2.0 — 思想工作台"
+```
 
 ## v1.2 Gates
 
@@ -228,6 +250,7 @@ npm run audit:assessments
 npm run test
 npm run test:e2e
 npm run test:code-examples
+npm run test:assessments
 npm run build
 npm run link:check
 npm run link:external:inventory
