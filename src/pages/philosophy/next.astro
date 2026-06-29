@@ -1,0 +1,249 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import PhilosophyWorkflowNav from "../../components/philosophy/PhilosophyWorkflowNav.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+const [claims, questions, readings, sources] = await Promise.all([
+  getCollection("understanding-claims"),
+  getCollection("questions"),
+  getCollection("readings"),
+  getCollection("sources")
+]);
+
+const questionById = new Map(questions.map((question) => [question.id, question]));
+const statusLabels = {
+  open: "持续追问",
+  provisional: "已有暂定回答",
+  settled: "阶段性稳定",
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置",
+  unread: "未读",
+  reading: "在读",
+  finished: "已读完",
+  saved: "已保存",
+  skimmed: "已浏览",
+  read: "已读",
+  extracted: "已提取",
+  rejected: "已弃用"
+} as const;
+const confidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+const reliabilityLabels = {
+  high: "高可靠性",
+  medium: "中等可靠性",
+  low: "低可靠性",
+  unknown: "可靠性未判断"
+} as const;
+const currentDate = new Date();
+const stalledQuestionStatuses = new Set(["open", "provisional", "active", "developing"]);
+
+function daysSince(date: string | undefined) {
+  if (!date) return Number.POSITIVE_INFINITY;
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return Number.POSITIVE_INFINITY;
+  return Math.floor((currentDate.getTime() - parsed.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function questionsForReading(readingId: string) {
+  return questions.filter((question) => question.data.relatedReadings.includes(readingId));
+}
+
+function linkedQuestions(ids: string[]) {
+  return ids
+    .map((id) => questionById.get(id))
+    .filter((question): question is CollectionEntry<"questions"> => Boolean(question));
+}
+
+const claimTasks = claims.flatMap((claim) => (
+  claim.data.nextTasks.map((task) => ({ claim, task }))
+));
+const questionOpenQuestions = questions.flatMap((question) => (
+  question.data.openQuestions.map((openQuestion) => ({ question, openQuestion }))
+));
+const readingsToContinue = readings.filter((reading) => reading.data.status !== "finished");
+const sourcesToProcess = sources.filter((source) => (
+  ["saved", "skimmed", "reading"].includes(source.data.status)
+));
+const stalledQuestions = questions
+  .map((question) => ({
+    question,
+    age: daysSince(question.data.updatedAt)
+  }))
+  .filter(({ question, age }) => stalledQuestionStatuses.has(question.data.status) && age > 30);
+---
+
+<PhilosophyLayout
+  title="下一步学习"
+  description="把理解主张、问题、阅读和资料中的下一步动作聚合成一个轻量回顾页。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "下一步学习" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Review dashboard</p>
+    <h1>下一步学习</h1>
+    <p class="lead">这页不做全局图谱，只回答一个朴素问题：我下一步该读什么、写什么、补什么证据？</p>
+  </header>
+
+  <PhilosophyWorkflowNav current="next" />
+
+  <section class="ph-section" data-next-section="claim-tasks" aria-labelledby="claim-tasks-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Claim next tasks</p>
+      <h2 id="claim-tasks-heading">补什么证据 / 写什么</h2>
+      <p>{claimTasks.length} 个任务来自 understanding-claims.nextTasks。</p>
+    </div>
+    {claimTasks.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {claimTasks.map(({ claim, task }) => (
+          <article class="ph-question-card">
+            <div class="ph-card-meta">
+              <span>{statusLabels[claim.data.status]}</span>
+              <span>{confidenceLabels[claim.data.confidence]}</span>
+            </div>
+            <h3><a href={`/understanding-claims/${claim.id}/`}>{claim.data.title}</a></h3>
+            <p>{task}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">当前没有 claim nextTasks。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-next-section="question-open-questions" aria-labelledby="question-open-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Question open questions</p>
+      <h2 id="question-open-heading">还要写清楚什么问题</h2>
+      <p>{questionOpenQuestions.length} 个开放问题来自 questions.openQuestions。</p>
+    </div>
+    {questionOpenQuestions.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {questionOpenQuestions.map(({ question, openQuestion }) => (
+          <article class="ph-question-card">
+            <div class="ph-card-meta">
+              <span>{statusLabels[question.data.status]}</span>
+              <span>更新于 {question.data.updatedAt}</span>
+            </div>
+            <h3><a href={`/questions/${question.id}/`}>{question.data.title}</a></h3>
+            <p>{openQuestion}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">当前没有 openQuestions。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-next-section="readings-to-continue" aria-labelledby="readings-next-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Readings to continue</p>
+      <h2 id="readings-next-heading">下一步该读什么</h2>
+      <p>{readingsToContinue.length} 条 reading 还未完成。</p>
+    </div>
+    {readingsToContinue.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {readingsToContinue.map((reading) => {
+          const relatedQuestions = questionsForReading(reading.id);
+          return (
+            <article class="ph-reading-card">
+              <div class="ph-card-meta">
+                <span>{statusLabels[reading.data.status]}</span>
+                <span>{reading.data.author}</span>
+                {reading.data.year && <span>{reading.data.year}</span>}
+              </div>
+              <h3><a href={`/readings/${reading.id}/`}>{reading.data.title}</a></h3>
+              {relatedQuestions.length > 0 ? (
+                <p>
+                  <strong>关联问题：</strong>
+                  {relatedQuestions.map((question, index) => (
+                    <>
+                      {index > 0 && "、"}
+                      <a href={`/questions/${question.id}/`}>{question.data.title}</a>
+                    </>
+                  ))}
+                </p>
+              ) : (
+                <p class="muted">暂未关联 question。</p>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="ph-empty">所有 reading 都已完成。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-next-section="sources-to-process" aria-labelledby="sources-next-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Sources to process</p>
+      <h2 id="sources-next-heading">还没处理完的资料</h2>
+      <p>{sourcesToProcess.length} 条 source 仍处在 saved / skimmed / reading。</p>
+    </div>
+    {sourcesToProcess.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {sourcesToProcess.map((source) => {
+          const relatedQuestions = linkedQuestions(source.data.relatedQuestions);
+          return (
+            <article class="ph-reading-card">
+              <div class="ph-card-meta">
+                <span>{statusLabels[source.data.status]}</span>
+                <span>{reliabilityLabels[source.data.reliability]}</span>
+                <span>{source.data.type}</span>
+              </div>
+              <h3><a href={`/sources/${source.id}/`}>{source.data.title}</a></h3>
+              <p>{source.data.summary}</p>
+              {relatedQuestions.length > 0 && (
+                <p>
+                  <strong>关联问题：</strong>
+                  {relatedQuestions.map((question, index) => (
+                    <>
+                      {index > 0 && "、"}
+                      <a href={`/questions/${question.id}/`}>{question.data.title}</a>
+                    </>
+                  ))}
+                </p>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="ph-empty">当前没有待处理 source。</p>
+    )}
+  </section>
+
+  <section class="ph-section" data-next-section="stalled-questions" aria-labelledby="stalled-next-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Stalled questions</p>
+      <h2 id="stalled-next-heading">需要重新推进的停滞问题</h2>
+      <p>来自 /philosophy/review 的 stalled questions：开放或暂定问题超过 30 天没有更新。</p>
+    </div>
+    {stalledQuestions.length > 0 ? (
+      <div class="ph-dashboard-grid">
+        {stalledQuestions.map(({ question, age }) => (
+          <article class="ph-question-card">
+            <div class="ph-card-meta">
+              <span>{statusLabels[question.data.status]}</span>
+              <span>{age} 天未更新</span>
+            </div>
+            <h3><a href={`/questions/${question.id}/`}>{question.data.title}</a></h3>
+            <p>{question.data.currentAnswer}</p>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">当前没有停滞问题。</p>
+    )}
+  </section>
+</PhilosophyLayout>

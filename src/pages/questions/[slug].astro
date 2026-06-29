@@ -1,0 +1,501 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import AbilityTags from "../../components/philosophy/AbilityTags.astro";
+import QuestionLocalMap from "../../components/philosophy/QuestionLocalMap.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+import { deriveQuestionLearningState } from "../../lib/philosophy-state";
+
+export async function getStaticPaths() {
+  const questions = await getCollection("questions");
+  return questions.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry }
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<"questions">;
+}
+
+const { entry } = Astro.props as Props;
+const [perspectives, readings, entries, sources, notions, understandingClaims] = await Promise.all([
+  getCollection("perspectives"),
+  getCollection("readings"),
+  getCollection("entries"),
+  getCollection("sources"),
+  getCollection("notions"),
+  getCollection("understanding-claims")
+]);
+
+const perspectiveById = new Map(perspectives.map((item) => [item.id, item]));
+const readingById = new Map(readings.map((item) => [item.id, item]));
+const notionById = new Map(notions.map((item) => [item.id, item]));
+const questionEntries = entries
+  .filter((item) => item.data.question === entry.id)
+  .sort((a, b) => a.data.fromVersion - b.data.fromVersion || a.data.date.localeCompare(b.data.date));
+const dimensions = entry.data.dimensions ?? [];
+const stances = entry.data.stances ?? [];
+const relatedReadingIds = entry.data.relatedReadings ?? [];
+const learningState = deriveQuestionLearningState(
+  entry,
+  readings,
+  new Date().toISOString().slice(0, 10)
+);
+const relatedSources = sources.filter((source) => source.data.relatedQuestions.includes(entry.id));
+const relatedUnderstandingClaims = understandingClaims.filter((claim) =>
+  claim.data.relatedQuestions.includes(entry.id) || (claim.data.targetType === "question" && claim.data.target === entry.id)
+);
+const relatedNotionIds = new Set<string>();
+stances.forEach((stance) => {
+  perspectiveById.get(stance.perspective)?.data.keyNotions.forEach((notion) => relatedNotionIds.add(notion));
+});
+relatedSources.forEach((source) => source.data.relatedNotions.forEach((notion) => relatedNotionIds.add(notion)));
+const relatedNotions = [...relatedNotionIds]
+  .map((id) => notionById.get(id))
+  .filter((item): item is CollectionEntry<"notions"> => Boolean(item));
+const unresolvedQuestions = entry.data.openQuestions ?? [];
+const statusLabels = {
+  open: "持续追问",
+  provisional: "已有暂定回答",
+  settled: "阶段性稳定"
+} as const;
+const readingStatusLabels = {
+  unread: "未读",
+  reading: "在读",
+  finished: "已读完"
+} as const;
+const sourceReliabilityLabels = {
+  high: "高可靠性",
+  medium: "中等可靠性",
+  low: "低可靠性",
+  unknown: "可靠性未判断"
+} as const;
+const sourceStatusLabels = {
+  saved: "已保存",
+  skimmed: "已浏览",
+  reading: "阅读中",
+  read: "已读",
+  extracted: "已提取",
+  rejected: "已弃用"
+} as const;
+const understandingClaimStatusLabels = {
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置"
+} as const;
+const understandingClaimConfidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+
+function stanceTitle(slug: string) {
+  return perspectiveById.get(slug)?.data.title || slug;
+}
+
+function readingTitle(slug: string) {
+  return readingById.get(slug)?.data.title || slug;
+}
+
+function compactMeta(values: Array<string | undefined | false | null>) {
+  return values.filter((value): value is string => Boolean(value));
+}
+
+const localMapConfig = entry.data.localMap;
+type LocalMapType = (typeof localMapConfig.includeTypes)[number];
+const localMapIncludeTypes = new Set(localMapConfig.includeTypes);
+const localMapAllows = (type: LocalMapType) => localMapIncludeTypes.has(type);
+
+const perspectiveDetails = stances.map((stance) => {
+  const perspective = perspectiveById.get(stance.perspective);
+  return {
+    id: stance.perspective,
+    title: perspective?.data.title || stance.perspective,
+    href: `/perspectives/${stance.perspective}/`,
+    meta: compactMeta([
+      perspective?.data.tradition,
+      perspective?.data.thinkers?.join("、")
+    ]),
+    description: stance.note || perspective?.data.summary
+  };
+});
+
+const readingDetails = relatedReadingIds.map((readingId) => {
+  const reading = readingById.get(readingId);
+  return {
+    id: readingId,
+    title: reading?.data.title || readingId,
+    href: `/readings/${readingId}/`,
+    meta: compactMeta([
+      reading ? readingStatusLabels[reading.data.status] : undefined,
+      reading?.data.author,
+      reading?.data.year ? String(reading.data.year) : undefined
+    ]),
+    description: reading?.data.notes
+  };
+});
+
+const sourceDetails = relatedSources.map((source) => ({
+  id: source.id,
+  title: source.data.title || source.id,
+  href: `/sources/${source.id}/`,
+  meta: compactMeta([
+    source.data.type,
+    sourceReliabilityLabels[source.data.reliability],
+    sourceStatusLabels[source.data.status]
+  ]),
+  description: source.data.summary
+}));
+
+const notionDetails = relatedNotions.map((notion) => ({
+  id: notion.id,
+  title: notion.data.title || notion.id,
+  href: `/notions/${notion.id}/`,
+  meta: compactMeta([
+    notion.data.perspective ? stanceTitle(notion.data.perspective) : undefined
+  ]),
+  description: notion.data.summary
+}));
+
+const understandingClaimDetails = relatedUnderstandingClaims.map((claim) => ({
+  id: claim.id,
+  title: claim.data.title || claim.id,
+  href: `/understanding-claims/${claim.id}/`,
+  meta: compactMeta([
+    understandingClaimStatusLabels[claim.data.status],
+    understandingClaimConfidenceLabels[claim.data.confidence],
+    `${claim.data.evidence.length} 条证据`
+  ]),
+  description: claim.data.claim
+}));
+
+const entryDetails = questionEntries.map((item) => ({
+  id: item.id,
+  title: item.data.title || item.id,
+  href: `/entries/${item.id}/`,
+  meta: compactMeta([
+    item.data.date,
+    `V${item.data.fromVersion} → V${item.data.toVersion}`,
+    item.data.triggeredBy ? `触发阅读：${readingTitle(item.data.triggeredBy)}` : undefined
+  ]),
+  description: item.data.newStance
+}));
+
+const allLocalMapNodes = [
+  { type: "perspective", key: "perspectives", label: "theory answers", count: perspectiveDetails.length, href: "#perspectives-heading", x: 150, y: 78 },
+  { type: "reading", key: "readings", label: "primary texts", count: readingDetails.length, href: "#readings-heading", x: 320, y: 56 },
+  { type: "entry", key: "entries", label: "stance changes", count: entryDetails.length, href: "#timeline-heading", x: 490, y: 78 },
+  { type: "understanding-claim", key: "claims", label: "understanding", count: understandingClaimDetails.length, href: "#understanding-claims-heading", x: 510, y: 292 },
+  { type: "notion", key: "notions", label: "key notions", count: notionDetails.length, href: "#notions-heading", x: 320, y: 324 },
+  { type: "source", key: "sources", label: "supporting info", count: sourceDetails.length, href: "#sources-heading", x: 130, y: 292 }
+] as const;
+
+const localMapNodes = allLocalMapNodes.filter((node) => localMapAllows(node.type));
+const allLocalMapDetailGroups = [
+  { type: "perspective", key: "perspectives", title: "Perspectives", count: perspectiveDetails.length, items: perspectiveDetails },
+  { type: "reading", key: "readings", title: "Readings", count: readingDetails.length, items: readingDetails },
+  { type: "source", key: "sources", title: "Sources", count: sourceDetails.length, items: sourceDetails },
+  { type: "notion", key: "notions", title: "Notions", count: notionDetails.length, items: notionDetails },
+  { type: "understanding-claim", key: "understanding-claims", title: "Understanding Claims", count: understandingClaimDetails.length, items: understandingClaimDetails },
+  { type: "entry", key: "entries", title: "Entries", count: entryDetails.length, items: entryDetails }
+] as const;
+const localMapDetailGroups = allLocalMapDetailGroups.filter((group) => localMapAllows(group.type));
+const showLocalMapDetailPanel = localMapConfig.variant === "detail-panel" && localMapConfig.showDetailPanel;
+---
+
+<PhilosophyLayout
+  title={entry.data.title || "未命名问题"}
+  description={entry.data.currentAnswer || "一个仍在推进的问题。"}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: entry.data.title || "未命名问题" }
+  ]}
+>
+  <header class="ph-hero">
+    <span class="ph-status">{statusLabels[entry.data.status] ?? "持续追问"}</span>
+    <p class="eyebrow">我正在追问什么？</p>
+    <h1>{entry.data.title || "未命名问题"}</h1>
+    <p class="lead">问题原文：{entry.data.title || "暂未记录问题原文。"}</p>
+    {entry.data.updatedAt && <p class="muted">更新于 {entry.data.updatedAt}</p>}
+  </header>
+
+  <AbilityTags
+    abilities={entry.data.abilities}
+    title="此问题涉及的能力维度"
+  />
+
+  <section class="ph-section" aria-labelledby="current-answer-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Current answer</p>
+      <h2 id="current-answer-heading">当前暂定回答</h2>
+    </div>
+    <p class="ph-current-answer" data-question-current-answer>{entry.data.currentAnswer || "尚未形成暂定回答。"}</p>
+  </section>
+
+  {localMapConfig.enabled && (
+    <QuestionLocalMap
+      questionTitle={entry.data.title || entry.id}
+      questionHref={`/questions/${entry.id}/`}
+      nodes={localMapNodes}
+      detailGroups={localMapDetailGroups}
+      showDetailPanel={showLocalMapDetailPanel}
+      note={localMapConfig.note}
+    />
+  )}
+  {entry.id === "what-is-history" && (
+    <p><a class="ph-inline-link" href="/questions/what-is-history/essay/">阅读 essay 实验页 →</a></p>
+  )}
+
+  <section class="ph-section" aria-labelledby="dimensions-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Dimensions</p>
+      <h2 id="dimensions-heading">把问题拆成可比较的维度</h2>
+    </div>
+    {dimensions.length > 0 ? (
+      <ol class="ph-dimensions">
+        {dimensions.map((dimension) => <li>{dimension.label || dimension.key}</li>)}
+      </ol>
+    ) : (
+      <p class="ph-empty">这个问题还没有拆分比较维度。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="matrix-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Answers in comparison</p>
+      <h2 id="matrix-heading">不同理论如何回答同一个问题</h2>
+      <p>按同一组维度并排阅读，差异才不会被作者介绍或流派标签遮住。</p>
+    </div>
+    {dimensions.length > 0 && stances.length > 0 ? (
+      <div class="ph-matrix-scroll" data-stance-matrix tabindex="0">
+        <table class="ph-matrix">
+          <caption class="ph-sr-only">不同理论对“{entry.data.title}”的回答矩阵</caption>
+          <thead>
+            <tr>
+              <th scope="col">比较维度</th>
+              {stances.map((stance) => (
+                <th scope="col">
+                  {stanceTitle(stance.perspective)}
+                  <small>{stance.note || "暂未概括这一立场。"}</small>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {dimensions.map((dimension) => (
+              <tr>
+                <th scope="row">{dimension.label || dimension.key}</th>
+                {stances.map((stance) => (
+                  <td>{stance.answers?.find((answer) => answer.dimension === dimension.key)?.position || "暂未回答这一维度。"}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <p class="ph-empty">理论回答矩阵尚未建立。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="perspectives-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Perspectives</p>
+      <h2 id="perspectives-heading">这些回答从哪里来</h2>
+    </div>
+    {stances.length > 0 ? (
+      <div class="ph-answer-grid">
+        {stances.map((stance) => {
+          const perspective = perspectiveById.get(stance.perspective);
+          return (
+            <article class="ph-answer-card" data-perspective-card={stance.perspective}>
+              <p class="eyebrow">对这个问题的回答</p>
+              <h3>{perspective?.data.title || stance.perspective}</h3>
+              <p><strong>{stance.note || "暂未概括。"}</strong></p>
+              <p class="muted">{perspective?.data.summary || "该理论视角的独立页面尚未补充。"}</p>
+              {perspective ? <a href={`/perspectives/${perspective.id}/`}>阅读理论视角 →</a> : <span class="muted">内容待补</span>}
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有理论回答与这个问题关联。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="readings-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Primary texts</p>
+      <h2 id="readings-heading">支撑这些回答的原典阅读</h2>
+      <p>readings 是持续跟读、做笔记并触发立场变化的文本，不属于 citation registry。</p>
+    </div>
+    {learningState.nextReading && (
+      <div class="ph-next-action" data-question-next-reading>
+        <span class="ph-status">{learningState.nextReading.data.status === "reading" ? "继续阅读" : "下一步阅读"}</span>
+        <div>
+          <strong><a href={`/readings/${learningState.nextReading.id}/`}>{learningState.nextReading.data.title}</a></strong>
+          <p>还有 {learningState.pendingReadings.length} 条 reading 未完成。</p>
+        </div>
+      </div>
+    )}
+    {relatedReadingIds.length > 0 ? (
+      <div class="ph-reading-grid">
+        {relatedReadingIds.map((readingId) => {
+          const reading = readingById.get(readingId);
+          return (
+            <article class="ph-reading-card" data-reading-card={readingId}>
+              <p class="eyebrow">Reading</p>
+              <h3>{reading?.data.title || readingId}</h3>
+              {reading ? (
+                <>
+                  <p>{reading.data.author || "作者未记录"}{reading.data.year ? ` · ${reading.data.year}` : ""}</p>
+                  <div class="ph-card-meta">
+                    <span>{readingStatusLabels[reading.data.status] ?? "状态未记录"}</span>
+                    {learningState.nextReading?.id === reading.id && <span>下一步</span>}
+                  </div>
+                  <a href={`/readings/${reading.id}/`}>打开阅读笔记 →</a>
+                </>
+              ) : (
+                <p class="muted">这条 reading 引用已保留，内容文件尚未创建。</p>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有关联 primary text。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="sources-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Sources</p>
+      <h2 id="sources-heading">帮助判断的辅助资料</h2>
+      <p>这些资料用于确认定义、寻找线索和校验判断；它们不替代需要长期跟读的 readings。</p>
+    </div>
+    {relatedSources.length > 0 ? (
+      <div class="ph-reading-grid">
+        {relatedSources.map((source) => (
+          <article class="ph-reading-card" data-source-card={source.id}>
+            <div class="ph-card-meta">
+              <span>{source.data.type}</span>
+              <span>{sourceReliabilityLabels[source.data.reliability]}</span>
+              <span>{sourceStatusLabels[source.data.status]}</span>
+            </div>
+            <h3><a href={`/sources/${source.id}/`}>{source.data.title || "未命名资料"}</a></h3>
+            <p>{source.data.summary || "暂未概括这份资料。"}</p>
+            <p><strong>为什么保存：</strong>{source.data.whySaved || "尚未记录。"}</p>
+            {source.data.useFor.length > 0 && <p><strong>用途：</strong>{source.data.useFor.join("、")}</p>}
+            {source.data.limitations.length > 0 && <p class="muted"><strong>局限：</strong>{source.data.limitations.join("；")}</p>}
+            <a href={`/sources/${source.id}/`}>查看资料判断 →</a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有 source 与这个问题关联。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="notions-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Notions</p>
+      <h2 id="notions-heading">组织这些回答的关键概念</h2>
+      <p>notions 来自相关 perspective 与 source，用来定位理论分歧发生在哪些概念节点。</p>
+    </div>
+    {relatedNotions.length > 0 ? (
+      <div class="ph-answer-grid">
+        {relatedNotions.map((notion) => (
+          <article class="ph-answer-card" data-notion-card={notion.id}>
+            <p class="eyebrow">Notion</p>
+            <h3>{notion.data.title}</h3>
+            <p>{notion.data.summary}</p>
+            <a href={`/notions/${notion.id}/`}>查看 notion</a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有 notion 与这个问题关联。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="understanding-claims-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Understanding claims</p>
+      <h2 id="understanding-claims-heading">我凭什么说自己理解了</h2>
+      <p>理解主张不是百科词条，而是可被证据支持、反驳和修订的判断档案。</p>
+    </div>
+    {relatedUnderstandingClaims.length > 0 ? (
+      <div class="ph-answer-grid">
+        {relatedUnderstandingClaims.map((claim) => (
+          <article class="ph-answer-card" data-understanding-claim-card={claim.id}>
+            <div class="ph-card-meta">
+              <span>{understandingClaimStatusLabels[claim.data.status]}</span>
+              <span>{understandingClaimConfidenceLabels[claim.data.confidence]}</span>
+              <span>{claim.data.evidence.length} 条证据</span>
+            </div>
+            <h3><a href={`/understanding-claims/${claim.id}/`}>{claim.data.title || "未命名理解主张"}</a></h3>
+            <p>{claim.data.claim || "尚未写下主张。"}</p>
+            {claim.data.gaps.length > 0 && <p class="muted"><strong>仍缺：</strong>{claim.data.gaps[0]}</p>}
+            <a href={`/understanding-claims/${claim.id}/`}>查看证据档案 →</a>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有 understanding claim 与这个问题关联。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="timeline-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Stance evolution</p>
+      <h2 id="timeline-heading">阅读如何改变了我的立场</h2>
+      <p>按时间从 V0 向后排列。每个新版本都由一次具体阅读触发。</p>
+    </div>
+    {questionEntries.length > 0 ? (
+      <div class="ph-timeline">
+        <article class="ph-timeline-node" data-stance-version="v0">
+          <span class="ph-version">V{questionEntries[0]?.data.fromVersion ?? 0}</span>
+          <h3>阅读前的立场</h3>
+          <p>{questionEntries[0]?.data.priorStance || "没有留下初始立场记录。"}</p>
+        </article>
+        {questionEntries.map((item) => (
+          <article class="ph-timeline-node" data-stance-version={`v${item.data.toVersion}`}>
+            <span class="ph-version">V{item.data.fromVersion} → V{item.data.toVersion}</span>
+            <h3>{item.data.date || "日期未记录"} · {item.data.title}</h3>
+            <p>{item.data.newStance || "这次变化尚未写下。"}</p>
+            <p><strong>为什么改变：</strong>{item.data.reason}</p>
+            <div>
+              <strong>判断依据</strong>
+              <ul>{item.data.evidence.map((evidence) => <li>{evidence}</li>)}</ul>
+            </div>
+            <p><strong>仍待处理：</strong>{item.data.newQuestions.join("；")}</p>
+            <div class="ph-card-meta">
+              <span>触发阅读：{item.data.triggeredBy ? readingTitle(item.data.triggeredBy) : "未记录"}</span>
+              <a class="ph-inline-link" href={`/entries/${item.id}/`}>查看变化记录</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p class="ph-empty">还没有立场变化记录；第一篇 entry 会成为 V0 → V1。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="unresolved-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Open ends</p>
+      <h2 id="unresolved-heading">仍未解决的问题</h2>
+    </div>
+    <div class="ph-unresolved">
+      {unresolvedQuestions.length > 0 ? (
+        <ul>{unresolvedQuestions.map((question) => <li>{question}</li>)}</ul>
+      ) : (
+        <p>尚未单独记录。可以在下一次立场变化 entry 中补写由阅读产生的新问题。</p>
+      )}
+    </div>
+  </section>
+</PhilosophyLayout>

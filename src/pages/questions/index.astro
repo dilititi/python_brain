@@ -1,0 +1,107 @@
+---
+import { getCollection } from "astro:content";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+import { deriveQuestionLearningState } from "../../lib/philosophy-state";
+
+const [questions, perspectives, sources, entries, readings] = await Promise.all([
+  getCollection("questions"),
+  getCollection("perspectives"),
+  getCollection("sources"),
+  getCollection("entries"),
+  getCollection("readings")
+]);
+const today = new Date().toISOString().slice(0, 10);
+const perspectiveById = new Map(perspectives.map((perspective) => [perspective.id, perspective]));
+const statusLabels = { open: "持续追问", provisional: "已有暂定回答", settled: "阶段性稳定" } as const;
+
+function notionIdsFor(question: (typeof questions)[number]) {
+  const ids = new Set<string>();
+  question.data.stances.forEach((stance) => {
+    perspectiveById.get(stance.perspective)?.data.keyNotions.forEach((notion) => ids.add(notion));
+  });
+  sources
+    .filter((source) => source.data.relatedQuestions.includes(question.id))
+    .forEach((source) => source.data.relatedNotions.forEach((notion) => ids.add(notion)));
+  return ids;
+}
+---
+
+<PhilosophyLayout
+  title="问题索引"
+  description="从问题进入 readings、sources、notions 与立场变化。"
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "问题索引" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Questions</p>
+    <h1>问题索引</h1>
+    <p class="lead">每张卡片显示一个问题当前积累的原典、辅助资料、概念和立场变化证据。</p>
+  </header>
+
+  <section class="ph-section" aria-labelledby="question-list-heading">
+    <div class="ph-section-heading"><h2 id="question-list-heading">正在推进的问题</h2></div>
+    <div class="ph-filter-bar" data-question-filters role="group" aria-label="筛选问题">
+      <button type="button" data-filter="all" aria-pressed="true">全部</button>
+      <button type="button" data-filter="open" aria-pressed="false">持续追问</button>
+      <button type="button" data-filter="provisional" aria-pressed="false">已有暂定回答</button>
+      <button type="button" data-filter="settled" aria-pressed="false">阶段性稳定</button>
+      <button type="button" data-filter="stalled" aria-pressed="false">已停滞</button>
+    </div>
+    <div class="ph-question-grid">
+      {questions.map((question) => {
+        const sourceCount = sources.filter((source) => source.data.relatedQuestions.includes(question.id)).length;
+        const entryCount = entries.filter((entry) => entry.data.question === question.id).length;
+        const notionCount = notionIdsFor(question).size;
+        const learningState = deriveQuestionLearningState(question, readings, today);
+        return (
+          <article
+            class="ph-question-card"
+            data-question-card={question.id}
+            data-question-status={question.data.status}
+            data-question-stalled={learningState.isStalled ? "true" : "false"}
+          >
+            <span class="ph-status">{statusLabels[question.data.status]}</span>
+            <h2><a href={`/questions/${question.id}/`}>{question.data.title}</a></h2>
+            <p>{question.data.currentAnswer}</p>
+            <div class="ph-card-meta">
+              <span>{question.data.relatedReadings.length} 个 readings</span>
+              <span>{sourceCount} 个 source</span>
+              <span>{entryCount} 次立场变化</span>
+              <span>{notionCount} 个 notions</span>
+            </div>
+            <p class="muted">{question.data.updatedAt ? `更新于 ${question.data.updatedAt}` : "更新时间未记录"}</p>
+            {learningState.nextReading ? (
+              <p><strong>下一步阅读：</strong><a href={`/readings/${learningState.nextReading.id}/`}>{learningState.nextReading.data.title}</a></p>
+            ) : <p class="muted">关联 readings 已全部完成。</p>}
+            {learningState.isStalled && <p class="ph-stalled-note">已停滞 {learningState.daysSinceUpdate} 天，建议重新确认下一步。</p>}
+            <a href={`/questions/${question.id}/`}>进入问题工作台 →</a>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  <script>
+    const filterGroup = document.querySelector("[data-question-filters]");
+    if (filterGroup) {
+      const buttons = filterGroup.querySelectorAll<HTMLButtonElement>("button[data-filter]");
+      const cards = document.querySelectorAll<HTMLElement>("[data-question-card]");
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const filter = button.dataset.filter ?? "all";
+          buttons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          cards.forEach((card) => {
+            const visible = filter === "all"
+              || card.dataset.questionStatus === filter
+              || (filter === "stalled" && card.dataset.questionStalled === "true");
+            card.hidden = !visible;
+          });
+        });
+      });
+    }
+  </script>
+</PhilosophyLayout>

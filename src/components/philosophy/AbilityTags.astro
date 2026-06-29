@@ -1,0 +1,27 @@
+---
+import {
+  abilityDimensionMeta,
+  type AbilityDimension
+} from "../../data/philosophy/abilities";
+
+interface Props {
+  abilities?: AbilityDimension[];
+  title?: string;
+}
+
+const { abilities = [], title } = Astro.props as Props;
+const visibleAbilities = abilities.filter((ability) => abilityDimensionMeta[ability]);
+---
+
+{visibleAbilities.length > 0 && (
+  <section class="ph-ability-tags" data-ability-tags aria-label={title ?? "能力维度"}>
+    {title && <h2>{title}</h2>}
+    <ul class="ph-ability-tag-list">
+      {visibleAbilities.map((ability) => (
+        <li class="ph-ability-tag" title={abilityDimensionMeta[ability].label}>
+          {abilityDimensionMeta[ability].shortLabel}
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

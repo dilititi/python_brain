@@ -1,0 +1,248 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import RelationCard from "../../components/astro/RelationCard.astro";
+import EvidenceChain from "../../components/philosophy/EvidenceChain.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+export async function getStaticPaths() {
+  const claims = await getCollection("understanding-claims");
+  return claims.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<"understanding-claims"> }
+const { entry } = Astro.props as Props;
+const { Content } = await render(entry);
+
+const [
+  questions,
+  notions,
+  perspectives,
+  readings,
+  sources,
+  stanceEntries,
+  concepts,
+  cases,
+  projects,
+  people,
+  paths
+] = await Promise.all([
+  getCollection("questions"),
+  getCollection("notions"),
+  getCollection("perspectives"),
+  getCollection("readings"),
+  getCollection("sources"),
+  getCollection("entries"),
+  getCollection("concepts"),
+  getCollection("cases"),
+  getCollection("projects"),
+  getCollection("people"),
+  getCollection("paths")
+]);
+
+const questionById = new Map(questions.map((item) => [item.id, item]));
+const notionById = new Map(notions.map((item) => [item.id, item]));
+const perspectiveById = new Map(perspectives.map((item) => [item.id, item]));
+const readingById = new Map(readings.map((item) => [item.id, item]));
+const sourceById = new Map(sources.map((item) => [item.id, item]));
+const entryById = new Map(stanceEntries.map((item) => [item.id, item]));
+const conceptById = new Map(concepts.map((item) => [item.id, item]));
+const caseById = new Map(cases.map((item) => [item.id, item]));
+const projectById = new Map(projects.map((item) => [item.id, item]));
+const personById = new Map(people.map((item) => [item.id, item]));
+const pathById = new Map(paths.map((item) => [item.id, item]));
+
+const statusLabels = {
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置"
+} as const;
+const confidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+const targetTypeLabels = {
+  question: "问题",
+  notion: "概念",
+  perspective: "理论视角",
+  reading: "原典阅读",
+  source: "辅助资料",
+  entry: "立场变化",
+  concept: "Python 知识点",
+  case: "Python 案例",
+  project: "Python 项目",
+  person: "人物",
+  path: "路径",
+  other: "其他"
+} as const;
+type LinkInfo = {
+  href: string;
+  title: string;
+  description?: string;
+  meta: string;
+};
+
+function linkFor(refType: string, ref?: string): LinkInfo | undefined {
+  if (!ref) return undefined;
+
+  switch (refType) {
+    case "question": {
+      const item = questionById.get(ref);
+      return { href: `/questions/${ref}/`, title: item?.data.title || ref, description: item?.data.currentAnswer, meta: "question" };
+    }
+    case "notion": {
+      const item = notionById.get(ref);
+      return { href: `/notions/${ref}/`, title: item?.data.title || ref, description: item?.data.summary, meta: "notion" };
+    }
+    case "perspective": {
+      const item = perspectiveById.get(ref);
+      return { href: `/perspectives/${ref}/`, title: item?.data.title || ref, description: item?.data.summary, meta: "perspective" };
+    }
+    case "reading": {
+      const item = readingById.get(ref);
+      return { href: `/readings/${ref}/`, title: item?.data.title || ref, description: item?.data.notes, meta: "reading" };
+    }
+    case "source": {
+      const item = sourceById.get(ref);
+      return { href: `/sources/${ref}/`, title: item?.data.title || ref, description: item?.data.summary, meta: "source" };
+    }
+    case "entry": {
+      const item = entryById.get(ref);
+      return { href: `/entries/${ref}/`, title: item?.data.title || ref, description: item?.data.reason, meta: "entry" };
+    }
+    case "concept": {
+      const item = conceptById.get(ref);
+      return { href: `/concepts/${ref}/`, title: item?.data.title || ref, description: item?.data.summary, meta: "Python concept" };
+    }
+    case "case": {
+      const item = caseById.get(ref);
+      return { href: `/cases/${ref}/`, title: item?.data.title || ref, description: item?.data.description, meta: "Python case" };
+    }
+    case "project": {
+      const item = projectById.get(ref);
+      return { href: `/projects/${ref}/`, title: item?.data.title || ref, description: item?.data.description, meta: "Python project" };
+    }
+    case "person": {
+      const item = personById.get(ref);
+      return { href: `/people/${ref}/`, title: item?.data.name || ref, description: item?.data.description, meta: "person" };
+    }
+    case "path": {
+      const item = pathById.get(ref);
+      return { href: `/path/${ref}/`, title: item?.data.title || ref, description: item?.data.description, meta: "path" };
+    }
+    default:
+      return undefined;
+  }
+}
+
+function linksFor(refType: string, refs: string[]): LinkInfo[] {
+  return refs
+    .map((ref) => linkFor(refType, ref))
+    .filter((item): item is LinkInfo => Boolean(item));
+}
+
+const targetLink = entry.data.targetType === "other"
+  ? undefined
+  : linkFor(entry.data.targetType, entry.data.target);
+const evidenceRows = entry.data.evidence.map((item, index) => ({
+  ...item,
+  index,
+  link: linkFor(item.refType, item.ref)
+}));
+const relationSections = [
+  { title: "关联问题", links: linksFor("question", entry.data.relatedQuestions) },
+  { title: "关联 notions", links: linksFor("notion", entry.data.relatedNotions) },
+  { title: "关联 perspectives", links: linksFor("perspective", entry.data.relatedPerspectives) },
+  { title: "关联 readings", links: linksFor("reading", entry.data.relatedReadings) },
+  { title: "关联 sources", links: linksFor("source", entry.data.relatedSources) },
+  { title: "关联 entries", links: linksFor("entry", entry.data.relatedEntries) }
+].filter((section) => section.links.length > 0);
+---
+
+<PhilosophyLayout
+  title={entry.data.title}
+  description={entry.data.claim}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "理解主张", href: "/understanding-claims/" },
+    { label: entry.data.title }
+  ]}
+>
+  <header class="ph-hero">
+    <span class="ph-status">{statusLabels[entry.data.status]}</span>
+    <p class="eyebrow">Understanding claim · {targetTypeLabels[entry.data.targetType]}</p>
+    <h1>{entry.data.title}</h1>
+    <p class="lead">{entry.data.claim}</p>
+    <div class="ph-card-meta">
+      <span>{confidenceLabels[entry.data.confidence]}</span>
+      {entry.data.updatedAt && <span>更新于 {entry.data.updatedAt}</span>}
+      {targetLink && <span>目标：<a class="ph-inline-link" href={targetLink.href}>{targetLink.title}</a></span>}
+    </div>
+  </header>
+
+  <section class="ph-section" aria-labelledby="claim-heading">
+    <div class="ph-section-heading">
+      <p class="eyebrow">Claim</p>
+      <h2 id="claim-heading">我的理解主张</h2>
+    </div>
+    <p class="ph-current-answer">{entry.data.claim}</p>
+  </section>
+
+  <EvidenceChain
+    evidence={evidenceRows}
+    gaps={entry.data.gaps}
+    counterEvidence={entry.data.counterEvidence}
+    nextTasks={entry.data.nextTasks}
+  />
+
+  <div class="ph-detail-grid ph-section">
+    <main>
+      <section class="ph-section" aria-labelledby="claim-notes-heading">
+        <div class="ph-section-heading">
+          <h2 id="claim-notes-heading">补充笔记</h2>
+        </div>
+        <div class="content-flow ph-prose"><Content /></div>
+      </section>
+    </main>
+
+    <aside class="ph-detail-sidebar">
+      <section class="ph-fact-card">
+        <h2>状态</h2>
+        <dl class="ph-facts">
+          <div><dt>处理状态</dt><dd>{statusLabels[entry.data.status]}</dd></div>
+          <div><dt>信心</dt><dd>{confidenceLabels[entry.data.confidence]}</dd></div>
+          <div><dt>证据数</dt><dd>{entry.data.evidence.length}</dd></div>
+          <div><dt>目标类型</dt><dd>{targetTypeLabels[entry.data.targetType]}</dd></div>
+          <div><dt>创建</dt><dd>{entry.data.createdAt || "未记录"}</dd></div>
+          <div><dt>更新</dt><dd>{entry.data.updatedAt || "未记录"}</dd></div>
+        </dl>
+      </section>
+      {targetLink && (
+        <section class="ph-fact-card">
+          <h2>理解对象</h2>
+          <RelationCard href={targetLink.href} title={targetLink.title} description={targetLink.description} meta={targetLink.meta} />
+        </section>
+      )}
+    </aside>
+  </div>
+
+  {relationSections.length > 0 && (
+    <section class="ph-section" aria-labelledby="claim-relations-heading">
+      <div class="ph-section-heading">
+        <h2 id="claim-relations-heading">这条 claim 连到哪里</h2>
+      </div>
+      {relationSections.map((section) => (
+        <div class="ph-section">
+          <div class="ph-section-heading"><h3>{section.title}</h3></div>
+          <div class="grid cols-3">
+            {section.links.map((link) => <RelationCard href={link.href} title={link.title} description={link.description} meta={link.meta} />)}
+          </div>
+        </div>
+      ))}
+    </section>
+  )}
+</PhilosophyLayout>

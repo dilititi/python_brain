@@ -1,0 +1,88 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import RelationCard from "../../components/astro/RelationCard.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+export async function getStaticPaths() {
+  const perspectives = await getCollection("perspectives");
+  return perspectives.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<"perspectives"> }
+const { entry } = Astro.props as Props;
+const { Content } = await render(entry);
+const [questions, readings] = await Promise.all([getCollection("questions"), getCollection("readings")]);
+const relatedQuestions = questions.filter((question) => question.data.stances?.some((stance) => stance.perspective === entry.id));
+const readingById = new Map(readings.map((reading) => [reading.id, reading]));
+const runtimeData = entry.data as unknown as Record<string, unknown>;
+
+function textList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+  if (typeof value === "string" && value.trim()) return [value];
+  return [];
+}
+
+const explicitAxes = textList(runtimeData.axes ?? runtimeData.axis);
+const inferredAxes = [...new Set(relatedQuestions.flatMap((question) => question.data.dimensions?.map((dimension) => dimension.label) ?? []))];
+const axes = explicitAxes.length > 0 ? explicitAxes : inferredAxes;
+---
+
+<PhilosophyLayout
+  title={entry.data.title || "未命名理论视角"}
+  description={entry.data.summary || "理论视角与问题回答。"}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "理论视角" },
+    { label: entry.data.title || "未命名理论视角" }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Perspective</p>
+    <h1>{entry.data.title || "未命名理论视角"}</h1>
+    <p class="lead">{entry.data.summary || "暂未写下这个理论视角的简介。"}</p>
+  </header>
+
+  <div class="ph-detail-grid ph-section">
+    <main>
+      <section aria-labelledby="claims-heading">
+        <div class="ph-section-heading"><h2 id="claims-heading">核心主张</h2></div>
+        {entry.data.coreClaims?.length > 0 ? <ul>{entry.data.coreClaims.map((claim) => <li>{claim}</li>)}</ul> : <p class="ph-empty">核心主张尚未整理。</p>}
+      </section>
+      <section class="ph-section" aria-labelledby="notes-heading">
+        <div class="ph-section-heading"><h2 id="notes-heading">理论笔记</h2></div>
+        <div class="content-flow ph-prose"><Content /></div>
+      </section>
+    </main>
+    <aside class="ph-detail-sidebar">
+      <section class="ph-fact-card">
+        <h2>视角信息</h2>
+        <dl class="ph-facts">
+          <div><dt>思想家</dt><dd>{entry.data.thinkers?.join("、") || "未记录"}</dd></div>
+          <div><dt>传统</dt><dd>{entry.data.tradition || "未记录"}</dd></div>
+          <div><dt>讨论轴线</dt><dd>{axes.length > 0 ? axes.join("；") : "将从关联 question 的 dimensions 自动汇总"}</dd></div>
+        </dl>
+      </section>
+    </aside>
+  </div>
+
+  <section class="ph-section" aria-labelledby="perspective-readings-heading">
+    <div class="ph-section-heading"><h2 id="perspective-readings-heading">关联 readings</h2></div>
+    {entry.data.readings?.length > 0 ? (
+      <div class="grid cols-3">
+        {entry.data.readings.map((readingId) => {
+          const reading = readingById.get(readingId);
+          return reading ? <RelationCard href={`/readings/${reading.id}/`} title={reading.data.title} description={reading.data.author} meta={reading.data.status} /> : <RelationCard href="/philosophy/" title={readingId} description="reading 内容尚未创建" meta="missing" />;
+        })}
+      </div>
+    ) : <p class="ph-empty">还没有关联 reading。</p>}
+  </section>
+
+  <section class="ph-section" aria-labelledby="perspective-questions-heading">
+    <div class="ph-section-heading"><h2 id="perspective-questions-heading">它回答了哪些 questions</h2></div>
+    {relatedQuestions.length > 0 ? (
+      <div class="grid cols-3">{relatedQuestions.map((question) => <RelationCard href={`/questions/${question.id}/`} title={question.data.title} description={question.data.currentAnswer} meta="question" />)}</div>
+    ) : <p class="ph-empty">还没有 question 引用这个理论视角。</p>}
+  </section>
+</PhilosophyLayout>
+

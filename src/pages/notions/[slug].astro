@@ -1,0 +1,112 @@
+---
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import RelationCard from "../../components/astro/RelationCard.astro";
+import AbilityTags from "../../components/philosophy/AbilityTags.astro";
+import PhilosophyLayout from "../../layouts/PhilosophyLayout.astro";
+
+export async function getStaticPaths() {
+  const notions = await getCollection("notions");
+  return notions.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+interface Props { entry: CollectionEntry<"notions"> }
+const { entry } = Astro.props as Props;
+const { Content } = await render(entry);
+const [perspectives, questions, sources, understandingClaims] = await Promise.all([
+  getCollection("perspectives"),
+  getCollection("questions"),
+  getCollection("sources"),
+  getCollection("understanding-claims")
+]);
+const relatedPerspectives = perspectives.filter((perspective) =>
+  perspective.id === entry.data.perspective || perspective.data.keyNotions.includes(entry.id)
+);
+const perspectiveIds = new Set(relatedPerspectives.map((perspective) => perspective.id));
+const sourceQuestionIds = new Set(
+  sources
+    .filter((source) => source.data.relatedNotions.includes(entry.id))
+    .flatMap((source) => source.data.relatedQuestions)
+);
+const relatedQuestions = questions.filter((question) =>
+  sourceQuestionIds.has(question.id) || question.data.stances.some((stance) => perspectiveIds.has(stance.perspective))
+);
+const relatedUnderstandingClaims = understandingClaims.filter((claim) =>
+  claim.data.relatedNotions.includes(entry.id) || (claim.data.targetType === "notion" && claim.data.target === entry.id)
+);
+const understandingClaimStatusLabels = {
+  draft: "草稿",
+  testing: "检验中",
+  supported: "已有证据支持",
+  contested: "存在反证",
+  revised: "已修订",
+  retired: "已搁置"
+} as const;
+const understandingClaimConfidenceLabels = {
+  low: "低信心",
+  medium: "中等信心",
+  high: "高信心"
+} as const;
+---
+
+<PhilosophyLayout
+  title={entry.data.title}
+  description={entry.data.summary}
+  breadcrumbs={[
+    { label: "首页", href: "/" },
+    { label: "思想工作台", href: "/philosophy/" },
+    { label: "Notions" },
+    { label: entry.data.title }
+  ]}
+>
+  <header class="ph-hero">
+    <p class="eyebrow">Notion</p>
+    <h1>{entry.data.title}</h1>
+    <p class="lead">{entry.data.summary}</p>
+  </header>
+
+  <AbilityTags
+    abilities={entry.data.abilities}
+    title="此概念涉及的能力维度"
+  />
+
+  <section class="ph-section" aria-labelledby="notion-notes-heading">
+    <div class="ph-section-heading"><h2 id="notion-notes-heading">概念笔记</h2></div>
+    <div class="content-flow ph-prose"><Content /></div>
+  </section>
+
+  <section class="ph-section" aria-labelledby="notion-perspectives-heading">
+    <div class="ph-section-heading"><h2 id="notion-perspectives-heading">相关 perspectives</h2></div>
+    {relatedPerspectives.length > 0 ? (
+      <div class="grid cols-3">{relatedPerspectives.map((perspective) => <RelationCard href={`/perspectives/${perspective.id}/`} title={perspective.data.title} description={perspective.data.summary} meta="perspective" />)}</div>
+    ) : <p class="ph-empty">尚未关联 perspective。</p>}
+  </section>
+
+  <section class="ph-section" aria-labelledby="notion-questions-heading">
+    <div class="ph-section-heading"><h2 id="notion-questions-heading">参与回答的问题</h2></div>
+    {relatedQuestions.length > 0 ? (
+      <div class="grid cols-3">{relatedQuestions.map((question) => <RelationCard href={`/questions/${question.id}/`} title={question.data.title} description={question.data.currentAnswer} meta="question" />)}</div>
+    ) : <p class="ph-empty">尚未关联 question。</p>}
+  </section>
+
+  <section class="ph-section" aria-labelledby="notion-claims-heading">
+    <div class="ph-section-heading">
+      <h2 id="notion-claims-heading">围绕这个概念的理解主张</h2>
+      <p>这里不是解释概念本身，而是记录“我声称自己理解了什么，以及凭什么”。</p>
+    </div>
+    {relatedUnderstandingClaims.length > 0 ? (
+      <div class="ph-answer-grid">
+        {relatedUnderstandingClaims.map((claim) => (
+          <article class="ph-answer-card" data-understanding-claim-card={claim.id}>
+            <div class="ph-card-meta">
+              <span>{understandingClaimStatusLabels[claim.data.status]}</span>
+              <span>{understandingClaimConfidenceLabels[claim.data.confidence]}</span>
+              <span>{claim.data.evidence.length} 条证据</span>
+            </div>
+            <h3><a href={`/understanding-claims/${claim.id}/`}>{claim.data.title}</a></h3>
+            <p>{claim.data.claim}</p>
+          </article>
+        ))}
+      </div>
+    ) : <p class="ph-empty">尚未围绕这个 notion 建立 understanding claim。</p>}
+  </section>
+</PhilosophyLayout>

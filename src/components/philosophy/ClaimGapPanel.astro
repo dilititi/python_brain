@@ -1,0 +1,44 @@
+---
+interface Props {
+  gaps: string[];
+  counterEvidence: string[];
+  nextTasks: string[];
+}
+
+const { gaps, counterEvidence, nextTasks } = Astro.props as Props;
+---
+
+<div class="ph-gap-panel" data-claim-gap-panel>
+  <section aria-labelledby="gaps-heading">
+    <div class="ph-section-heading">
+      <h2 id="gaps-heading">仍然缺什么</h2>
+    </div>
+    {gaps.length > 0 ? (
+      <ul>{gaps.map((gap) => <li>{gap}</li>)}</ul>
+    ) : (
+      <p class="ph-empty">暂未记录理解缺口。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="counter-evidence-heading">
+    <div class="ph-section-heading">
+      <h2 id="counter-evidence-heading">可能的反证或张力</h2>
+    </div>
+    {counterEvidence.length > 0 ? (
+      <ul>{counterEvidence.map((item) => <li>{item}</li>)}</ul>
+    ) : (
+      <p class="ph-empty">暂未记录反证或张力。</p>
+    )}
+  </section>
+
+  <section class="ph-section" aria-labelledby="next-tasks-heading">
+    <div class="ph-section-heading">
+      <h2 id="next-tasks-heading">下一步验证任务</h2>
+    </div>
+    {nextTasks.length > 0 ? (
+      <ol>{nextTasks.map((task) => <li>{task}</li>)}</ol>
+    ) : (
+      <p class="ph-empty">暂未记录下一步验证任务。</p>
+    )}
+  </section>
+</div>

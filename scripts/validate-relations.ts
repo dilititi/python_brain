@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import matter from "gray-matter";
 import YAML from "yaml";
+import { validatePhilosophyRelations } from "../src/lib/philosophy-relations";
 
 const root = process.cwd();
 const contentRoot = join(root, "src", "content");
@@ -166,6 +167,13 @@ const projects = await readMdxCollection("projects");
 const people = await readMdxCollection("people");
 const paths = await readYamlCollection("paths");
 const works = await readWorksRegistry();
+const questions = await readMdxCollection("questions");
+const perspectives = await readMdxCollection("perspectives");
+const readings = await readMdxCollection("readings");
+const notions = await readMdxCollection("notions");
+const philosophyEntries = await readMdxCollection("entries");
+const philosophySources = await readMdxCollection("sources");
+const understandingClaims = await readMdxCollection("understanding-claims");
 
 const conceptIds = new Set(concepts.map((entry) => entry.id));
 const caseIds = new Set(cases.map((entry) => entry.id));
@@ -744,6 +752,21 @@ if (visited.size !== graphNodes.length) {
   pushWarning("src/content", "graph.connectivity", `MVP content graph has disconnected nodes: ${missing.join(", ")}`, "Connect disconnected nodes to the main graph through shared concept ids.");
 }
 
+errors.push(...validatePhilosophyRelations({
+  questions,
+  perspectives,
+  readings,
+  notions,
+  entries: philosophyEntries,
+  sources: philosophySources,
+  understandingClaims,
+  concepts,
+  cases,
+  projects,
+  people,
+  paths
+}));
+
 if (warnings.length > 0) {
   console.warn(`Warnings:\n${warnings.join("\n")}`);
 }
@@ -753,7 +776,7 @@ if (errors.length > 0) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Relations valid: ${concepts.length} concepts, ${cases.length} cases, ${projects.length} projects, ${people.length} people, ${paths.length} paths, ${works.length} works.`
+    `Relations valid: ${concepts.length} concepts, ${cases.length} cases, ${projects.length} projects, ${people.length} people, ${paths.length} paths, ${works.length} works, ${questions.length} questions, ${perspectives.length} perspectives, ${readings.length} readings, ${notions.length} notions, ${philosophyEntries.length} entries, ${philosophySources.length} sources, ${understandingClaims.length} understanding-claims.`
   );
 
   if (warnings.length > 0 && Number.isInteger(warningExitCode) && warningExitCode > 0) {

@@ -1,0 +1,44 @@
+---
+import ClaimGapPanel from "./ClaimGapPanel.astro";
+import EvidenceItem from "./EvidenceItem.astro";
+
+type EvidenceLink = {
+  href: string;
+  title: string;
+  meta: string;
+};
+
+interface Props {
+  evidence: Array<{
+    type: string;
+    refType: string;
+    ref?: string;
+    note?: string;
+    strength: "weak" | "moderate" | "strong";
+    link?: EvidenceLink;
+  }>;
+  gaps: string[];
+  counterEvidence: string[];
+  nextTasks: string[];
+}
+
+const { evidence, gaps, counterEvidence, nextTasks } = Astro.props as Props;
+---
+
+<section class="ph-section" aria-labelledby="evidence-heading" data-evidence-chain>
+  <div class="ph-section-heading">
+    <p class="eyebrow">Evidence chain</p>
+    <h2 id="evidence-heading">证据档案</h2>
+    <p>证据链卡片把“我凭什么理解了”拆成证据、缺口、反证和下一步验证任务。</p>
+  </div>
+
+  {evidence.length > 0 ? (
+    <div class="ph-evidence-grid">
+      {evidence.map((item) => <EvidenceItem item={item} />)}
+    </div>
+  ) : (
+    <p class="ph-empty">这条理解主张还没有证据。至少补一条证据后再提升状态。</p>
+  )}
+
+  <ClaimGapPanel gaps={gaps} counterEvidence={counterEvidence} nextTasks={nextTasks} />
+</section>

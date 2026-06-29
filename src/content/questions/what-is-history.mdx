@@ -1,0 +1,101 @@
+---
+title: 历史是什么？
+status: provisional
+updatedAt: "2026-06-22"
+abilities:
+  - existential
+  - linguistic
+  - logical_mathematical
+  - intrapersonal
+currentAnswer: >
+  历史不是事实的被动堆积，也不是黑格尔或马克思式单一逻辑的展开。
+  我暂时把历史哲学问题放在几种尺度之间：辩证法与阶级矛盾解释方向，
+  结构主义揭示关系约束，福柯的谱系学则追踪话语、规训和权力 / 知识
+  如何形成局部规律。当前回答放弃贯穿全部历史的唯一驱动力，但保留
+  比较具体制度、主体形成与抵抗方式的可能。
+dimensions:
+  - key: driver
+    label: 驱动历史的根本动力是什么
+  - key: shape
+    label: 历史的整体形态是连续展开还是断裂重组
+  - key: subject
+    label: 个体在历史中是能动者还是被结构决定的载体
+stances:
+  - perspective: hegel
+    note: 历史是理性自我认识的辩证展开
+    answers:
+      - dimension: driver
+        position: 绝对精神的自我实现
+      - dimension: shape
+        position: 连续的辩证展开，最终指向自我认识的完成
+      - dimension: subject
+        position: 个体是「理性的狡计」借以实现自身的工具
+  - perspective: marxism
+    note: 历史是阶级斗争的物质运动
+    answers:
+      - dimension: driver
+        position: 生产关系与阶级矛盾
+      - dimension: shape
+        position: 连续的辩证运动，但以革命断点向前推进
+      - dimension: subject
+        position: 个体能动性嵌在阶级位置之中，阶级本身可成为集体能动者
+  - perspective: structuralism
+    note: 历史表层之下是相对稳定的深层结构
+    answers:
+      - dimension: driver
+        position: 深层的认知 / 语言结构
+      - dimension: shape
+        position: 表层事件不断变化，深层结构相对恒定，历史性被弱化
+      - dimension: subject
+        position: 个体是结构的承载者，能动性更多是表层效果
+  - perspective: foucault
+    note: 历史由各时期局部的、断裂变化的话语规则组织
+    answers:
+      - dimension: driver
+        position: 特定时期的权力 - 知识构型，没有跨时期的统一驱动力
+      - dimension: shape
+        position: 由认识型断裂分隔的若干局部秩序，整体不连续，但每段内部仍有可考古的规律
+      - dimension: subject
+        position: 主体本身是话语构造的产物，但仍可能在话语的缝隙中抵抗
+relatedReadings:
+  - phenomenology-of-spirit
+  - capital
+  - discipline-and-punish
+localMap:
+  enabled: true
+  variant: "detail-panel"
+  includeTypes:
+    - "perspective"
+    - "reading"
+    - "source"
+    - "notion"
+    - "understanding-claim"
+    - "entry"
+  maxNodes: 20
+  showLegend: true
+  showFilters: true
+  showDetailPanel: true
+openQuestions:
+  - 局部规律如何避免退化成不可比较的碎片描述？
+  - 如果主体由话语构成，抵抗的能动性从哪里产生？
+---
+
+## 我的当前回答
+
+（在这里展开 `currentAnswer` 里的判断，第一人称，允许犹豫和保留。这部分是全文唯一一处不引用任何理论原文的纯自己的声音。）
+
+## 不同理论回答矩阵
+
+（渲染层伪代码：双重循环 `dimensions × stances`，每个单元格取
+`stances[i].answers.find(a => a.dimension === dimensions[j].key).position`。
+矩阵本身不下结论——它只是把"谁在哪个维度上回答了什么"摆在一起，
+方便你在正文里指出具体的对话或冲突在哪一格发生。）
+
+## 阅读立场时间线
+
+（按 `entries` collection 中 `question` 字段等于本页 slug 的条目，
+按 `date` 升序渲染——每一条都是一次具体的、被某本书触发的立场调整。）
+
+## 相关著作
+
+（渲染 `relatedReadings` 引用的 `readings` collection 条目，按读完 / 在读 / 未读分组。）

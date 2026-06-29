@@ -7,15 +7,16 @@ interface Props {
   description?: string;
 }
 
-const { title, description = "Python 知识外脑" } = Astro.props;
+const { title, description = "问题驱动的思想工作台" } = Astro.props;
 const nav = [
-  { href: "/path/", label: "应用方向" },
-  { href: "/progress/", label: "进度" },
-  { href: "/assessments/", label: "评估" },
-  { href: "/concepts/", label: "概念" },
-  { href: "/cases/", label: "案例" },
-  { href: "/projects/", label: "项目" },
-  { href: "/people/", label: "人物" },
+  { href: "/philosophy/", label: "思想" },
+  { href: "/philosophy/review/", label: "回顾" },
+  { href: "/philosophy/next/", label: "下一步" },
+  { href: "/philosophy/evidence/", label: "证据" },
+  { href: "/philosophy/gaps/", label: "缺口" },
+  { href: "/questions/", label: "问题" },
+  { href: "/readings/", label: "阅读" },
+  { href: "/concepts/", label: "Python" },
   { href: "/graph/", label: "图谱" }
 ];
 ---
@@ -26,15 +27,15 @@ const nav = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <title>{title} · Python 知识外脑</title>
+    <title>{title} · 思想工作台</title>
   </head>
   <body>
     <div class="site-shell">
       <header class="site-header">
         <nav class="site-nav" aria-label="主导航">
           <a class="brand" href="/">
-            <span class="brand-mark">Py</span>
-            <span>Python 知识外脑</span>
+            <span class="brand-mark">思</span>
+            <span>思想工作台</span>
           </a>
           <div class="nav-links">
             {nav.map((item) => <a href={item.href}>{item.label}</a>)}
