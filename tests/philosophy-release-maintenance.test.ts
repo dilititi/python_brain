@@ -23,3 +23,12 @@ test("changelog records the graph homepage release and V4.9 polish", () => {
   assert.match(changelog, /导航|navigation/i);
   assert.match(changelog, /测试|verified|verification/i);
 });
+
+test("v1.2.0 release metadata stays aligned", () => {
+  const packageJson = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8"));
+  const packageLock = JSON.parse(readFileSync(join(process.cwd(), "package-lock.json"), "utf8"));
+
+  assert.equal(packageJson.version, "1.2.0");
+  assert.equal(packageLock.version, "1.2.0");
+  assert.equal(packageLock.packages[""].version, "1.2.0");
+});
