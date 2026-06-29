@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.2.0 — 思想工作台 (2026-06-29)
+
+### Released
+
+- 将根首页发布为 Graph-first、搜索驱动的 Philosophy 局部图谱；中心节点只展示一阶邻居，并通过 inspector 进入详情页。
+- 建立 Question、Perspective、Reading、Source、Entry、Notion 与 Understanding Claim 的问题驱动阅读工作流。
+- 提供 Review、Next、Evidence、Gaps 与 Ability Lens 页面，把阅读状态、证据缺口和下一步行动聚合为可持续维护的思想工作台。
+- 保留 Python concepts、graph、assessments 与 progress 系统作为辅助模块，不混入 Philosophy 首页主图。
+
+### Release hardening
+
+- 增加 Combobox 搜索、键盘选择、URL focus、Reset center、颜色图例和移动端布局。
+- 补齐 Question Local Map detail panel、`what-is-history` essay 实验页和 Philosophy 作者命令。
+- 修复移动端导航逐字换行与 CodeRunner 首屏布局探测；Lighthouse 保持 0.9 门槛并改用 3 次采样中位数。
+- 统一 README、package 版本、发布 handoff 与部署文档；V4.8/V4.9 继续作为 Philosophy 功能轨迹保留。
+
+### Verification
+
+- Release candidate 执行 relations、concept/assessment audits、unit、e2e、code examples、assessment solutions、build、internal links 与 external URL inventory。
+- 合并后以 GitHub Actions Static gates、Lighthouse beacon pages、Vercel 部署和生产主入口抽样共同判定发布健康。
+
 ## V4.9 — Navigation and Release Polish (2026-06-28)
 
 ### Changed
